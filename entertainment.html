@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Entertainment - Fourlinkx | Games, Movies & Books</title>
+
+  <!-- Primary Meta Tags -->
+  <meta name="description" content="Explore Fourlinkx’s exciting entertainment options including Games, Movies, and Books. Enjoy engaging digital content and interactive fun." />
+  <meta name="keywords" content="Entertainment, Games, Movies, Books, Digital Content, Fourlinkx Entertainment, Online Games, Movie Streaming, Book Collection" />
+  <meta name="author" content="Fourlinkx" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:title" content="Fourlinkx Entertainment - Games, Movies & Books" />
+  <meta property="og:description" content="Discover fun games, movies, and books at Fourlinkx Entertainment. Join us for exciting digital entertainment experiences." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com/entertainment.html" />
+  <meta property="og:image" content="https://yourdomain.com/images/entertainment-og.jpg" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Fourlinkx Entertainment - Games, Movies & Books" />
+  <meta name="twitter:description" content="Enjoy engaging games, movies, and books with Fourlinkx Entertainment. Explore our digital content today." />
+  <meta name="twitter:image" content="https://yourdomain.com/images/entertainment-twitter.jpg" />
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://yourdomain.com/entertainment.html" />
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Fourlinkx",
+    "url": "https://yourdomain.com",
+    "logo": "https://yourdomain.com/images/logo.png",
+    "sameAs": [
+      "https://www.facebook.com/yourpage",
+      "https://twitter.com/yourprofile",
+      "https://www.linkedin.com/company/yourcompany"
+    ],
+    "contactPoint": [{
+      "@type": "ContactPoint",
+      "telephone": "+1-555-555-5555",
+      "contactType": "customer service",
+      "areaServed": "US",
+      "availableLanguage": ["English"]
+    }]
+  }
+  </script>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --secondary: #3a0ca3;
+      --accent: #f72585;
+      --accent-light: #ff7096;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --glass: rgba(255, 255, 255, 0.2);
+      --glass-border: rgba(255, 255, 255, 0.3);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Inter", sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e2e8f0 100%);
+      color: var(--dark);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+      padding-top: 80px;
+    }
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      z-index: 999;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .logo i {
+      font-size: 1.3rem;
+    }
+    nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      border: 2px solid var(--accent);
+      border-radius: 8px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    nav a:hover {
+      background-color: var(--accent);
+      color: white;
+    }
+    main {
+      max-width: 1200px;
+      margin: 0 auto 2rem;
+      padding: 1rem;
+    }
+    .hero {
+      text-align: center;
+      padding: 4rem 1rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border-radius: 16px;
+      margin-bottom: 3rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+    .card-link {
+      text-decoration: none;
+      color: inherit;
+      perspective: 1000px;
+      display: block;
+      height: 100%;
+    }
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 2rem;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      height: 100%;
+      will-change: transform;
+    }
+    .card:hover {
+      transform: translateY(-10px) scale(1.05);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+      background: rgba(255, 255, 255, 0.35);
+    }
+    .card i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: var(--accent);
+      transition: color 0.3s ease;
+    }
+    .card:hover i {
+      color: var(--accent-light);
+    }
+    .card h3 {
+      font-size: 1.6rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      transition: color 0.3s ease;
+    }
+    .card:hover h3 {
+      color: var(--accent-light);
+    }
+    .card p {
+      color: var(--dark);
+      opacity: 0.9;
+      flex-grow: 1;
+      font-size: 1rem;
+    }
+    @media (max-width: 768px) {
+      .cards {
+        grid-template-columns: 1fr;
+      }
+    }
+    /* Loading Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      z-index: 3000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.show {
+      display: flex;
+    }
+    .modal-content {
+      background: white;
+      color: var(--primary);
+      padding: 2rem 3rem;
+      border-radius: 12px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      box-shadow: 0 0 20px rgba(67, 97, 238, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .modal-content i {
+      font-size: 2rem;
+      animation: spin 1.5s linear infinite;
+      color: var(--accent);
+    }
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <i class="fas fa-rocket"></i> Fourlinkx
+    </div>
+    <nav>
+      <a href="index.html">Home</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Entertainment</h1>
+      <p>Discover fun and engaging entertainment options including games, movies, and books.</p>
+    </section>
+
+    <section class="cards">
+      <a href="games.html" class="card-link" data-target="games.html" aria-label="Games">
+        <div class="card" role="button" tabindex="0">
+          <i class="fas fa-gamepad"></i>
+          <h3>Games</h3>
+          <p>Engage in fun and interactive gaming experiences for all skill levels.</p>
+        </div>
+      </a>
+      <a href="movies.html" class="card-link" data-target="movies.html" aria-label="Movies">
+        <div class="card" role="button" tabindex="0">
+          <i class="fas fa-film"></i>
+          <h3>Movies</h3>
+          <p>Enjoy a wide selection of movies and digital content for entertainment.</p>
+        </div>
+      </a>
+      <a href="books.html" class="card-link" data-target="books.html" aria-label="Books">
+        <div class="card" role="button" tabindex="0">
+          <i class="fas fa-book"></i>
+          <h3>Books</h3>
+          <p>Explore a rich collection of books across various genres and topics.</p>
+        </div>
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2024 Fourlinkx Information Technology Services</p>
+  </footer>
+
+  <!-- Loading Modal -->
+  <div id="loading-modal" class="modal" role="alert" aria-live="assertive" aria-modal="true">
+    <div class="modal-content">
+      <i class="fas fa-spinner"></i>
+      Loading...
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById("loading-modal");
+
+    document.querySelectorAll(".card-link").forEach((link) => {
+      link.addEventListener("click", function (e) {
+        e.preventDefault();
+        const targetUrl = this.getAttribute("href") || this.dataset.target;
+        if (!targetUrl) return;
+
+        modal.classList.add("show");
+
+        setTimeout(() => {
+          window.location.href = targetUrl;
+        }, 2000);
+      });
+
+      // Optional: allow keyboard "Enter" key to trigger click for accessibility
+      link.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          this.click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
