@@ -2,9 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>VR Football Game with Individual Player Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>Mobile-Friendly VR Football Game</title>
 
+  <!-- Favicon: inline SVG with soccer ball emoji -->
+  <link rel="icon" href="data:image/svg+xml,
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+      <circle cx='32' cy='32' r='30' fill='%23f72585'/>
+      <circle cx='32' cy='32' r='20' fill='white'/>
+      <circle cx='32' cy='32' r='14' fill='%231e90ff'/>
+      <text x='32' y='40' font-size='24' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>⚽</text>
+    </svg>" type="image/svg+xml" />
+
+  <!-- A-Frame and dependencies -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://unpkg.com/networked-aframe@0.8.0/dist/networked-aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
@@ -16,26 +26,48 @@
       font-family: Arial, sans-serif;
       background: #000;
       color: #fff;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
     }
     #scoreboard {
       position: fixed;
-      top: 10px;
-      left: 50%;
+      top: 10px; left: 50%;
       transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0,0,0,0.7);
       padding: 10px 25px;
       border-radius: 12px;
       font-size: 1.5rem;
       font-weight: bold;
-      z-index: 1000;
-      user-select: none;
+      z-index: 10000;
       pointer-events: none;
+      user-select: none;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    #instructions {
+      position: fixed;
+      bottom: 15px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      padding: 8px 20px;
+      border-radius: 12px;
+      font-size: 1rem;
+      color: #f72585;
+      z-index: 10000;
+      user-select: none;
+      font-family: monospace;
+      pointer-events: none;
+      max-width: 90vw;
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
   <div id="scoreboard">Team Blue 0 - 0 Team Red</div>
+  <div id="instructions">Use WASD or touch joystick to move, drag to look, tap screen or press Space to kick the ball</div>
 
   <a-scene
     physics="gravity: -9.8"
@@ -49,16 +81,9 @@
     <a-sky color="#87ceeb"></a-sky>
 
     <!-- Football Field -->
-    <a-plane
-      position="0 0 0"
-      rotation="-90 0 0"
-      width="40"
-      height="60"
-      color="#2d5a27"
-      material="repeat: 20 30; src: https://cdn.aframe.io/a-painter/images/floor.jpg"
-      static-body
-      shadow="receive: true"
-    ></a-plane>
+    <a-plane position="0 0 0" rotation="-90 0 0" width="40" height="60" color="#2d5a27"
+             material="repeat: 20 30; src: https://cdn.aframe.io/a-painter/images/floor.jpg"
+             static-body shadow="receive: true"></a-plane>
 
     <!-- Field Lines -->
     <a-entity position="0 0.01 0">
@@ -66,8 +91,9 @@
       <a-ring position="0 0 0" radius-inner="4" radius-outer="4.2" rotation="-90 0 0" color="#fff"></a-ring>
       <a-box position="0 0 25" depth="10" height="0.02" width="16" color="#fff"></a-box>
       <a-box position="0 0 -25" depth="10" height="0.02" width="16" color="#fff"></a-box>
-      <a-box position="0 1 30" width="7" height="3" depth="0.5" color="#fff" static-body></a-box>
-      <a-box position="0 1 -30" width="7" height="3" depth="0.5" color="#fff" static-body></a-box>
+      <!-- Goals (invisible, for collision detection) -->
+      <a-box id="goal-blue" position="0 1 30" width="7" height="3" depth="0.5" color="#00f" static-body visible="false"></a-box>
+      <a-box id="goal-red" position="0 1 -30" width="7" height="3" depth="0.5" color="#f00" static-body visible="false"></a-box>
     </a-entity>
 
     <!-- Stadium Stands -->
@@ -96,18 +122,11 @@
     <a-entity id="fieldCenter" position="0 0 0"></a-entity>
 
     <!-- Soccer Ball -->
-    <a-sphere
-      id="soccer-ball"
-      radius="0.3"
-      color="#fff"
-      position="0 0.5 0"
-      dynamic-body="mass: 0.5; linearDamping: 0.3; angularDamping: 0.3"
-      shadow="cast: true"
-    >
-      <a-animation attribute="rotation" to="0 360 0" repeat="indefinite" dur="4000"></a-animation>
-    </a-sphere>
+    <a-sphere id="soccer-ball" radius="0.3" color="#fff" position="0 0.5 0"
+              dynamic-body="mass: 0.5; linearDamping: 0.3; angularDamping: 0.3"
+              shadow="cast: true"></a-sphere>
 
-    <!-- Networked Player Template -->
+    <!-- Player Avatar Template -->
     <template id="player-template">
       <a-entity>
         <a-sphere radius="0.3" color="#1e90ff" position="0 0.3 0" shadow="cast: true"></a-sphere>
@@ -115,15 +134,15 @@
       </a-entity>
     </template>
 
-    <!-- Networked Player Entity -->
-    <a-entity
-      networked="template:#player-template;attachTemplateToLocal:true;networkId:player"
-      position="0 1.6 10"
-      id="player"
-      camera
-      look-controls
-      wasd-controls="acceleration: 20"
-    ></a-entity>
+    <!-- Networked Player Entity (local player with controls) -->
+    <a-entity id="player" networked="template:#player-template;attachTemplateToLocal:true;networkId:player"
+              camera look-controls wasd-controls="acceleration: 20" position="0 1.6 10">
+      <!-- Laser pointer for aiming -->
+      <a-entity geometry="primitive: cylinder; radius: 0.01; height: 1.5"
+                material="color: #f72585; opacity: 0.7"
+                position="0 0 -1"
+                rotation="-90 0 0"></a-entity>
+    </a-entity>
 
     <!-- Ambient and Directional Light -->
     <a-light type="ambient" color="#666"></a-light>
@@ -133,21 +152,71 @@
   <script>
     const ball = document.querySelector('#soccer-ball');
     const player = document.querySelector('#player');
+    const scoreboard = document.getElementById('scoreboard');
 
-    // Kick ball on spacebar press (only local player can kick)
+    let scoreBlue = 0;
+    let scoreRed = 0;
+
+    // Kick the ball in the camera's forward direction on spacebar press or screen tap
+    function kickBall() {
+      const direction = new THREE.Vector3();
+      player.object3D.getWorldDirection(direction);
+      direction.y = 0.1; // slight upward force for realism
+      direction.normalize();
+      direction.multiplyScalar(15);
+
+      if (ball.body) {
+        ball.body.applyImpulse(
+          new CANNON.Vec3(direction.x, direction.y, direction.z),
+          new CANNON.Vec3().copy(ball.body.position)
+        );
+      }
+    }
+
+    // Keyboard kick (spacebar)
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space') {
-        const direction = new THREE.Vector3();
-        player.object3D.getWorldDirection(direction);
-        direction.multiplyScalar(10);
-        if (ball.body) {
-          ball.body.applyImpulse(
-            new CANNON.Vec3(direction.x, direction.y + 2, direction.z),
-            new CANNON.Vec3().copy(ball.body.position)
-          );
-        }
+        kickBall();
       }
     });
+
+    // Mobile kick: tap anywhere on screen
+    window.addEventListener('touchstart', (e) => {
+      if (e.target === document.body) {
+        kickBall();
+      }
+    }, {passive: true});
+
+    // Goal detection
+    const goalBlue = document.querySelector('#goal-blue');
+    const goalRed = document.querySelector('#goal-red');
+
+    ball.addEventListener('collide', (e) => {
+      if (!e.detail.body || !e.detail.body.el) return;
+      const collidedEl = e.detail.body.el;
+
+      if (collidedEl === goalBlue) {
+        // Red scores
+        scoreRed++;
+        updateScore();
+        resetBall();
+      } else if (collidedEl === goalRed) {
+        // Blue scores
+        scoreBlue++;
+        updateScore();
+        resetBall();
+      }
+    });
+
+    function updateScore() {
+      scoreboard.textContent = `Team Blue ${scoreBlue} - ${scoreRed} Team Red`;
+    }
+
+    function resetBall() {
+      ball.body.position.set(0, 0.5, 0);
+      ball.body.velocity.set(0, 0, 0);
+      ball.body.angularVelocity.set(0, 0, 0);
+    }
   </script>
 
 </body>
