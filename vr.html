@@ -3,421 +3,152 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fourlinkx VR Multiplayer Shooting Game - Reloadable Gun</title>
+  <title>VR Football Game with Individual Player Control</title>
 
-  <!-- SEO Meta Tags -->
-  <meta name="description" content="Experience Fourlinkx VR Multiplayer Shooting Game with realistic guns, reload mechanics, and moving targets. Play online with friends in immersive virtual reality." />
-  <meta name="keywords" content="VR shooting game, multiplayer VR game, virtual reality shooter, reloadable gun VR, online VR games, Fourlinkx games, VR multiplayer shooting" />
-  <meta name="author" content="Fourlinkx" />
-  <meta name="robots" content="index, follow" />
-
-  <!-- Open Graph / Facebook -->
-  <meta property="og:title" content="Fourlinkx VR Multiplayer Shooting Game - Realistic Reloadable Gun" />
-  <meta property="og:description" content="Join Fourlinkx's VR multiplayer shooting game featuring realistic guns, reload mechanics, and dynamic moving targets. Play now in immersive virtual reality!" />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://yourdomain.com/shooting.html" />
-  <meta property="og:image" content="https://yourdomain.com/images/vr-shooting-game-og.jpg" />
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Fourlinkx VR Multiplayer Shooting Game" />
-  <meta name="twitter:description" content="Play Fourlinkx VR multiplayer shooting game with realistic reloadable guns and moving targets. Experience immersive gameplay online." />
-  <meta name="twitter:image" content="https://yourdomain.com/images/vr-shooting-game-twitter.jpg" />
-
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://yourdomain.com/shooting.html" />
-
-  <!-- A-Frame and Networked-Aframe -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://unpkg.com/networked-aframe@0.8.0/dist/networked-aframe.min.js"></script>
-
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-physics-system@4.0.1/dist/aframe-physics-system.min.js"></script>
 
   <style>
     body, html {
       margin: 0; height: 100%; overflow: hidden;
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      font-family: Arial, sans-serif;
+      background: #000;
       color: #fff;
-      display: flex; flex-direction: column;
     }
-    header {
-      padding: 1rem; text-align: center; font-weight: 700;
-      font-size: 1.8rem; background: rgba(30, 60, 114, 0.85);
-      user-select: none;
-      flex-shrink: 0;
-    }
-    #loading {
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 1.5rem; background: rgba(0,0,0,0.6);
-      padding: 1rem 2rem; border-radius: 12px;
-      box-shadow: 0 0 15px #f72585;
-      color: #f72585; z-index: 10;
-      display: flex; align-items: center; gap: 1rem;
-      font-weight: 600;
-    }
-    .spinner {
-      border: 4px solid rgba(255, 255, 255, 0.2);
-      border-top: 4px solid #f72585;
-      border-radius: 50%;
-      width: 24px; height: 24px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg);}
-      100% { transform: rotate(360deg);}
-    }
-    a-scene {
-      flex-grow: 1;
-      width: 100vw;
-      height: 100vh;
-      display: block;
-    }
-    #ammo-display {
+    #scoreboard {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      font-size: 1.5rem;
-      background: rgba(0,0,0,0.5);
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
-      font-weight: 700;
-      color: #f72585;
-      user-select: none;
-      z-index: 20;
-      font-family: 'Inter', sans-serif;
-    }
-
-    /* Modal Styles */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 5000;
-      user-select: none;
-    }
-    .modal[aria-hidden="true"] {
-      display: none;
-    }
-    .modal-content {
-      background: white;
-      color: #4361ee;
-      padding: 2rem 3rem;
-      border-radius: 20px;
-      max-width: 400px;
-      width: 90%;
-      margin: auto;
-      position: relative;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      text-align: center;
-      user-select: none;
-    }
-    .modal-content h2 {
-      margin-bottom: 1rem;
-    }
-    .modal-content p {
-      font-size: 1.1rem;
-      opacity: 0.9;
-      margin-bottom: 2rem;
-    }
-    .close-modal {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      font-size: 2rem;
-      background: transparent;
-      border: none;
-      color: #f72585;
-      cursor: pointer;
-      transition: color 0.3s ease;
-      user-select: none;
-    }
-    .close-modal:hover,
-    .close-modal:focus {
-      color: #ff7096;
-      outline: none;
-    }
-    .btn-get-started {
-      background: #f72585;
-      color: white;
-      border: none;
-      padding: 1rem 2.5rem;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 25px;
       border-radius: 12px;
-      font-weight: 700;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: background 0.3s ease;
+      font-size: 1.5rem;
+      font-weight: bold;
+      z-index: 1000;
       user-select: none;
-    }
-    .btn-get-started:hover,
-    .btn-get-started:focus {
-      background: #ff7096;
-      outline: none;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
-  <header>Fourlinkx VR Multiplayer Shooting Game - Reloadable Gun</header>
 
-  <div id="loading">
-    <div class="spinner" aria-hidden="true"></div>
-    Connecting to VR Multiplayer...
-  </div>
-
-  <div id="ammo-display">Ammo: 6 / 6</div>
-
-  <!-- Welcome Modal -->
-  <div id="welcome-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="welcome-modal-title" aria-describedby="welcome-modal-desc" aria-hidden="true" style="display:none;">
-    <div class="modal-content" role="document">
-      <button id="close-welcome" class="close-modal" aria-label="Close welcome popup">&times;</button>
-      <h2 id="welcome-modal-title">Welcome to Fourlinkx Virtual Reality</h2>
-      <p id="welcome-modal-desc">Enjoy immersive multiplayer VR experiences with Fourlinkx.</p>
-      <button id="btn-get-started" class="btn-get-started">Get Started</button>
-    </div>
-  </div>
+  <div id="scoreboard">Team Blue 0 - 0 Team Red</div>
 
   <a-scene
-    networked-scene="
-      room: fourlinkx-shooting-room-reload;
-      debug: false;
-      adapter: easyrtc;
-    "
+    physics="gravity: -9.8"
+    networked-scene="room: fourlinkx-football-stadium; debug: false; adapter: easyrtc;"
     vr-mode-ui="enabled: true"
+    background="color: #87ceeb"
     embedded
-    background="color: #1e3c72"
-    renderer="antialias: true; colorManagement: true;"
-    loading-screen="enabled: false"
+    shadow="type:pcfsoft"
   >
-    <!-- Ground -->
-    <a-plane rotation="-90 0 0" width="40" height="40" color="#2a5298" shadow></a-plane>
+    <!-- Sky -->
+    <a-sky color="#87ceeb"></a-sky>
 
-    <!-- Lights -->
-    <a-light type="ambient" color="#888"></a-light>
-    <a-light type="directional" intensity="0.8" position="1 4 1" castShadow="true"></a-light>
+    <!-- Football Field -->
+    <a-plane
+      position="0 0 0"
+      rotation="-90 0 0"
+      width="40"
+      height="60"
+      color="#2d5a27"
+      material="repeat: 20 30; src: https://cdn.aframe.io/a-painter/images/floor.jpg"
+      static-body
+      shadow="receive: true"
+    ></a-plane>
 
-    <!-- Avatar template -->
-    <template id="avatar-template">
+    <!-- Field Lines -->
+    <a-entity position="0 0.01 0">
+      <a-box position="0 0 0" depth="0.1" height="0.02" width="40" color="#fff"></a-box>
+      <a-ring position="0 0 0" radius-inner="4" radius-outer="4.2" rotation="-90 0 0" color="#fff"></a-ring>
+      <a-box position="0 0 25" depth="10" height="0.02" width="16" color="#fff"></a-box>
+      <a-box position="0 0 -25" depth="10" height="0.02" width="16" color="#fff"></a-box>
+      <a-box position="0 1 30" width="7" height="3" depth="0.5" color="#fff" static-body></a-box>
+      <a-box position="0 1 -30" width="7" height="3" depth="0.5" color="#fff" static-body></a-box>
+    </a-entity>
+
+    <!-- Stadium Stands -->
+    <a-entity>
+      <a-box position="-22 5 0" width="4" height="10" depth="60" color="#555" shadow></a-box>
+      <a-box position="22 5 0" width="4" height="10" depth="60" color="#555" shadow></a-box>
+      <a-box position="0 5 -32" width="44" height="10" depth="4" color="#555" shadow></a-box>
+      <a-box position="0 5 32" width="44" height="10" depth="4" color="#555" shadow></a-box>
+    </a-entity>
+
+    <!-- Stadium Lights -->
+    <a-entity>
+      <a-cylinder position="-18 15 -25" radius="0.3" height="10" color="#ccc"></a-cylinder>
+      <a-light type="spot" position="-18 20 -25" angle="30" intensity="1.2" target="#fieldCenter" castShadow="true" penumbra="0.5"></a-light>
+
+      <a-cylinder position="18 15 -25" radius="0.3" height="10" color="#ccc"></a-cylinder>
+      <a-light type="spot" position="18 20 -25" angle="30" intensity="1.2" target="#fieldCenter" castShadow="true" penumbra="0.5"></a-light>
+
+      <a-cylinder position="-18 15 25" radius="0.3" height="10" color="#ccc"></a-cylinder>
+      <a-light type="spot" position="-18 20 25" angle="30" intensity="1.2" target="#fieldCenter" castShadow="true" penumbra="0.5"></a-light>
+
+      <a-cylinder position="18 15 25" radius="0.3" height="10" color="#ccc"></a-cylinder>
+      <a-light type="spot" position="18 20 25" angle="30" intensity="1.2" target="#fieldCenter" castShadow="true" penumbra="0.5"></a-light>
+    </a-entity>
+
+    <a-entity id="fieldCenter" position="0 0 0"></a-entity>
+
+    <!-- Soccer Ball -->
+    <a-sphere
+      id="soccer-ball"
+      radius="0.3"
+      color="#fff"
+      position="0 0.5 0"
+      dynamic-body="mass: 0.5; linearDamping: 0.3; angularDamping: 0.3"
+      shadow="cast: true"
+    >
+      <a-animation attribute="rotation" to="0 360 0" repeat="indefinite" dur="4000"></a-animation>
+    </a-sphere>
+
+    <!-- Networked Player Template -->
+    <template id="player-template">
       <a-entity>
-        <!-- Head -->
-        <a-sphere radius="0.15" color="#f72585" position="0 1.6 0" shadow="cast: true"></a-sphere>
-        <!-- Left hand -->
-        <a-box depth="0.1" height="0.2" width="0.05" color="#ff7096" position="-0.3 1.4 0" shadow="cast: true"></a-box>
-        <!-- Right hand with gun -->
-        <a-entity position="0.3 1.4 0" rotation="0 0 0" shadow="cast: true">
-          <a-box depth="0.6" height="0.15" width="0.1" color="#222" position="0 0 0"></a-box>
-          <a-box depth="0.1" height="0.05" width="0.2" color="#444" position="0 0.05 0.25"></a-box>
-          <!-- Laser beam -->
-          <a-entity laser-beam></a-entity>
-        </a-entity>
+        <a-sphere radius="0.3" color="#1e90ff" position="0 0.3 0" shadow="cast: true"></a-sphere>
+        <a-cylinder radius="0.15" height="0.6" color="#fff" position="0 1 0" shadow="cast: true"></a-cylinder>
       </a-entity>
     </template>
 
-    <!-- Player camera & controls -->
-    <a-entity id="player" camera look-controls wasd-controls position="0 1.6 0" networked="template:#avatar-template;attachTemplateToLocal:true"></a-entity>
+    <!-- Networked Player Entity -->
+    <a-entity
+      networked="template:#player-template;attachTemplateToLocal:true;networkId:player"
+      position="0 1.6 10"
+      id="player"
+      camera
+      look-controls
+      wasd-controls="acceleration: 20"
+    ></a-entity>
 
-    <!-- Bullets container -->
-    <a-entity id="bullets"></a-entity>
-
-    <!-- Moving targets -->
-    <a-box id="target1" position="5 1 0" depth="0.5" height="1" width="1" color="#ff4444" shadow></a-box>
-    <a-box id="target2" position="-5 1 -3" depth="0.5" height="1" width="1" color="#ff4444" shadow></a-box>
-
+    <!-- Ambient and Directional Light -->
+    <a-light type="ambient" color="#666"></a-light>
+    <a-light type="directional" intensity="0.8" position="10 20 10" castShadow="true"></a-light>
   </a-scene>
 
   <script>
-    // Laser beam component
-    AFRAME.registerComponent('laser-beam', {
-      schema: { length: { type: 'number', default: 5 } },
-      init: function () {
-        const beam = document.createElement('a-cylinder');
-        beam.setAttribute('color', '#f72585');
-        beam.setAttribute('radius', '0.005');
-        beam.setAttribute('height', this.data.length);
-        beam.setAttribute('position', `0 0 ${-this.data.length / 2}`);
-        beam.setAttribute('rotation', '-90 0 0');
-        beam.setAttribute('material', 'emissive: #f72585; emissiveIntensity: 1');
-        this.el.appendChild(beam);
-      }
-    });
+    const ball = document.querySelector('#soccer-ball');
+    const player = document.querySelector('#player');
 
-    const loadingEl = document.getElementById('loading');
-    const sceneEl = document.querySelector('a-scene');
-    const bulletsContainer = document.getElementById('bullets');
-    const ammoDisplay = document.getElementById('ammo-display');
-
-    sceneEl.addEventListener('connected', () => {
-      loadingEl.style.display = 'none';
-    });
-
-    setTimeout(() => {
-      if (loadingEl.style.display !== 'none') {
-        loadingEl.textContent = 'Unable to connect. Please try refreshing the page.';
-      }
-    }, 15000);
-
-    // Ammo variables
-    const MAX_AMMO = 6;
-    let currentAmmo = MAX_AMMO;
-    let isReloading = false;
-
-    // Animate targets side to side
-    const targets = [document.getElementById('target1'), document.getElementById('target2')];
-    let direction = 1;
-    let speed = 0.8; // units per second
-
-    function animateTargets(time) {
-      targets.forEach(target => {
-        if (!target) return;
-        let pos = target.getAttribute('position');
-        pos.x += direction * speed * 0.016; // approx 60fps
-        if (pos.x > 6) direction = -1;
-        if (pos.x < -6) direction = 1;
-        target.setAttribute('position', pos);
-      });
-      requestAnimationFrame(animateTargets);
-    }
-    requestAnimationFrame(animateTargets);
-
-    // Shoot bullet on mouse click or VR controller trigger
-    sceneEl.addEventListener('click', () => {
-      if (isReloading) return;
-      if (currentAmmo <= 0) {
-        alert('Out of ammo! Press "R" to reload.');
-        return;
-      }
-      shootBullet();
-      currentAmmo--;
-      updateAmmoDisplay();
-    });
-
-    // Reload on 'R' key press
+    // Kick ball on spacebar press (only local player can kick)
     window.addEventListener('keydown', (e) => {
-      if (e.key.toLowerCase() === 'r') {
-        reloadGun();
+      if (e.code === 'Space') {
+        const direction = new THREE.Vector3();
+        player.object3D.getWorldDirection(direction);
+        direction.multiplyScalar(10);
+        if (ball.body) {
+          ball.body.applyImpulse(
+            new CANNON.Vec3(direction.x, direction.y + 2, direction.z),
+            new CANNON.Vec3().copy(ball.body.position)
+          );
+        }
       }
     });
-
-    function updateAmmoDisplay() {
-      ammoDisplay.textContent = `Ammo: ${currentAmmo} / ${MAX_AMMO}`;
-    }
-
-    function reloadGun() {
-      if (isReloading || currentAmmo === MAX_AMMO) return;
-      isReloading = true;
-      ammoDisplay.textContent = 'Reloading...';
-      setTimeout(() => {
-        currentAmmo = MAX_AMMO;
-        isReloading = false;
-        updateAmmoDisplay();
-      }, 2000); // 2 seconds reload time
-    }
-
-    function shootBullet() {
-      const camera = sceneEl.camera.el;
-      if (!camera) return;
-
-      // Create bullet entity
-      const bullet = document.createElement('a-sphere');
-      bullet.setAttribute('radius', '0.05');
-      bullet.setAttribute('color', '#f72585');
-      bullet.setAttribute('position', camera.getAttribute('position'));
-      bullet.setAttribute('shadow', 'cast: true');
-      bulletsContainer.appendChild(bullet);
-
-      // Get forward direction vector
-      const directionVec = new THREE.Vector3();
-      camera.object3D.getWorldDirection(directionVec);
-
-      // Set velocity for bullet
-      const velocity = directionVec.multiplyScalar(15);
-
-      // Animate bullet movement
-      let start = null;
-      function animate(time) {
-        if (!start) start = time;
-        const delta = (time - start) / 1000; // seconds
-        const pos = bullet.getAttribute('position');
-        bullet.setAttribute('position', {
-          x: pos.x + velocity.x * delta,
-          y: pos.y + velocity.y * delta,
-          z: pos.z + velocity.z * delta
-        });
-
-        // Check collision with targets
-        if (checkCollision(bullet)) {
-          bullet.parentNode.removeChild(bullet);
-          return;
-        }
-
-        // Remove bullet after 3 seconds
-        if (delta > 3) {
-          bullet.parentNode.removeChild(bullet);
-          return;
-        }
-
-        requestAnimationFrame(animate);
-      }
-      requestAnimationFrame(animate);
-    }
-
-    function checkCollision(bullet) {
-      const bulletPos = bullet.object3D.position;
-      for (const target of targets) {
-        if (!target) continue;
-        const targetPos = target.object3D.position;
-        const distance = bulletPos.distanceTo(targetPos);
-        if (distance < 0.7) { // collision radius
-          flashTarget(target);
-          return true;
-        }
-      }
-      return false;
-    }
-
-    function flashTarget(target) {
-      let flashCount = 0;
-      const interval = setInterval(() => {
-        target.setAttribute('color', flashCount % 2 === 0 ? '#ffffff' : '#ff4444');
-        flashCount++;
-        if (flashCount > 5) {
-          clearInterval(interval);
-          target.setAttribute('color', '#ff4444');
-        }
-      }, 100);
-    }
-
-    // Welcome modal logic
-    const welcomeModal = document.getElementById('welcome-modal');
-    const closeWelcomeBtn = document.getElementById('close-welcome');
-    const getStartedBtn = document.getElementById('btn-get-started');
-
-    function openWelcomeModal() {
-      welcomeModal.style.display = 'flex';
-      welcomeModal.setAttribute('aria-hidden', 'false');
-      getStartedBtn.focus();
-    }
-
-    function closeWelcomeModal() {
-      welcomeModal.style.display = 'none';
-      welcomeModal.setAttribute('aria-hidden', 'true');
-    }
-
-    closeWelcomeBtn.addEventListener('click', closeWelcomeModal);
-    getStartedBtn.addEventListener('click', closeWelcomeModal);
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && welcomeModal.style.display === 'flex') {
-        closeWelcomeModal();
-      }
-    });
-
-    window.addEventListener('DOMContentLoaded', openWelcomeModal);
   </script>
+
 </body>
 </html>
