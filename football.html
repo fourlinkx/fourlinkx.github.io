@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Two-Player 8-Ball Pool with Precise Aiming</title>
+<title>Two-Player 8-Ball Pool</title>
 <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet" />
 <style>
   html, body {
@@ -193,7 +193,6 @@
       <div class="logo">
         P<span class="eight-ball"><span>8</span></span>OL
       </div>
-      <!-- Balls created dynamically -->
       <div class="cue-stick" id="cue-stick" style="display:none;">
         <div class="cue-tip"></div>
       </div>
@@ -204,7 +203,6 @@
 
 <script>
 (() => {
-  // Constants
   const table = document.getElementById('table');
   const msg = document.getElementById('msg');
   const cueStick = document.getElementById('cue-stick');
@@ -216,7 +214,6 @@
   const MIN_VELOCITY = 0.05;
   const POCKET_RADIUS = 18;
 
-  // Resize aim canvas to table size
   function resizeAimCanvas() {
     aimCanvas.width = table.clientWidth;
     aimCanvas.height = table.clientHeight;
@@ -226,21 +223,19 @@
   resizeAimCanvas();
   window.addEventListener('resize', resizeAimCanvas);
 
-  // Pocket positions relative to table container
   const pockets = [
-    {x: -7 + 14, y: -7 + 14}, // tl
-    {x: table.clientWidth / 2, y: -7 + 14}, // tc
-    {x: table.clientWidth + 7 - 14, y: -7 + 14}, // tr
-    {x: -7 + 14, y: table.clientHeight + 7 - 14}, // bl
-    {x: table.clientWidth / 2, y: table.clientHeight + 7 - 14}, // bc
-    {x: table.clientWidth + 7 - 14, y: table.clientHeight + 7 - 14} // br
+    {x: -7 + 14, y: -7 + 14},
+    {x: table.clientWidth / 2, y: -7 + 14},
+    {x: table.clientWidth + 7 - 14, y: -7 + 14},
+    {x: -7 + 14, y: table.clientHeight + 7 - 14},
+    {x: table.clientWidth / 2, y: table.clientHeight + 7 - 14},
+    {x: table.clientWidth + 7 - 14, y: table.clientHeight + 7 - 14}
   ];
 
-  // Ball class
   class Ball {
     constructor(id, group, color, number, x, y) {
       this.id = id;
-      this.group = group; // 'cue', 'solids', 'stripes', 'eight'
+      this.group = group;
       this.color = color;
       this.number = number;
       this.x = x;
@@ -307,12 +302,10 @@
     }
   }
 
-  // Utility
   function dist(x1, y1, x2, y2) {
     return Math.hypot(x1 - x2, y1 - y2);
   }
 
-  // Collision between balls
   function resolveCollision(b1, b2) {
     if (b1.pocketed || b2.pocketed) return;
 
@@ -349,7 +342,6 @@
     }
   }
 
-  // Check pocket
   function checkPocket(ball) {
     if (ball.pocketed) return false;
     for (const p of pockets) {
@@ -360,7 +352,6 @@
     return false;
   }
 
-  // Pocket ball
   function pocketBall(ball) {
     ball.pocketed = true;
     ball.vx = 0;
@@ -368,7 +359,6 @@
     ball.el.style.display = 'none';
   }
 
-  // Reset cue ball position
   function resetCueBallPosition(x = cueStart.x, y = cueStart.y) {
     const cueBall = balls.find(b => b.group === 'cue');
     cueBall.x = x;
@@ -380,17 +370,14 @@
     cueBall.updatePosition();
   }
 
-  // Check if balls moving
   function ballsAreMoving() {
     return balls.some(b => b.isMoving());
   }
 
-  // Show message
   function showMessage(text) {
     msg.textContent = text;
   }
 
-  // Game variables
   let balls = [];
   let currentPlayer = 1;
   let playerGroups = {1: null, 2: null};
@@ -402,14 +389,10 @@
   let pocketedThisShot = [];
   let cueBallScratch = false;
 
-  // Cue ball start
   const cueStart = {x: 145, y: 120};
-
-  // Rack start
   const rackStart = {x: 240, y: 100};
   const rowHeight = Math.sqrt(3) * BALL_RADIUS;
 
-  // Ball order for rack
   const rackBallsInfo = [
     {number: 1, group: 'solids', color: 'red'},
     {number: 14, group: 'stripes', color: 'blue'},
@@ -428,20 +411,16 @@
     {number: 15, group: 'stripes', color: 'brown'}
   ];
 
-  // Create balls
   function createBalls() {
     balls.forEach(b => {
       if (b.el.parentNode) b.el.parentNode.removeChild(b.el);
     });
     balls = [];
 
-    // Cue ball
     balls.push(new Ball(0, 'cue', 'cue', 0, cueStart.x, cueStart.y));
 
-    // Eight ball placeholder
     let eightBall = null;
 
-    // Place rack balls
     let ballIndex = 0;
     for (let row = 0; row < 5; row++) {
       const ballsInRow = row + 1;
@@ -464,25 +443,21 @@
     }
   }
 
-  // Switch turn
   function switchTurn() {
     currentPlayer = currentPlayer === 1 ? 2 : 1;
   }
 
-  // Enable cue ball placement after foul
   function enableCueBallPlacement() {
     showMessage(`Player ${currentPlayer}, place the cue ball.`);
     cueStick.style.display = 'none';
     cueBallInHand = true;
   }
 
-  // Disable cue ball placement
   function disableCueBallPlacement() {
     cueBallInHand = false;
     cueStick.style.display = 'block';
   }
 
-  // Update cue stick position and rotation
   function updateCueStick(angle) {
     const cueBall = balls.find(b => b.group === 'cue');
     const ballX = cueBall.x;
@@ -495,7 +470,6 @@
     cueStick.style.transform = `rotate(${angle * 180 / Math.PI}deg)`;
   }
 
-  // Shoot cue ball
   function shoot(power, angle) {
     if (ballsMoving || gameOver || cueBallInHand) return;
     const cueBall = balls.find(b => b.group === 'cue');
@@ -507,12 +481,10 @@
     cueStick.style.display = 'none';
   }
 
-  // Aiming variables
   let isAiming = false;
   let aimStart = null;
   let aimCurrent = null;
 
-  // Update aiming visuals: line and cue stick rotation
   function updateAimVisual() {
     aimCtx.clearRect(0, 0, aimCanvas.width, aimCanvas.height);
     if (!isAiming) return;
@@ -523,17 +495,14 @@
     aimCtx.lineTo(aimCurrent.x, aimCurrent.y);
     aimCtx.stroke();
 
-    // Rotate cue stick opposite to drag direction
     const angle = Math.atan2(aimStart.y - aimCurrent.y, aimStart.x - aimCurrent.x);
     updateCueStick(angle);
   }
 
-  // Clear aiming visuals
   function clearAimVisual() {
     aimCtx.clearRect(0, 0, aimCanvas.width, aimCanvas.height);
   }
 
-  // Get pointer position relative to table
   function getPointerPos(e) {
     const rect = table.getBoundingClientRect();
     let clientX, clientY;
@@ -550,7 +519,6 @@
     };
   }
 
-  // Pointer down handler
   function onPointerDown(e) {
     if (ballsMoving || gameOver) return;
     if (cueBallInHand) {
@@ -567,14 +535,12 @@
     }
   }
 
-  // Pointer move handler
   function onPointerMove(e) {
     if (!isAiming) return;
     aimCurrent = getPointerPos(e);
     updateAimVisual();
   }
 
-  // Pointer up handler
   function onPointerUp(e) {
     if (!isAiming) return;
     isAiming = false;
@@ -598,7 +564,6 @@
     shoot(power, angle);
   }
 
-  // Cue ball placement handler
   function onCueBallPlace(e) {
     if (!cueBallInHand) return;
     const pos = getPointerPos(e);
@@ -614,7 +579,6 @@
     updateCueStick(0);
   }
 
-  // Shot end logic
   function onShotEnd() {
     ballsMoving = false;
 
@@ -672,7 +636,6 @@
     if (!gameOver && !cueBallInHand) cueStick.style.display = 'block';
   }
 
-  // Main game loop
   function gameLoop() {
     if (!ballsMoving) {
       requestAnimationFrame(gameLoop);
@@ -703,7 +666,7 @@
     requestAnimationFrame(gameLoop);
   }
 
-  // Confetti effect (optional)
+  // Confetti effect
   const confettiCanvas = document.querySelector('.confetti');
   const confettiCtx = confettiCanvas.getContext('2d');
   let confettiPieces = [];
@@ -752,7 +715,6 @@
   createConfetti();
   drawConfetti();
 
-  // Initialize game
   function init() {
     createBalls();
     resetCueBallPosition();
@@ -769,7 +731,6 @@
     showMessage(`Player 1's turn. Aim and shoot.`);
   }
 
-  // Event listeners
   table.addEventListener('mousedown', onPointerDown);
   window.addEventListener('mousemove', onPointerMove);
   window.addEventListener('mouseup', onPointerUp);
