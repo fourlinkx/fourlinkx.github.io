@@ -78,7 +78,7 @@
     #coins {
       font-weight: 700;
       color: #ffb700;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       font-size: 1.3rem;
       user-select: text;
       display: flex;
@@ -104,6 +104,37 @@
       0% { transform: rotate(0deg);}
       100% { transform: rotate(360deg);}
     }
+
+    /* Share container for social buttons */
+    #share-container {
+      margin-bottom: 15px;
+      display: none;
+      user-select: none;
+      text-align: center;
+    }
+    #share-container p {
+      color: #ffd700;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-shadow: 0 0 6px #ffd700;
+    }
+    #share-container button {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+      transition: filter 0.3s ease;
+    }
+    #share-container button:hover,
+    #share-container button:focus {
+      filter: brightness(1.15);
+      outline: none;
+    }
+    #share-whatsapp { background: #25D366; }
+    #share-facebook { background: #3b5998; }
+    #share-twitter { background: #1DA1F2; }
 
     /* Live score display */
     #live-score {
@@ -621,6 +652,16 @@
       Coins: 0
     </div>
 
+    <!-- Share container for social buttons -->
+    <div id="share-container" style="margin-bottom: 15px; display: none; user-select:none; text-align:center;">
+      <p style="color:#ffd700; font-weight:700; margin-bottom: 8px; text-shadow: 0 0 6px #ffd700;">Share your progress!</p>
+      <div style="display: flex; justify-content: center; gap: 15px;">
+        <button id="share-whatsapp" aria-label="Share on WhatsApp" style="background:#25D366; border:none; border-radius: 8px; padding: 8px 14px; color:#fff; cursor:pointer; font-weight:700;">WhatsApp</button>
+        <button id="share-facebook" aria-label="Share on Facebook" style="background:#3b5998; border:none; border-radius: 8px; padding: 8px 14px; color:#fff; cursor:pointer; font-weight:700;">Facebook</button>
+        <button id="share-twitter" aria-label="Share on Twitter" style="background:#1DA1F2; border:none; border-radius: 8px; padding: 8px 14px; color:#fff; cursor:pointer; font-weight:700;">Twitter</button>
+      </div>
+    </div>
+
     <!-- Live score display -->
     <div id="live-score" aria-live="polite" aria-atomic="true">
       Score: 0
@@ -739,6 +780,10 @@
     const closeModalBtn = document.getElementById('close-modal-btn');
     const notification = document.getElementById('notification');
     const liveScoreElement = document.getElementById('live-score');
+    const shareContainer = document.getElementById('share-container');
+    const shareWhatsappBtn = document.getElementById('share-whatsapp');
+    const shareFacebookBtn = document.getElementById('share-facebook');
+    const shareTwitterBtn = document.getElementById('share-twitter');
 
     // Game variables
     let currentQuestionIndex = 0;
@@ -749,6 +794,7 @@
     let questionTime = questionTimeDefault;
     let timeLeft = questionTime;
     let timerInterval = null;
+    let shareTimeout = null;
 
     // Load coins from localStorage or start at 0
     function loadCoins() {
@@ -785,6 +831,7 @@
       showQuestion(questions[currentQuestionIndex]);
       resetTimer();
       startTimer();
+      hideShareContainer();
     }
 
     // Show question and answers
@@ -996,17 +1043,19 @@
       return colors[Math.floor(Math.random() * colors.length)];
     }
 
-    // Redeem modal logic with coin check
+    // Redeem modal logic with coin check and share panel
     redeemBtn.addEventListener('click', () => {
       if (coins <= 0) {
         showNotification("You have no coins yet! Let's start the quiz to earn some.", true);
         redeemModal.classList.remove('active'); // ensure modal is closed
         startQuiz(); // start the quiz so user can earn coins
         redeemBtn.blur(); // remove focus from redeem button for better UX
+        hideShareContainer();
       } else {
         populateRewards();
         redeemModal.classList.add('active');
         redeemModal.querySelector('.modal-content').focus();
+        hideShareContainer();
       }
     });
 
@@ -1046,13 +1095,16 @@
       });
     }
 
-    // Redeem reward function
+    // Redeem reward function with share panel display
     function redeemReward(reward) {
       if (coins >= reward.cost) {
         coins -= reward.cost;
         saveCoins();
         updateCoinsDisplay();
         showNotification(`You redeemed: ${reward.name}! 🎉`);
+
+        // Show share container with updated share links
+        showShareContainer();
 
         // Implement reward effects here:
         if (reward.id === 2) {
@@ -1066,6 +1118,46 @@
         redeemBtn.focus();
       } else {
         showNotification("Not enough coins to redeem this reward.", true);
+      }
+    }
+
+    // Show share container and set up share buttons
+    function showShareContainer() {
+      if (shareTimeout) clearTimeout(shareTimeout);
+      shareContainer.style.display = 'block';
+
+      const shareText = encodeURIComponent(`I scored ${score} points and have ${coins} coins in this fun quiz game! Try it yourself! 🎉`);
+
+      // WhatsApp share
+      shareWhatsappBtn.onclick = () => {
+        const url = `https://wa.me/?text=${shareText}`;
+        window.open(url, '_blank');
+      };
+
+      // Facebook share
+      shareFacebookBtn.onclick = () => {
+        const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.href)}&quote=${shareText}`;
+        window.open(url, '_blank');
+      };
+
+      // Twitter share
+      shareTwitterBtn.onclick = () => {
+        const url = `https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(location.href)}`;
+        window.open(url, '_blank');
+      };
+
+      // Auto-hide share container after 15 seconds
+      shareTimeout = setTimeout(() => {
+        hideShareContainer();
+      }, 15000);
+    }
+
+    // Hide share container
+    function hideShareContainer() {
+      shareContainer.style.display = 'none';
+      if (shareTimeout) {
+        clearTimeout(shareTimeout);
+        shareTimeout = null;
       }
     }
 
