@@ -3,12 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>Responsive Two-Player 8-Ball Pool</title>
+<title>8-Ball Pool Game</title>
 <style>
-  /* Reset and base */
-  * {
-    box-sizing: border-box;
-  }
   html, body {
     margin: 0; padding: 0;
     height: 100%;
@@ -16,7 +12,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Arial', sans-serif;
     user-select: none;
   }
   #game-container {
@@ -26,8 +21,8 @@
     aspect-ratio: 16 / 9;
     background: linear-gradient(145deg, #3ac6ff 60%, #0d47a1 100%);
     border-radius: 22px;
-    box-shadow: 0 0 30px 8px #2196f3, 0 6px 24px #000a;
     border: 7px solid #25c6fc;
+    box-shadow: 0 0 30px 8px #2196f3, 0 6px 24px #000a;
     overflow: hidden;
   }
   #pool-table {
@@ -35,66 +30,55 @@
     width: 100%;
     height: 100%;
   }
-  /* Pockets */
   .pocket {
     position: absolute;
-    width: 4.5vw;
-    height: 4.5vw;
-    max-width: 28px;
-    max-height: 28px;
+    width: 28px; height: 28px;
     border-radius: 50%;
     background: radial-gradient(circle at 60% 40%, #222 60%, #000 100%);
     box-shadow: 0 0 18px #000b, 0 0 0 4px #1b1836;
     z-index: 2;
   }
-  .pocket.tl { left: -1.2vw; top: -1.2vw; }
-  .pocket.tr { right: -1.2vw; top: -1.2vw; }
-  .pocket.bl { left: -1.2vw; bottom: -1.2vw; }
-  .pocket.br { right: -1.2vw; bottom: -1.2vw; }
-  .pocket.tc { left: 50%; top: -1.2vw; transform: translateX(-50%);}
-  .pocket.bc { left: 50%; bottom: -1.2vw; transform: translateX(-50%);}
-  /* Logo */
+  .pocket.tl { left: -7px; top: -7px; }
+  .pocket.tr { right: -7px; top: -7px; }
+  .pocket.bl { left: -7px; bottom: -7px; }
+  .pocket.br { right: -7px; bottom: -7px; }
+  .pocket.tc { left: 50%; top: -7px; transform: translateX(-50%);}
+  .pocket.bc { left: 50%; bottom: -7px; transform: translateX(-50%);}
   #logo {
     position: absolute;
     top: 5%;
     left: 50%;
     transform: translateX(-50%);
     font-family: 'Luckiest Guy', cursive;
-    font-size: 3vw;
+    font-size: 2.5rem;
     color: #e0f6ff;
-    letter-spacing: 0.8vw;
+    letter-spacing: 0.6rem;
     text-shadow: 0 3px 10px #0008, 0 1px 0 #2196f3;
     user-select: none;
     pointer-events: none;
-    z-index: 3;
     display: flex;
     align-items: center;
+    z-index: 3;
   }
   #logo .eight-ball {
-    width: 4vw;
-    height: 4vw;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: radial-gradient(circle at 60% 40%, #444 55%, #111 100%);
-    margin: 0 0.5vw;
+    margin: 0 5px;
     box-shadow: 0 0 10px #000a, 0 4px 10px #0008;
-    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-  #logo .eight-ball span {
-    color: #fff;
+    color: white;
     font-weight: bold;
-    font-size: 2vw;
+    font-family: Arial, sans-serif;
+    font-size: 1.2rem;
     text-shadow: 0 2px 4px #000a;
   }
-  /* Balls */
   .ball {
     position: absolute;
-    width: 3.5vw;
-    height: 3.5vw;
-    max-width: 22px;
-    max-height: 22px;
+    width: 22px; height: 22px;
     border-radius: 50%;
     box-shadow: 0 2px 8px #000a, 0 0 0 2px #fff3;
     border: 2px solid #fff8;
@@ -111,7 +95,7 @@
   .ball.eight {
     background: radial-gradient(circle at 60% 40%, #444 70%, #111 100%);
     color: #fff;
-    font-size: 1.2vw;
+    font-size: 1.1rem;
     text-shadow: 0 2px 4px #000a;
   }
   .ball.red { background: radial-gradient(circle at 60% 40%, #ff4b4b 70%, #a60000 100%);}
@@ -120,20 +104,15 @@
   .ball.green { background: radial-gradient(circle at 60% 40%, #4bff7b 70%, #00a64b 100%);}
   .ball.purple { background: radial-gradient(circle at 60% 40%, #c44bff 70%, #6a00a6 100%);}
   .ball.orange { background: radial-gradient(circle at 60% 40%, #ffb84b 70%, #a66a00 100%);}
-  /* Cue stick */
   #cue-stick {
     position: absolute;
-    width: 12vw;
-    max-width: 210px;
-    height: 0.5vw;
-    max-height: 7px;
-    left: 13vw;
-    top: 51%;
+    width: 210px;
+    height: 7px;
     background: linear-gradient(90deg, #ffb84b 0%, #d48a1b 60%, #333 100%);
     border-radius: 4px;
     box-shadow: 0 2px 8px #000a;
     z-index: 10;
-    transform-origin: 2.5vw 50%;
+    transform-origin: 30px 50%;
     cursor: pointer;
     user-select: none;
     pointer-events: auto;
@@ -141,34 +120,45 @@
   }
   #cue-stick .cue-tip {
     position: absolute;
-    left: 0; top: 0.07vw;
-    width: 1.8vw;
-    max-width: 28px;
-    height: 0.3vw;
-    max-height: 5px;
+    left: 0; top: 1px;
+    width: 28px; height: 5px;
     background: linear-gradient(90deg, #eee 60%, #2196f3 100%);
     border-radius: 3px 0 0 3px;
     box-shadow: 1px 0 3px #2196f3;
   }
-  /* Message */
   #message {
     position: absolute;
-    top: 1vw;
+    top: 5px;
     width: 100%;
     text-align: center;
     color: #fff;
-    font-size: 1.3vw;
+    font-size: 1.1rem;
     text-shadow: 0 2px 8px #000b;
     z-index: 100;
     pointer-events: none;
+    font-family: Arial, sans-serif;
   }
-  /* Confetti */
+  #aimCanvas {
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 20;
+  }
   #confetti {
     position: fixed;
     top: 0; left: 0;
     width: 100vw; height: 100vh;
     pointer-events: none;
     z-index: 1000;
+  }
+  @media (max-width: 500px) {
+    #game-container { width: 98vw; aspect-ratio: 16 / 9; }
+    #logo { font-size: 1.5rem; letter-spacing: 0.4rem; }
+    .ball { width: 18px; height: 18px; font-size: 0.8rem; }
+    #cue-stick { width: 160px; height: 5px; }
+    #cue-stick .cue-tip { width: 20px; height: 3px; }
+    #message { font-size: 0.9rem; }
   }
 </style>
 </head>
@@ -193,8 +183,6 @@
 
 <script>
 (() => {
-  // Constants & Setup
-  const container = document.getElementById('game-container');
   const table = document.getElementById('pool-table');
   const msg = document.getElementById('message');
   const cueStick = document.getElementById('cue-stick');
@@ -203,13 +191,27 @@
   const confettiCanvas = document.getElementById('confetti');
   const confettiCtx = confettiCanvas.getContext('2d');
 
-  const BALL_RADIUS_PX = 22; // max ball size in px for calculations
-  const BALL_RADIUS = 11; // half of ball size in px
+  const BALL_RADIUS = 11;
   const FRICTION = 0.98;
   const MIN_VELOCITY = 0.05;
   const POCKET_RADIUS = 28;
 
-  // Responsive sizing helpers
+  let balls = [];
+  let currentPlayer = 1;
+  let playerGroups = {1: null, 2: null};
+  let ballsPocketed = {solids: 0, stripes: 0};
+  const ballsPerGroup = 7;
+  let gameOver = false;
+  let cueBallInHand = false;
+  let ballsMoving = false;
+  let pocketedThisShot = [];
+  let cueBallScratch = false;
+
+  let isAiming = false;
+  let aimStart = null;
+  let aimCurrent = null;
+
+  // Responsive canvas sizes
   function resize() {
     const rect = table.getBoundingClientRect();
     aimCanvas.width = rect.width;
@@ -223,24 +225,23 @@
   window.addEventListener('resize', resize);
   resize();
 
-  // Pocket positions (relative to table)
+  // Pocket positions relative to table
   function getPocketPositions() {
     const rect = table.getBoundingClientRect();
     return [
       {x: 0, y: 0},
-      {x: rect.width/2, y: 0},
+      {x: rect.width / 2, y: 0},
       {x: rect.width, y: 0},
       {x: 0, y: rect.height},
-      {x: rect.width/2, y: rect.height},
+      {x: rect.width / 2, y: rect.height},
       {x: rect.width, y: rect.height}
     ];
   }
 
-  // Ball class
   class Ball {
     constructor(id, group, color, number, x, y) {
       this.id = id;
-      this.group = group; // 'cue', 'solids', 'stripes', 'eight'
+      this.group = group;
       this.color = color;
       this.number = number;
       this.x = x;
@@ -305,7 +306,6 @@
     }
   }
 
-  // Utility functions
   function dist(x1, y1, x2, y2) {
     return Math.hypot(x1 - x2, y1 - y2);
   }
@@ -364,74 +364,24 @@
     ball.updatePosition();
   }
 
-  // Game state variables
-  let balls = [];
-  let currentPlayer = 1;
-  let playerGroups = {1: null, 2: null};
-  let ballsPocketed = {solids: 0, stripes: 0};
-  const ballsPerGroup = 7;
-  let gameOver = false;
-  let cueBallInHand = false;
-  let ballsMoving = false;
-  let pocketedThisShot = [];
-  let cueBallScratch = false;
-
-  // Cue ball start position
-  let cueStartX, cueStartY;
-
-  // Initialize balls with relative positions scaled to container size
-  function initBalls() {
-    balls.forEach(b => b.el.remove());
-    balls = [];
-
-    const rect = table.getBoundingClientRect();
-    cueStartX = rect.width * 0.4;
-    cueStartY = rect.height * 0.6;
-
-    // Cue ball
-    balls.push(new Ball(0, 'cue', 'cue', 0, cueStartX, cueStartY));
-
-    // Rack balls arranged in triangle
-    const rackX = rect.width * 0.7;
-    const rackY = rect.height * 0.5;
-    const rowHeight = BALL_RADIUS * Math.sqrt(3);
-
-    // Balls order for rack
-    const rackBallsInfo = [
-      {number: 1, group: 'solids', color: 'red'},
-      {number: 14, group: 'stripes', color: 'blue'},
-      {number: 7, group: 'solids', color: 'brown'},
-      {number: 9, group: 'stripes', color: 'red'},
-      {number: 8, group: 'eight', color: 'eight'},
-      {number: 3, group: 'solids', color: 'green'},
-      {number: 13, group: 'stripes', color: 'purple'},
-      {number: 2, group: 'solids', color: 'yellow'},
-      {number: 12, group: 'stripes', color: 'orange'},
-      {number: 6, group: 'solids', color: 'blue'},
-      {number: 11, group: 'stripes', color: 'green'},
-      {number: 5, group: 'solids', color: 'purple'},
-      {number: 10, group: 'stripes', color: 'yellow'},
-      {number: 4, group: 'solids', color: 'orange'},
-      {number: 15, group: 'stripes', color: 'brown'}
-    ];
-
-    let ballIndex = 0;
-    for (let row = 0; row < 5; row++) {
-      const ballsInRow = row + 1;
-      const y = rackY + row * rowHeight;
-      const rowWidth = ballsInRow * BALL_RADIUS * 2;
-      const startX = rackX - rowWidth / 2 + BALL_RADIUS;
-      for (let col = 0; col < ballsInRow; col++) {
-        if (ballIndex >= rackBallsInfo.length) break;
-        const x = startX + col * BALL_RADIUS * 2;
-        const info = rackBallsInfo[ballIndex];
-        balls.push(new Ball(info.number, info.group, info.color, info.number, x, y));
-        ballIndex++;
-      }
-    }
+  function resetCueBallPosition(x, y) {
+    const cueBall = balls.find(b => b.group === 'cue');
+    cueBall.x = x;
+    cueBall.y = y;
+    cueBall.vx = 0;
+    cueBall.vy = 0;
+    cueBall.pocketed = false;
+    cueBall.updatePosition();
   }
 
-  // Game logic functions
+  function ballsAreMoving() {
+    return balls.some(b => b.isMoving());
+  }
+
+  function showMessage(text) {
+    msg.textContent = text;
+  }
+
   function switchTurn() {
     currentPlayer = currentPlayer === 1 ? 2 : 1;
   }
@@ -471,11 +421,6 @@
     cueBallScratch = false;
     cueStick.style.display = 'none';
   }
-
-  // Aiming variables
-  let isAiming = false;
-  let aimStart = null;
-  let aimCurrent = null;
 
   function updateAimVisual() {
     aimCtx.clearRect(0, 0, aimCanvas.width, aimCanvas.height);
@@ -703,20 +648,6 @@
   }
   drawConfetti();
 
-  function showMessage(text) {
-    msg.textContent = text;
-  }
-
-  function resetCueBallPosition(x = cueStartX, y = cueStartY) {
-    const cueBall = balls.find(b => b.group === 'cue');
-    cueBall.x = x;
-    cueBall.y = y;
-    cueBall.vx = 0;
-    cueBall.vy = 0;
-    cueBall.pocketed = false;
-    cueBall.updatePosition();
-  }
-
   // Initialize game
   function init() {
     gameOver = false;
@@ -728,157 +659,22 @@
     ballsPocketed = {solids: 0, stripes: 0};
     currentPlayer = 1;
     createBalls();
-    resetCueBallPosition();
+    resetCueBallPosition(cueStartX, cueStartY);
     cueStick.style.display = 'block';
     updateCueStick(0);
     showMessage(`Player 1's turn. Aim and shoot.`);
   }
 
-  // Create balls helper
-  function createBalls() {
-    balls.forEach(b => b.el.remove());
-    balls = [];
-
-    const rect = table.getBoundingClientRect();
-    cueStartX = rect.width * 0.4;
-    cueStartY = rect.height * 0.6;
-
-    balls.push(new Ball(0, 'cue', 'cue', 0, cueStartX, cueStartY));
-
-    const rackX = rect.width * 0.7;
-    const rackY = rect.height * 0.5;
-    const rowHeight = BALL_RADIUS * Math.sqrt(3);
-
-    const rackBallsInfo = [
-      {number: 1, group: 'solids', color: 'red'},
-      {number: 14, group: 'stripes', color: 'blue'},
-      {number: 7, group: 'solids', color: 'brown'},
-      {number: 9, group: 'stripes', color: 'red'},
-      {number: 8, group: 'eight', color: 'eight'},
-      {number: 3, group: 'solids', color: 'green'},
-      {number: 13, group: 'stripes', color: 'purple'},
-      {number: 2, group: 'solids', color: 'yellow'},
-      {number: 12, group: 'stripes', color: 'orange'},
-      {number: 6, group: 'solids', color: 'blue'},
-      {number: 11, group: 'stripes', color: 'green'},
-      {number: 5, group: 'solids', color: 'purple'},
-      {number: 10, group: 'stripes', color: 'yellow'},
-      {number: 4, group: 'solids', color: 'orange'},
-      {number: 15, group: 'stripes', color: 'brown'}
-    ];
-
-    let ballIndex = 0;
-    for (let row = 0; row < 5; row++) {
-      const ballsInRow = row + 1;
-      const y = rackY + row * rowHeight;
-      const rowWidth = ballsInRow * BALL_RADIUS * 2;
-      const startX = rackX - rowWidth / 2 + BALL_RADIUS;
-      for (let col = 0; col < ballsInRow; col++) {
-        if (ballIndex >= rackBallsInfo.length) break;
-        const x = startX + col * BALL_RADIUS * 2;
-        const info = rackBallsInfo[ballIndex];
-        balls.push(new Ball(info.number, info.group, info.color, info.number, x, y));
-        ballIndex++;
-      }
-    }
-  }
-
-  // Input event listeners
-  table.addEventListener('mousedown', e => {
-    if (ballsMoving || gameOver) return;
-    if (cueBallInHand) {
-      onCueBallPlace(e);
-      return;
-    }
-    const pos = getPointerPos(e);
-    const cueBall = balls.find(b => b.group === 'cue');
-    if (!cueBall || cueBall.pocketed) return;
-    if (dist(pos.x, pos.y, cueBall.x, cueBall.y) <= BALL_RADIUS * 1.5) {
-      isAiming = true;
-      aimStart = {x: cueBall.x, y: cueBall.y};
-      aimCurrent = pos;
-      updateAimVisual();
-    }
-  });
-  window.addEventListener('mousemove', e => {
-    if (!isAiming) return;
-    aimCurrent = getPointerPos(e);
-    updateAimVisual();
-  });
-  window.addEventListener('mouseup', e => {
-    if (!isAiming) return;
-    isAiming = false;
-    clearAimVisual();
-    const cueBall = balls.find(b => b.group === 'cue');
-    if (!cueBall || cueBall.pocketed) return;
-
-    const dx = aimStart.x - aimCurrent.x;
-    const dy = aimStart.y - aimCurrent.y;
-    const distance = dist(aimStart.x, aimStart.y, aimCurrent.x, aimCurrent.y);
-
-    if (distance < 5) {
-      showMessage(`Drag further to shoot.`);
-      updateCueStick(0);
-      return;
-    }
-
-    const maxPower = 15;
-    const power = Math.min(distance / 10, maxPower);
-    const angle = Math.atan2(dy, dx);
-
-    shoot(power, angle);
-  });
-
-  table.addEventListener('touchstart', e => {
-    e.preventDefault();
-    if (ballsMoving || gameOver) return;
-    if (cueBallInHand) {
-      onCueBallPlace(e);
-      return;
-    }
-    const pos = getPointerPos(e);
-    const cueBall = balls.find(b => b.group === 'cue');
-    if (!cueBall || cueBall.pocketed) return;
-    if (dist(pos.x, pos.y, cueBall.x, cueBall.y) <= BALL_RADIUS * 1.5) {
-      isAiming = true;
-      aimStart = {x: cueBall.x, y: cueBall.y};
-      aimCurrent = pos;
-      updateAimVisual();
-    }
-  }, {passive:false});
-  window.addEventListener('touchmove', e => {
-    e.preventDefault();
-    if (!isAiming) return;
-    aimCurrent = getPointerPos(e);
-    updateAimVisual();
-  }, {passive:false});
-  window.addEventListener('touchend', e => {
-    if (!isAiming) return;
-    isAiming = false;
-    clearAimVisual();
-    const cueBall = balls.find(b => b.group === 'cue');
-    if (!cueBall || cueBall.pocketed) return;
-
-    const dx = aimStart.x - aimCurrent.x;
-    const dy = aimStart.y - aimCurrent.y;
-    const distance = dist(aimStart.x, aimStart.y, aimCurrent.x, aimCurrent.y);
-
-    if (distance < 5) {
-      showMessage(`Drag further to shoot.`);
-      updateCueStick(0);
-      return;
-    }
-
-    const maxPower = 15;
-    const power = Math.min(distance / 10, maxPower);
-    const angle = Math.atan2(dy, dx);
-
-    shoot(power, angle);
-  });
-
-  // Game start
   init();
   requestAnimationFrame(gameLoop);
+
+  // Input listeners
+  table.addEventListener('mousedown', onPointerDown);
+  window.addEventListener('mousemove', onPointerMove);
+  window.addEventListener('mouseup', onPointerUp);
+  table.addEventListener('touchstart', e => { e.preventDefault(); onPointerDown(e); }, {passive:false});
+  window.addEventListener('touchmove', e => { e.preventDefault(); onPointerMove(e); }, {passive:false});
+  window.addEventListener('touchend', onPointerUp);
 })();
 </script>
 </body>
