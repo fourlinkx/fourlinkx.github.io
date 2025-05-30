@@ -239,67 +239,6 @@
       color: var(--accent-light);
       outline: none;
     }
-    form label {
-      font-weight: 600;
-      margin-bottom: 0.3rem;
-      display: block;
-      color: var(--dark);
-    }
-    form input,
-    form textarea {
-      width: 100%;
-      padding: 0.6rem 0.9rem;
-      margin-bottom: 1.2rem;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-      font-family: inherit;
-      color: var(--dark);
-      transition: box-shadow 0.3s ease;
-    }
-    form input::placeholder,
-    form textarea::placeholder {
-      color: #888;
-    }
-    form input:focus,
-    form textarea:focus {
-      outline: none;
-      box-shadow: 0 0 8px var(--accent);
-      border-color: var(--accent);
-    }
-    form button {
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 0.85rem 1.8rem;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      user-select: none;
-      width: 100%;
-    }
-    form button:hover,
-    form button:focus {
-      background: var(--accent-light);
-      outline: none;
-    }
-    .toggle-link {
-      margin-top: 1rem;
-      display: block;
-      text-align: center;
-      color: var(--accent);
-      cursor: pointer;
-      font-weight: 600;
-      user-select: none;
-    }
-    .toggle-link:hover,
-    .toggle-link:focus {
-      color: var(--accent-light);
-      text-decoration: underline;
-      outline: none;
-    }
     @keyframes modalFadeIn {
       from {
         opacity: 0;
@@ -416,10 +355,10 @@
         <h3>Virtual Reality</h3>
         <p>Experience immersive VR games that transport you to new worlds.</p>
       </div>
-      <div class="card" tabindex="0" aria-label="Football Games">
+      <div class="card" tabindex="0" aria-label="Quize Game" id="quize-game-card" role="button">
         <i class="fas fa-futbol"></i>
-        <h3>Football</h3>
-        <p>Play thrilling football games with realistic gameplay and tournaments.</p>
+        <h3>Quize Game</h3>
+        <p>Test your football knowledge with this fun quiz!</p>
       </div>
       <div class="card" tabindex="0" aria-label="Shooting Games">
         <i class="fas fa-crosshairs"></i>
@@ -498,12 +437,25 @@
       card.addEventListener("click", e => {
         e.preventDefault();
         const cardType = card.getAttribute("aria-label").split(" ")[0]; // Get first word of aria-label
+
+        // Redirect to quiz game page on Quize Game card click
+        if (card.id === "quize-game-card") {
+          showLoadingAndRedirect("Quize");
+          return;
+        }
+
         showLoadingAndRedirect(cardType);
       });
       card.addEventListener("keydown", e => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           const cardType = card.getAttribute("aria-label").split(" ")[0];
+
+          if (card.id === "quize-game-card") {
+            showLoadingAndRedirect("Quize");
+            return;
+          }
+
           showLoadingAndRedirect(cardType);
         }
       });
@@ -522,8 +474,8 @@
         case "Virtual":
           redirectURL = "vr.html";
           break;
-        case "Football":
-          redirectURL = "football.html";
+        case "Quize":
+          redirectURL = "quiz-game.html";  // <-- Replace with your quiz game page URL
           break;
         case "Shooting":
           redirectURL = "shooting.html";
