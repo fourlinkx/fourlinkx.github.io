@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Dynamic Quiz Game</title>
+<title>Dynamic Quiz Game with Social Sharing</title>
 <style>
+  /* ... (All previous styles unchanged) ... */
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
   :root {
     --primary-color: #ffb700;
@@ -232,7 +233,7 @@
   }
   #result-container h3 {
     font-size: 1.3rem;
-    margin-bottom: 25px;
+    margin-bottom: 15px;
     color: var(--primary-color);
     text-shadow: 0 0 8px var(--primary-color);
   }
@@ -488,8 +489,10 @@
       <h2>Your Score: <span id="score"></span></h2>
       <h3>Total Coins Earned This Round: <span id="final-coins"></span></h3>
       <div id="social-share" aria-label="Share your score">
-        <button id="share-twitter" aria-label="Share on Twitter" title="Share on Twitter">T</button>
-        <button id="share-facebook" aria-label="Share on Facebook" title="Share on Facebook">F</button>
+        <button id="share-twitter" aria-label="Share on Twitter" title="Share on Twitter">🐦</button>
+        <button id="share-whatsapp" aria-label="Share on WhatsApp" title="Share on WhatsApp">📱</button>
+        <button id="share-facebook" aria-label="Share on Facebook" title="Share on Facebook">📘</button>
+        <button id="share-instagram" aria-label="Share on Instagram" title="Share on Instagram">📸</button>
       </div>
       <button id="restart-btn" aria-label="Restart Quiz">Restart Quiz</button>
     </div>
@@ -534,7 +537,9 @@
       extraTimeMsg: "Extra 30 seconds added to each question for next quizzes!",
       badgesLabel: "Your badges",
       shareTwitter: "Share on Twitter",
-      shareFacebook: "Share on Facebook"
+      shareWhatsapp: "Share on WhatsApp",
+      shareFacebook: "Share on Facebook",
+      shareInstagram: "Share on Instagram"
     },
     es: {
       title: "Juego de Quiz Divertido",
@@ -556,7 +561,9 @@
       extraTimeMsg: "¡30 segundos extra añadidos a cada pregunta para los próximos quizzes!",
       badgesLabel: "Tus insignias",
       shareTwitter: "Compartir en Twitter",
-      shareFacebook: "Compartir en Facebook"
+      shareWhatsapp: "Compartir en WhatsApp",
+      shareFacebook: "Compartir en Facebook",
+      shareInstagram: "Compartir en Instagram"
     }
   };
 
@@ -583,7 +590,10 @@
   const closeModalBtn = document.getElementById('close-modal-btn');
   const notification = document.getElementById('notification');
   const shareTwitterBtn = document.getElementById('share-twitter');
+  const shareWhatsappBtn = document.getElementById('share-whatsapp');
   const shareFacebookBtn = document.getElementById('share-facebook');
+  const shareInstagramBtn = document.getElementById('share-instagram');
+  const socialShareDiv = document.getElementById('social-share');
 
   // Game Data
   let currentLang = 'en';
@@ -709,11 +719,15 @@
     redeemBtn.textContent = t('redeemCoins');
     nextBtn.textContent = t('nextQuestion');
     restartBtn.textContent = t('restartQuiz');
-    hintBtn.textContent = t('showHint');
+    hintBtn.textContent = hintVisible ? t('hideHint') : t('showHint');
     shareTwitterBtn.setAttribute('aria-label', t('shareTwitter'));
     shareTwitterBtn.title = t('shareTwitter');
+    shareWhatsappBtn.setAttribute('aria-label', t('shareWhatsapp'));
+    shareWhatsappBtn.title = t('shareWhatsapp');
     shareFacebookBtn.setAttribute('aria-label', t('shareFacebook'));
     shareFacebookBtn.title = t('shareFacebook');
+    shareInstagramBtn.setAttribute('aria-label', t('shareInstagram'));
+    shareInstagramBtn.title = t('shareInstagram');
     langToggleBtn.textContent = currentLang === 'en' ? 'ES' : 'EN';
     updateCoinsDisplay();
     updateBadgeDisplay();
@@ -1068,16 +1082,38 @@
     }
   });
 
-  // Social share buttons (mock)
+  // Social share buttons
   shareTwitterBtn.addEventListener('click', () => {
+    const msg = getShareMessage();
     const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent(`${t('yourScore')}: ${score} / ${questions.length} - I earned ${coinsThisRound} coins!`);
+    const text = encodeURIComponent(msg);
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+  });
+  shareWhatsappBtn.addEventListener('click', () => {
+    const msg = encodeURIComponent(getShareMessage());
+    window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
   });
   shareFacebookBtn.addEventListener('click', () => {
     const url = encodeURIComponent(window.location.href);
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
   });
+  shareInstagramBtn.addEventListener('click', () => {
+    const msg = getShareMessage() + "\n\nCopy this message and share it on Instagram Stories or posts!";
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(msg).then(() => {
+        alert('Score message copied! Paste it in your Instagram story or post.');
+      }, () => {
+        alert('Copy failed! Please copy manually:\n\n' + msg);
+      });
+    } else {
+      alert('Copy this message and share it on Instagram:\n\n' + msg);
+    }
+  });
+
+  // Compose share message
+  function getShareMessage() {
+    return `${t('yourScore')}: ${score} / ${questions.length} - I earned ${coinsThisRound} coins! Try it yourself: ${window.location.href}`;
+  }
 
   // Leaderboard save (top 5)
   function saveLeaderboard(score) {
