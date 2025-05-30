@@ -476,6 +476,93 @@
       background-color: #ffb700;
       border-radius: 4px;
     }
+
+    /* === SHARE MODAL === */
+    #share-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 25000;
+      user-select: none;
+    }
+    #share-modal.active {
+      display: flex;
+    }
+    #share-modal .modal-content {
+      background: #22223b;
+      border-radius: 15px;
+      padding: 30px 35px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 0 40px #ffb700;
+      color: #fff;
+      outline: none;
+    }
+    #share-modal h2 {
+      font-weight: 700;
+      font-size: 2rem;
+      margin-bottom: 15px;
+      color: #ffb700;
+      text-shadow: 0 0 15px #ffb700;
+      user-select: none;
+    }
+    #share-modal p {
+      font-size: 1.1rem;
+      margin-bottom: 25px;
+      user-select: none;
+    }
+    #share-modal .share-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    #share-modal .share-btn {
+      background: #ffb700;
+      color: #1e1e2f;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 12px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 0 15px #ffb700;
+      text-decoration: none;
+      user-select: none;
+      transition: background 0.3s ease, transform 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #share-modal .share-btn:hover,
+    #share-modal .share-btn:focus {
+      background: #e6a700;
+      outline: none;
+      transform: scale(1.05);
+    }
+    #share-modal .close-share-btn {
+      background: #dc3545;
+      color: white;
+      font-weight: 700;
+      padding: 12px 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: background 0.3s ease;
+      user-select: none;
+      border: none;
+      width: 100%;
+    }
+    #share-modal .close-share-btn:hover,
+    #share-modal .close-share-btn:focus {
+      background: #a71d2a;
+      outline: none;
+      transform: scale(1.05);
+    }
   </style>
 </head>
 <body>
@@ -515,6 +602,26 @@
         <!-- Rewards will be inserted here dynamically -->
       </ul>
       <button id="close-modal-btn" aria-label="Close redeem modal">Close</button>
+    </div>
+  </div>
+
+  <!-- Share Modal -->
+  <div id="share-modal" role="dialog" aria-modal="true" aria-labelledby="share-title" aria-describedby="share-desc" tabindex="-1">
+    <div class="modal-content" tabindex="0">
+      <h2 id="share-title">Enjoyed the game?</h2>
+      <p id="share-desc">Share your achievement with friends!</p>
+      <div class="share-buttons">
+        <a href="#" id="share-facebook" class="share-btn" target="_blank" rel="noopener" aria-label="Share on Facebook" title="Share on Facebook">
+          Facebook
+        </a>
+        <a href="#" id="share-whatsapp" class="share-btn" target="_blank" rel="noopener" aria-label="Share on WhatsApp" title="Share on WhatsApp">
+          WhatsApp
+        </a>
+        <a href="#" id="share-twitter" class="share-btn" target="_blank" rel="noopener" aria-label="Share on Twitter" title="Share on Twitter">
+          Twitter
+        </a>
+      </div>
+      <button id="close-share-btn" class="close-share-btn" aria-label="Close share modal">Close</button>
     </div>
   </div>
 
@@ -598,6 +705,13 @@
     const notification = document.getElementById('notification');
     const quizContainer = document.querySelector('.quiz-container');
     const body = document.body;
+
+    // Share modal elements
+    const shareModal = document.getElementById('share-modal');
+    const shareFacebookBtn = document.getElementById('share-facebook');
+    const shareWhatsappBtn = document.getElementById('share-whatsapp');
+    const shareTwitterBtn = document.getElementById('share-twitter');
+    const closeShareBtn = document.getElementById('close-share-btn');
 
     // === GAME VARIABLES ===
     let currentQuestionIndex = 0;
@@ -761,7 +875,7 @@
       startQuiz();
     });
 
-    // === SHOW FINAL RESULTS WITH CONFETTI ===
+    // === SHOW FINAL RESULTS WITH CONFETTI & SHARE MODAL ===
     function showResults() {
       questionContainer.classList.add('hide');
       nextButton.style.display = 'none';
@@ -772,6 +886,10 @@
       finalCoinsElement.innerText = coins;
       restartButton.focus();
       launchConfetti();
+      // Show share modal after a short delay for smoothness
+      setTimeout(() => {
+        openShareModal();
+      }, 1200);
     }
 
     // === TIMER FUNCTIONS ===
@@ -853,7 +971,7 @@
       redeemBtn.focus();
     });
 
-    // Close modal on outside click
+    // Close redeem modal on outside click
     redeemModal.addEventListener('click', (e) => {
       if (e.target === redeemModal) {
         redeemModal.classList.remove('active');
@@ -861,7 +979,7 @@
       }
     });
 
-    // Close modal on Escape key
+    // Close redeem modal on Escape key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && redeemModal.classList.contains('active')) {
         redeemModal.classList.remove('active');
@@ -940,6 +1058,46 @@
         notification.classList.remove('show');
       }, 3500);
     }
+
+    // === SHARE MODAL FUNCTIONS ===
+    function openShareModal() {
+      // Build share URLs with dynamic score and page URL
+      const shareText = encodeURIComponent(`I scored ${score} out of ${questions.length} in this fun quiz game! Try it yourself:`);
+      const pageUrl = encodeURIComponent(window.location.href);
+
+      // Facebook share URL
+      shareFacebookBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}&quote=${shareText}`;
+
+      // WhatsApp share URL (mobile and desktop)
+      shareWhatsappBtn.href = `https://wa.me/?text=${shareText}%20${pageUrl}`;
+
+      // Twitter share URL
+      shareTwitterBtn.href = `https://twitter.com/intent/tweet?text=${shareText}&url=${pageUrl}&hashtags=QuizGame,FunTrivia`;
+
+      shareModal.classList.add('active');
+      shareModal.querySelector('.modal-content').focus();
+    }
+
+    closeShareBtn.addEventListener('click', () => {
+      shareModal.classList.remove('active');
+      restartButton.focus();
+    });
+
+    // Close share modal on outside click
+    shareModal.addEventListener('click', (e) => {
+      if (e.target === shareModal) {
+        shareModal.classList.remove('active');
+        restartButton.focus();
+      }
+    });
+
+    // Close share modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && shareModal.classList.contains('active')) {
+        shareModal.classList.remove('active');
+        restartButton.focus();
+      }
+    });
 
     // === INITIALIZE ON PAGE LOAD ===
     window.onload = () => {
