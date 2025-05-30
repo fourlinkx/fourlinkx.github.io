@@ -1,500 +1,509 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Dynamic Quiz Game with Social Sharing</title>
-<style>
-  /* ... (All previous styles unchanged) ... */
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
-  :root {
-    --primary-color: #ffb700;
-    --correct-color: #28a745;
-    --wrong-color: #dc3545;
-    --bg-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-  }
-  body {
-    font-family: 'Poppins', Arial, sans-serif;
-    background: var(--bg-gradient);
-    margin: 0; padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    color: #fff;
-    user-select: none;
-  }
-  .container {
-    background: #1e1e2f;
-    border-radius: 15px;
-    width: 100%;
-    max-width: 480px;
-    padding: 30px 25px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-    text-align: center;
-    position: relative;
-  }
-  h1 {
-    font-weight: 700;
-    font-size: 2rem;
-    margin-bottom: 15px;
-    text-shadow: 0 0 10px var(--primary-color);
-  }
-  #lang-toggle {
-    position: absolute;
-    top: 15px; right: 20px;
-    background: transparent;
-    border: 2px solid var(--primary-color);
-    color: var(--primary-color);
-    border-radius: 20px;
-    padding: 6px 14px;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 0.9rem;
-    user-select: none;
-  }
-  #coins {
-    font-weight: 700;
-    color: var(--primary-color);
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-  }
-  #coins svg {
-    width: 24px; height: 24px;
-    animation: spin 2s linear infinite;
-  }
-  @keyframes spin {
-    0% { transform: rotate(0deg);}
-    100% { transform: rotate(360deg);}
-  }
-  #badge-display {
-    margin-bottom: 15px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    color: #ffd700;
-    font-weight: 700;
-    font-size: 1.1rem;
-    text-shadow: 0 0 8px #ffd700;
-    user-select: none;
-    flex-wrap: wrap;
-  }
-  #badge-display.visible {
-    display: flex;
-  }
-  #badge-display svg {
-    width: 32px;
-    height: 32px;
-    filter: drop-shadow(0 0 4px #ffd700);
-  }
-  #progress-bar-container {
-    background: #33334d;
-    border-radius: 10px;
-    height: 12px;
-    overflow: hidden;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
-    margin-bottom: 20px;
-  }
-  #progress-bar {
-    height: 100%;
-    width: 0%;
-    background: var(--primary-color);
-    border-radius: 10px;
-    transition: width 0.4s ease;
-    box-shadow: 0 0 10px var(--primary-color);
-  }
-  #timer-container {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 20px;
-  }
-  svg#timer-svg {
-    transform: rotate(-90deg);
-  }
-  circle#timer-bg {
-    fill: none;
-    stroke: #444466;
-    stroke-width: 8;
-  }
-  circle#timer-progress {
-    fill: none;
-    stroke: var(--primary-color);
-    stroke-width: 8;
-    stroke-linecap: round;
-    transition: stroke-dashoffset 1s linear;
-  }
-  #timer-text {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-weight: 700;
-    font-size: 1.3rem;
-    color: var(--primary-color);
-    user-select: none;
-  }
-  #question {
-    font-size: 1.3rem;
-    font-weight: 600;
-    margin-bottom: 10px;
-    min-height: 70px;
-    line-height: 1.3;
-    text-shadow: 0 0 5px rgba(0,0,0,0.7);
-  }
-  #hint-btn {
-    background: transparent;
-    border: none;
-    color: var(--primary-color);
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin-bottom: 10px;
-    user-select: none;
-  }
-  #hint-text {
-    font-style: italic;
-    font-size: 0.9rem;
-    margin-bottom: 15px;
-    color: #ccc;
-    min-height: 20px;
-  }
-  .btn-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-    margin-bottom: 20px;
-  }
-  button.btn {
-    padding: 16px;
-    font-size: 17px;
-    border: none;
-    border-radius: 12px;
-    background: #3a3a5a;
-    color: #fff;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    transition: background 0.3s ease, transform 0.15s ease;
-    user-select: none;
-    position: relative;
-    overflow: hidden;
-  }
-  button.btn:hover:not(:disabled),
-  button.btn:focus:not(:disabled) {
-    background: var(--primary-color);
-    color: #1e1e2f;
-    outline: none;
-    transform: scale(1.05);
-    box-shadow: 0 0 15px var(--primary-color);
-    z-index: 1;
-  }
-  button.btn:disabled {
-    cursor: default;
-    opacity: 0.7;
-  }
-  .correct {
-    background-color: var(--correct-color) !important;
-    color: white !important;
-    box-shadow: 0 0 15px var(--correct-color) !important;
-  }
-  .wrong {
-    background-color: var(--wrong-color) !important;
-    color: white !important;
-    box-shadow: 0 0 15px var(--wrong-color) !important;
-  }
-  #next-btn {
-    margin-top: 15px;
-    display: none;
-    width: 100%;
-    background: var(--primary-color);
-    color: #1e1e2f;
-    font-weight: 700;
-    font-size: 1.1rem;
-    box-shadow: 0 0 15px var(--primary-color);
-    transition: background 0.3s ease;
-  }
-  #next-btn:hover,
-  #next-btn:focus {
-    background: #e6a700;
-    outline: none;
-    transform: scale(1.05);
-  }
-  #result-container {
-    color: #fff;
-  }
-  #result-container h2 {
-    font-size: 1.8rem;
-    margin-bottom: 10px;
-    text-shadow: 0 0 10px var(--primary-color);
-  }
-  #result-container h3 {
-    font-size: 1.3rem;
-    margin-bottom: 15px;
-    color: var(--primary-color);
-    text-shadow: 0 0 8px var(--primary-color);
-  }
-  #restart-btn {
-    background: #28a745;
-    font-weight: 700;
-    font-size: 1.1rem;
-    box-shadow: 0 0 15px #28a745;
-    transition: background 0.3s ease;
-    width: 100%;
-  }
-  #restart-btn:hover,
-  #restart-btn:focus {
-    background: #1e7e34;
-    outline: none;
-    transform: scale(1.05);
-  }
-  /* Coin animation */
-  .coin-fly {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Gold_coin_icon.svg/1024px-Gold_coin_icon.svg.png') no-repeat center center / contain;
-    pointer-events: none;
-    animation: flyToCoin 0.8s forwards ease-in-out;
-    z-index: 9999;
-  }
-  @keyframes flyToCoin {
-    0% {
-      opacity: 1;
-      transform: translate(0, 0) scale(1);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quiz Game with Redeemable Coins</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+    /* Background animation */
+    @keyframes backgroundShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
-    100% {
+
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      background-size: 200% 200%;
+      animation: backgroundShift 15s ease infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      padding: 10px;
+      overflow-x: hidden;
+      user-select: none;
+      color: #fff;
+      flex-direction: column;
+    }
+
+    .quiz-container {
+      background: #1e1e2f;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 460px;
+      padding: 30px 35px 40px;
+      box-shadow: 0 12px 40px rgba(255, 183, 0, 0.6);
+      text-align: center;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+
+    .quiz-container:hover {
+      transform: scale(1.02);
+      box-shadow: 0 15px 50px rgba(255, 183, 0, 0.8);
+    }
+
+    h1 {
+      margin-bottom: 5px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      font-size: 2.4rem;
+      text-shadow: 0 0 15px #ffb700;
+      user-select: text;
+    }
+
+    h2.subtitle {
+      font-weight: 400;
+      font-size: 1.1rem;
+      color: #ffd966;
+      margin-bottom: 20px;
+      text-shadow: 0 0 8px #ffd966;
+      user-select: none;
+    }
+
+    #welcome-msg {
+      font-size: 1rem;
+      margin-bottom: 25px;
+      color: #eee;
+      font-style: italic;
+      user-select: none;
+      text-shadow: 0 0 5px rgba(255,255,255,0.3);
+    }
+
+    #coins {
+      font-weight: 700;
+      color: #ffb700;
+      margin-bottom: 20px;
+      font-size: 1.3rem;
+      user-select: text;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      animation: glowCoin 2.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes glowCoin {
+      0% { filter: drop-shadow(0 0 3px #ffb700); }
+      100% { filter: drop-shadow(0 0 15px #ffd700); }
+    }
+
+    #coins .coin-icon {
+      width: 28px;
+      height: 28px;
+      animation: spin 2s linear infinite;
+      filter: drop-shadow(0 0 3px #ffb700);
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+
+    #progress-bar-container {
+      width: 100%;
+      background: #33334d;
+      border-radius: 12px;
+      height: 12px;
+      margin-bottom: 25px;
+      overflow: hidden;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.6);
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #ffb700;
+      border-radius: 12px;
+      transition: width 0.5s ease;
+      box-shadow: 0 0 20px #ffb700;
+    }
+
+    #timer {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      font-weight: 700;
+      color: #ff6f61;
+      text-shadow: 0 0 8px #ff6f61;
+      user-select: none;
+    }
+
+    #question {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      min-height: 70px;
+      line-height: 1.4;
+      text-shadow: 0 0 8px rgba(0,0,0,0.8);
+      user-select: text;
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      padding: 18px;
+      font-size: 18px;
+      border: none;
+      border-radius: 14px;
+      background: #3a3a5a;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+      transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .btn:hover:not(:disabled),
+    .btn:focus:not(:disabled) {
+      background: #ffb700;
+      color: #1e1e2f;
+      outline: none;
+      transform: scale(1.07);
+      box-shadow: 0 0 25px #ffb700;
+      z-index: 1;
+    }
+
+    .btn:disabled {
+      cursor: default;
+      opacity: 0.65;
+    }
+
+    .correct {
+      background-color: #28a745 !important;
+      color: white !important;
+      box-shadow: 0 0 20px #28a745 !important;
+    }
+
+    .wrong {
+      background-color: #dc3545 !important;
+      color: white !important;
+      box-shadow: 0 0 20px #dc3545 !important;
+    }
+
+    .next-btn {
+      margin-top: 30px;
+      display: none;
+      width: 100%;
+      background: #ffb700;
+      color: #1e1e2f;
+      font-weight: 800;
+      font-size: 1.2rem;
+      box-shadow: 0 0 25px #ffb700;
+      transition: background 0.3s ease, transform 0.15s ease;
+      border-radius: 14px;
+      letter-spacing: 0.05em;
+    }
+
+    .next-btn:hover,
+    .next-btn:focus {
+      background: #e6a700;
+      outline: none;
+      transform: scale(1.07);
+    }
+
+    #result-container {
+      color: #fff;
+      user-select: none;
+    }
+
+    #result-container h2 {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      text-shadow: 0 0 15px #ffb700;
+    }
+
+    #result-container h3 {
+      font-size: 1.4rem;
+      margin-bottom: 30px;
+      color: #ffb700;
+      text-shadow: 0 0 12px #ffb700;
+    }
+
+    #restart-btn {
+      background: #28a745;
+      font-weight: 800;
+      font-size: 1.2rem;
+      box-shadow: 0 0 25px #28a745;
+      transition: background 0.3s ease, transform 0.15s ease;
+      width: 100%;
+      border-radius: 14px;
+      letter-spacing: 0.05em;
+    }
+
+    #restart-btn:hover,
+    #restart-btn:focus {
+      background: #1e7e34;
+      outline: none;
+      transform: scale(1.07);
+    }
+
+    /* Coin animation */
+    .coin-fly {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Gold_coin_icon.svg/1024px-Gold_coin_icon.svg.png') no-repeat center center / contain;
+      pointer-events: none;
+      animation: flyToCoin 0.8s forwards ease-in-out;
+      z-index: 9999;
+      filter: drop-shadow(0 0 5px #ffb700);
+    }
+
+    @keyframes flyToCoin {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(calc(100vw - 50px), -100px) scale(0.2);
+      }
+    }
+
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #ffb700;
+      opacity: 0.9;
+      top: 0;
+      left: 50%;
+      pointer-events: none;
+      animation: confetti-fall linear forwards;
+      border-radius: 3px;
+      box-shadow: 0 0 8px #ffb700;
+      z-index: 10000;
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Redeem button */
+    #redeem-btn {
+      margin-bottom: 25px;
+      background: #17a2b8;
+      font-weight: 800;
+      font-size: 1.1rem;
+      box-shadow: 0 0 25px #17a2b8;
+      color: #fff;
+      border-radius: 14px;
+      padding: 14px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
+      user-select: none;
+      width: 100%;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    #redeem-btn:hover,
+    #redeem-btn:focus {
+      background: #117a8b;
+      outline: none;
+      transform: scale(1.07);
+      box-shadow: 0 0 35px #17a2b8;
+    }
+
+    /* Modal styles */
+    #redeem-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 20000;
+      backdrop-filter: blur(6px);
+    }
+
+    #redeem-modal.active {
+      display: flex;
+    }
+
+    #redeem-modal .modal-content {
+      background: #2c2c44;
+      border-radius: 20px;
+      padding: 30px 35px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(255, 183, 0, 0.9);
+      color: #fff;
+      user-select: none;
+    }
+
+    #redeem-modal h2 {
+      margin-bottom: 20px;
+      font-weight: 800;
+      font-size: 2rem;
+      color: #ffb700;
+      text-shadow: 0 0 15px #ffb700;
+      letter-spacing: 0.05em;
+    }
+
+    #redeem-modal p {
+      font-size: 1.1rem;
+      margin-bottom: 25px;
+      color: #ffd966;
+      text-shadow: 0 0 8px #ffd966;
+      font-style: italic;
+    }
+
+    #redeem-modal ul {
+      list-style: none;
+      padding: 0;
+      margin: 15px 0 30px;
+      text-align: left;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    #redeem-modal ul li {
+      background: #444466;
+      margin-bottom: 14px;
+      padding: 15px 20px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: background 0.3s ease, color 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    #redeem-modal ul li:hover,
+    #redeem-modal ul li:focus {
+      background: #ffb700;
+      color: #1e1e2f;
+      outline: none;
+      box-shadow: 0 0 15px #ffb700;
+      transform: scale(1.03);
+      font-weight: 700;
+    }
+
+    #redeem-modal ul li span.cost {
+      font-weight: 700;
+      color: #fff;
+      background: #1e1e2f;
+      padding: 5px 12px;
+      border-radius: 10px;
+      font-size: 1rem;
+      min-width: 50px;
+      text-align: center;
+      user-select: none;
+      box-shadow: 0 0 10px rgba(0,0,0,0.7);
+    }
+
+    #close-modal-btn {
+      background: #dc3545;
+      border: none;
+      color: white;
+      font-weight: 800;
+      padding: 14px 25px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: background 0.3s ease, transform 0.15s ease;
+      margin-top: 10px;
+      width: 100%;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 0 25px #dc3545;
+    }
+
+    #close-modal-btn:hover,
+    #close-modal-btn:focus {
+      background: #a71d2a;
+      outline: none;
+      transform: scale(1.07);
+      box-shadow: 0 0 35px #dc3545;
+    }
+
+    /* Notification */
+    #notification {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #28a745;
+      color: white;
+      padding: 14px 28px;
+      border-radius: 30px;
+      box-shadow: 0 0 25px #28a745;
+      font-weight: 700;
+      font-size: 1.1rem;
       opacity: 0;
-      transform: translate(calc(100vw - 50px), -100px) scale(0.2);
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      z-index: 30000;
+      letter-spacing: 0.03em;
+      user-select: none;
+      text-shadow: 0 0 8px rgba(0,0,0,0.3);
     }
-  }
-  /* Confetti */
-  .confetti {
-    position: fixed;
-    width: 10px;
-    height: 10px;
-    background-color: var(--primary-color);
-    opacity: 0.9;
-    top: 0;
-    left: 50%;
-    pointer-events: none;
-    animation: confetti-fall linear forwards;
-    border-radius: 3px;
-    box-shadow: 0 0 5px var(--primary-color);
-    z-index: 10000;
-  }
-  @keyframes confetti-fall {
-    0% {
-      transform: translateY(0) rotate(0deg);
+
+    #notification.show {
       opacity: 1;
+      pointer-events: auto;
     }
-    100% {
-      transform: translateY(100vh) rotate(360deg);
-      opacity: 0;
-    }
-  }
-  /* Redeem button */
-  #redeem-btn {
-    margin-top: 10px;
-    background: #17a2b8;
-    font-weight: 700;
-    font-size: 1rem;
-    box-shadow: 0 0 15px #17a2b8;
-    color: #fff;
-    border-radius: 12px;
-    padding: 12px;
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.15s ease;
-    user-select: none;
-    width: 100%;
-  }
-  #redeem-btn:hover,
-  #redeem-btn:focus {
-    background: #117a8b;
-    outline: none;
-    transform: scale(1.05);
-  }
-  /* Modal styles */
-  #redeem-modal {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.7);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 20000;
-  }
-  #redeem-modal.active {
-    display: flex;
-  }
-  #redeem-modal .modal-content {
-    background: #2c2c44;
-    border-radius: 15px;
-    padding: 25px 30px;
-    max-width: 350px;
-    width: 90%;
-    text-align: center;
-    box-shadow: 0 0 30px rgba(255, 183, 0, 0.7);
-    color: #fff;
-  }
-  #redeem-modal h2 {
-    margin-bottom: 15px;
-    font-weight: 700;
-    font-size: 1.8rem;
-    color: var(--primary-color);
-    text-shadow: 0 0 10px var(--primary-color);
-  }
-  #redeem-modal ul {
-    list-style: none;
-    padding: 0;
-    margin: 15px 0 25px;
-    text-align: left;
-    max-height: 200px;
-    overflow-y: auto;
-  }
-  #redeem-modal ul li {
-    background: #444466;
-    margin-bottom: 10px;
-    padding: 12px 15px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  #redeem-modal ul li:hover,
-  #redeem-modal ul li:focus {
-    background: var(--primary-color);
-    color: #1e1e2f;
-    outline: none;
-  }
-  #redeem-modal ul li span.cost {
-    font-weight: 700;
-    color: #fff;
-    background: #1e1e2f;
-    padding: 3px 8px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    min-width: 40px;
-    text-align: center;
-  }
-  #close-modal-btn {
-    background: #dc3545;
-    border: none;
-    color: white;
-    font-weight: 700;
-    padding: 10px 20px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background 0.3s ease;
-    margin-top: 10px;
-    width: 100%;
-  }
-  #close-modal-btn:hover,
-  #close-modal-btn:focus {
-    background: #a71d2a;
-    outline: none;
-    transform: scale(1.05);
-  }
-  /* Notification */
-  #notification {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #28a745;
-    color: white;
-    padding: 12px 20px;
-    border-radius: 20px;
-    box-shadow: 0 0 15px #28a745;
-    font-weight: 700;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s ease;
-    z-index: 30000;
-  }
-  #notification.show {
-    opacity: 1;
-    pointer-events: auto;
-  }
-  /* Social share buttons */
-  #social-share {
-    margin-top: 15px;
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-  }
-  #social-share button {
-    background: var(--primary-color);
-    border: none;
-    border-radius: 50%;
-    width: 38px;
-    height: 38px;
-    cursor: pointer;
-    box-shadow: 0 0 10px var(--primary-color);
-    transition: background 0.3s ease, transform 0.15s ease;
-    color: #1e1e2f;
-    font-weight: 700;
-    font-size: 1.2rem;
-    user-select: none;
-  }
-  #social-share button:hover,
-  #social-share button:focus {
-    background: #e6a700;
-    outline: none;
-    transform: scale(1.2);
-  }
-</style>
+  </style>
 </head>
 <body>
-  <div class="container" role="main" aria-label="Dynamic Quiz Game">
-    <h1 id="title">Fun Quiz Game</h1>
-    <button id="lang-toggle" aria-label="Toggle language">ES</button>
-    <div id="coins" aria-live="polite" aria-atomic="true" title="Coins collected" tabindex="0" aria-label="Coins collected">
-      <svg aria-hidden="true" viewBox="0 0 64 64" fill="#ffb700" xmlns="http://www.w3.org/2000/svg">
+  <div class="quiz-container" role="main" aria-label="Fun Quiz Game">
+    <h1>Fun Quiz Game</h1>
+    <h2 class="subtitle">Challenge Your Brain & Earn Rewards!</h2>
+    <div id="welcome-msg">Answer questions correctly to collect coins and unlock awesome rewards!</div>
+
+    <div id="coins" aria-live="polite" aria-atomic="true" title="Coins collected">
+      <svg class="coin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#ffb700" aria-hidden="true">
         <circle cx="32" cy="32" r="30" stroke="#d4af37" stroke-width="4"/>
         <circle cx="32" cy="32" r="20" fill="#ffd700"/>
         <circle cx="32" cy="32" r="10" stroke="#d4af37" stroke-width="2" fill="none"/>
       </svg>
       Coins: 0
     </div>
-    <div id="badge-display" aria-live="polite" aria-atomic="true" aria-label="Your badges" role="region">
-      <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" fill="#ffd700" viewBox="0 0 64 64">
-        <path d="M32 2L39.09 21.26L59 22.27L42 36.14L48.18 55.02L32 44.77L15.82 55.02L22 36.14L5 22.27L24.91 21.26L32 2Z"/>
-      </svg>
-      <span>Golden Badge</span>
-    </div>
-    <button id="redeem-btn" aria-label="Redeem your coins">Redeem Coins</button>
+
+    <button id="redeem-btn" aria-label="Redeem your coins">Redeem Your Coins & Unlock Rewards</button>
+
     <div id="progress-bar-container" aria-hidden="true">
       <div id="progress-bar"></div>
     </div>
-    <div id="timer-container" aria-label="Timer">
-      <svg id="timer-svg" width="80" height="80" viewBox="0 0 100 100" aria-hidden="true">
-        <circle id="timer-bg" cx="50" cy="50" r="45"/>
-        <circle id="timer-progress" cx="50" cy="50" r="45" stroke-dasharray="283" stroke-dashoffset="0"/>
-      </svg>
-      <div id="timer-text" aria-live="polite" aria-atomic="true">15</div>
+
+    <div id="timer" aria-live="polite" aria-atomic="true" aria-label="Time remaining">Time left: 15s</div>
+
+    <div id="question-container">
+      <div id="question" tabindex="0">Question text</div>
+      <div id="answer-buttons" class="btn-grid" role="list"></div>
     </div>
-    <div id="question" tabindex="0">Question text</div>
-    <button id="hint-btn" aria-expanded="false" aria-controls="hint-text">Show Hint</button>
-    <div id="hint-text" aria-live="polite" aria-atomic="true"></div>
-    <div class="btn-grid" role="list" aria-label="Answer choices" id="answer-buttons"></div>
-    <button id="next-btn" aria-label="Next question">Next</button>
-    <div id="result-container" class="hide" role="region" aria-live="polite" aria-atomic="true">
-      <h2>Your Score: <span id="score"></span></h2>
+
+    <button id="next-btn" class="next-btn btn" aria-label="Next question">Next Question →</button>
+
+    <div id="result-container" class="hide" role="region" aria-live="polite">
+      <h2>Awesome Job! Your Score: <span id="score"></span></h2>
       <h3>Total Coins Earned This Round: <span id="final-coins"></span></h3>
-      <div id="social-share" aria-label="Share your score">
-        <button id="share-twitter" aria-label="Share on Twitter" title="Share on Twitter">🐦</button>
-        <button id="share-whatsapp" aria-label="Share on WhatsApp" title="Share on WhatsApp">📱</button>
-        <button id="share-facebook" aria-label="Share on Facebook" title="Share on Facebook">📘</button>
-        <button id="share-instagram" aria-label="Share on Instagram" title="Share on Instagram">📸</button>
-      </div>
-      <button id="restart-btn" aria-label="Restart Quiz">Restart Quiz</button>
+      <button id="restart-btn" class="btn" aria-label="Restart Quiz">Play Again 🔄</button>
     </div>
   </div>
 
@@ -502,9 +511,9 @@
   <div id="redeem-modal" role="dialog" aria-modal="true" aria-labelledby="redeem-title" aria-describedby="redeem-desc">
     <div class="modal-content" tabindex="0">
       <h2 id="redeem-title">Redeem Your Coins</h2>
-      <p id="redeem-desc">Select a reward to redeem your coins!</p>
-      <ul id="rewards-list" tabindex="0" aria-label="Rewards list">
-        <!-- Rewards inserted here -->
+      <p id="redeem-desc">Select a reward to redeem your hard-earned coins and enhance your quiz experience!</p>
+      <ul id="rewards-list" tabindex="0">
+        <!-- Rewards will be inserted here -->
       </ul>
       <button id="close-modal-btn" aria-label="Close redeem modal">Close</button>
     </div>
@@ -513,627 +522,413 @@
   <!-- Notification -->
   <div id="notification" role="alert" aria-live="assertive"></div>
 
-<script>
-(() => {
-  // Localization strings
-  const locales = {
-    en: {
-      title: "Fun Quiz Game",
-      coinsLabel: "Coins",
-      redeemCoins: "Redeem Coins",
-      nextQuestion: "Next",
-      restartQuiz: "Restart Quiz",
-      yourScore: "Your Score",
-      totalCoinsThisRound: "Total Coins Earned This Round",
-      redeemYourCoins: "Redeem Your Coins",
-      selectReward: "Select a reward to redeem your coins!",
-      close: "Close",
-      showHint: "Show Hint",
-      hideHint: "Hide Hint",
-      timeLeft: "Time left",
-      timeUp: "Time is up!",
-      notEnoughCoins: "Not enough coins to redeem this reward.",
-      redeemed: "You redeemed:",
-      extraTimeMsg: "Extra 30 seconds added to each question for next quizzes!",
-      badgesLabel: "Your badges",
-      shareTwitter: "Share on Twitter",
-      shareWhatsapp: "Share on WhatsApp",
-      shareFacebook: "Share on Facebook",
-      shareInstagram: "Share on Instagram"
-    },
-    es: {
-      title: "Juego de Quiz Divertido",
-      coinsLabel: "Monedas",
-      redeemCoins: "Canjear Monedas",
-      nextQuestion: "Siguiente",
-      restartQuiz: "Reiniciar Quiz",
-      yourScore: "Tu Puntaje",
-      totalCoinsThisRound: "Monedas Ganadas Esta Ronda",
-      redeemYourCoins: "Canjea tus monedas",
-      selectReward: "Selecciona una recompensa para canjear tus monedas!",
-      close: "Cerrar",
-      showHint: "Mostrar pista",
-      hideHint: "Ocultar pista",
-      timeLeft: "Tiempo restante",
-      timeUp: "¡Se acabó el tiempo!",
-      notEnoughCoins: "No tienes suficientes monedas para canjear esta recompensa.",
-      redeemed: "Has canjeado:",
-      extraTimeMsg: "¡30 segundos extra añadidos a cada pregunta para los próximos quizzes!",
-      badgesLabel: "Tus insignias",
-      shareTwitter: "Compartir en Twitter",
-      shareWhatsapp: "Compartir en WhatsApp",
-      shareFacebook: "Compartir en Facebook",
-      shareInstagram: "Compartir en Instagram"
+  <script>
+    // Questions data
+    const questions = [
+      {
+        question: "What is the capital of France?",
+        answers: [
+          { text: "Paris", correct: true },
+          { text: "London", correct: false },
+          { text: "Berlin", correct: false },
+          { text: "Madrid", correct: false }
+        ]
+      },
+      {
+        question: "Which planet is known as the Red Planet?",
+        answers: [
+          { text: "Venus", correct: false },
+          { text: "Mars", correct: true },
+          { text: "Jupiter", correct: false },
+          { text: "Saturn", correct: false }
+        ]
+      },
+      {
+        question: "Who wrote 'Hamlet'?",
+        answers: [
+          { text: "Charles Dickens", correct: false },
+          { text: "William Shakespeare", correct: true },
+          { text: "Leo Tolstoy", correct: false },
+          { text: "Mark Twain", correct: false }
+        ]
+      },
+      {
+        question: "What is the smallest prime number?",
+        answers: [
+          { text: "1", correct: false },
+          { text: "2", correct: true },
+          { text: "3", correct: false },
+          { text: "0", correct: false }
+        ]
+      },
+      {
+        question: "Which language is primarily used for Android app development?",
+        answers: [
+          { text: "Swift", correct: false },
+          { text: "Kotlin", correct: true },
+          { text: "JavaScript", correct: false },
+          { text: "Ruby", correct: false }
+        ]
+      }
+    ];
+
+    // Rewards data
+    const rewards = [
+      { id: 1, name: "Golden Badge", cost: 50, description: "Show off your achievement with a shiny badge!" },
+      { id: 2, name: "Extra 30s Timer", cost: 100, description: "Get extra time on each question for your next quiz." },
+      { id: 3, name: "Secret Quiz Theme", cost: 150, description: "Unlock a cool secret theme for the quiz." },
+      { id: 4, name: "Custom Avatar", cost: 200, description: "Unlock a custom avatar for your profile." }
+    ];
+
+    // DOM Elements
+    const questionContainer = document.getElementById('question-container');
+    const questionElement = document.getElementById('question');
+    const answerButtons = document.getElementById('answer-buttons');
+    const nextButton = document.getElementById('next-btn');
+    const resultContainer = document.getElementById('result-container');
+    const scoreElement = document.getElementById('score');
+    const restartButton = document.getElementById('restart-btn');
+    const coinsElement = document.getElementById('coins');
+    const finalCoinsElement = document.getElementById('final-coins');
+    const progressBar = document.getElementById('progress-bar');
+    const timerElement = document.getElementById('timer');
+    const redeemBtn = document.getElementById('redeem-btn');
+    const redeemModal = document.getElementById('redeem-modal');
+    const rewardsList = document.getElementById('rewards-list');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const notification = document.getElementById('notification');
+
+    // Game variables
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let coins = 0;
+    const coinsPerCorrect = 10;
+    const questionTimeDefault = 15; // seconds per question
+    let questionTime = questionTimeDefault;
+    let timeLeft = questionTime;
+    let timerInterval = null;
+
+    // Load coins from localStorage or start at 0
+    function loadCoins() {
+      const stored = localStorage.getItem('quizCoins');
+      coins = stored ? parseInt(stored, 10) : 0;
     }
-  };
 
-  // Elements
-  const langToggleBtn = document.getElementById('lang-toggle');
-  const titleEl = document.getElementById('title');
-  const coinsEl = document.getElementById('coins');
-  const badgeDisplay = document.getElementById('badge-display');
-  const redeemBtn = document.getElementById('redeem-btn');
-  const progressBar = document.getElementById('progress-bar');
-  const timerText = document.getElementById('timer-text');
-  const timerProgress = document.getElementById('timer-progress');
-  const questionEl = document.getElementById('question');
-  const hintBtn = document.getElementById('hint-btn');
-  const hintText = document.getElementById('hint-text');
-  const answerButtons = document.getElementById('answer-buttons');
-  const nextBtn = document.getElementById('next-btn');
-  const resultContainer = document.getElementById('result-container');
-  const scoreEl = document.getElementById('score');
-  const finalCoinsEl = document.getElementById('final-coins');
-  const restartBtn = document.getElementById('restart-btn');
-  const redeemModal = document.getElementById('redeem-modal');
-  const rewardsList = document.getElementById('rewards-list');
-  const closeModalBtn = document.getElementById('close-modal-btn');
-  const notification = document.getElementById('notification');
-  const shareTwitterBtn = document.getElementById('share-twitter');
-  const shareWhatsappBtn = document.getElementById('share-whatsapp');
-  const shareFacebookBtn = document.getElementById('share-facebook');
-  const shareInstagramBtn = document.getElementById('share-instagram');
-  const socialShareDiv = document.getElementById('social-share');
-
-  // Game Data
-  let currentLang = 'en';
-  let questions = [
-    {
-      question: {
-        en: "What is the capital of France?",
-        es: "¿Cuál es la capital de Francia?"
-      },
-      answers: [
-        { text: {en:"Paris", es:"París"}, correct: true },
-        { text: {en:"London", es:"Londres"}, correct: false },
-        { text: {en:"Berlin", es:"Berlín"}, correct: false },
-        { text: {en:"Madrid", es:"Madrid"}, correct: false }
-      ],
-      hint: {
-        en: "It's also known as the City of Light.",
-        es: "También se conoce como la Ciudad de la Luz."
-      }
-    },
-    {
-      question: {
-        en: "Which planet is known as the Red Planet?",
-        es: "¿Qué planeta es conocido como el Planeta Rojo?"
-      },
-      answers: [
-        { text: {en:"Venus", es:"Venus"}, correct: false },
-        { text: {en:"Mars", es:"Marte"}, correct: true },
-        { text: {en:"Jupiter", es:"Júpiter"}, correct: false },
-        { text: {en:"Saturn", es:"Saturno"}, correct: false }
-      ],
-      hint: {
-        en: "It is the fourth planet from the Sun.",
-        es: "Es el cuarto planeta desde el Sol."
-      }
-    },
-    {
-      question: {
-        en: "Who wrote 'Hamlet'?",
-        es: "¿Quién escribió 'Hamlet'?"
-      },
-      answers: [
-        { text: {en:"Charles Dickens", es:"Charles Dickens"}, correct: false },
-        { text: {en:"William Shakespeare", es:"William Shakespeare"}, correct: true },
-        { text: {en:"Leo Tolstoy", es:"Leo Tolstoy"}, correct: false },
-        { text: {en:"Mark Twain", es:"Mark Twain"}, correct: false }
-      ],
-      hint: {
-        en: "He is a famous English playwright.",
-        es: "Es un famoso dramaturgo inglés."
-      }
-    },
-    {
-      question: {
-        en: "What is the smallest prime number?",
-        es: "¿Cuál es el número primo más pequeño?"
-      },
-      answers: [
-        { text: {en:"1", es:"1"}, correct: false },
-        { text: {en:"2", es:"2"}, correct: true },
-        { text: {en:"3", es:"3"}, correct: false },
-        { text: {en:"0", es:"0"}, correct: false }
-      ],
-      hint: {
-        en: "It's the only even prime number.",
-        es: "Es el único número primo par."
-      }
-    },
-    {
-      question: {
-        en: "Which language is primarily used for Android app development?",
-        es: "¿Qué lenguaje se usa principalmente para desarrollar apps Android?"
-      },
-      answers: [
-        { text: {en:"Swift", es:"Swift"}, correct: false },
-        { text: {en:"Kotlin", es:"Kotlin"}, correct: true },
-        { text: {en:"JavaScript", es:"JavaScript"}, correct: false },
-        { text: {en:"Ruby", es:"Ruby"}, correct: false }
-      ],
-      hint: {
-        en: "It's a modern language developed by JetBrains.",
-        es: "Es un lenguaje moderno desarrollado por JetBrains."
-      }
+    // Save coins to localStorage
+    function saveCoins() {
+      localStorage.setItem('quizCoins', coins);
     }
-  ];
 
-  const rewards = [
-    { id: 1, name: {en:"Golden Badge", es:"Insignia Dorada"}, cost: 50, description: {en:"Show off your achievement with a shiny badge!", es:"Muestra tu logro con una brillante insignia!"} },
-    { id: 2, name: {en:"Extra 30s Timer", es:"30s Extra de Tiempo"}, cost: 100, description: {en:"Get extra time on each question for your next quiz.", es:"Obtén tiempo extra en cada pregunta para tu próximo quiz."} },
-    { id: 3, name: {en:"Secret Quiz Theme", es:"Tema Secreto"}, cost: 150, description: {en:"Unlock a cool secret theme for the quiz.", es:"Desbloquea un tema secreto genial para el quiz."} },
-    { id: 4, name: {en:"Custom Avatar", es:"Avatar Personalizado"}, cost: 200, description: {en:"Unlock a custom avatar for your profile.", es:"Desbloquea un avatar personalizado para tu perfil."} }
-  ];
+    // Sounds
+    const soundCorrect = new Audio('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg');
+    const soundWrong = new Audio('https://actions.google.com/sounds/v1/cartoon/boing.ogg');
+    const soundClick = new Audio('https://actions.google.com/sounds/v1/ui/click.ogg');
 
-  // State variables
-  let currentQuestionIndex = 0;
-  let score = 0;
-  let coins = 0;
-  let coinsThisRound = 0;
-  const coinsPerCorrect = 10;
-  const questionTimeDefault = 15; // seconds per question
-  let questionTime = questionTimeDefault;
-  let timeLeft = questionTime;
-  let timerInterval = null;
-  let currentAnswers = [];
-  let hintVisible = false;
-  let goldenBadgeOwned = false;
-  let leaderboard = [];
-
-  // Elements for timer circle
-  const radius = 45;
-  const circumference = 2 * Math.PI * radius;
-  timerProgress.style.strokeDasharray = circumference;
-  timerProgress.style.strokeDashoffset = 0;
-
-  // Localization helper
-  function t(key) {
-    return locales[currentLang][key] || key;
-  }
-
-  // Update all UI text for current language
-  function updateLanguageText() {
-    titleEl.textContent = t('title');
-    redeemBtn.textContent = t('redeemCoins');
-    nextBtn.textContent = t('nextQuestion');
-    restartBtn.textContent = t('restartQuiz');
-    hintBtn.textContent = hintVisible ? t('hideHint') : t('showHint');
-    shareTwitterBtn.setAttribute('aria-label', t('shareTwitter'));
-    shareTwitterBtn.title = t('shareTwitter');
-    shareWhatsappBtn.setAttribute('aria-label', t('shareWhatsapp'));
-    shareWhatsappBtn.title = t('shareWhatsapp');
-    shareFacebookBtn.setAttribute('aria-label', t('shareFacebook'));
-    shareFacebookBtn.title = t('shareFacebook');
-    shareInstagramBtn.setAttribute('aria-label', t('shareInstagram'));
-    shareInstagramBtn.title = t('shareInstagram');
-    langToggleBtn.textContent = currentLang === 'en' ? 'ES' : 'EN';
-    updateCoinsDisplay();
-    updateBadgeDisplay();
-  }
-
-  // Load coins, badges, leaderboard from localStorage
-  function loadGameData() {
-    coins = parseInt(localStorage.getItem('quizCoins')) || 0;
-    goldenBadgeOwned = localStorage.getItem('goldenBadgeOwned') === 'true';
-    leaderboard = JSON.parse(localStorage.getItem('quizLeaderboard')) || [];
-  }
-
-  // Save coins and badges
-  function saveGameData() {
-    localStorage.setItem('quizCoins', coins);
-    localStorage.setItem('goldenBadgeOwned', goldenBadgeOwned ? 'true' : 'false');
-    localStorage.setItem('quizLeaderboard', JSON.stringify(leaderboard));
-  }
-
-  // Update coins display
-  function updateCoinsDisplay() {
-    coinsEl.innerHTML = `
-      <svg aria-hidden="true" viewBox="0 0 64 64" fill="#ffb700" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="32" cy="32" r="30" stroke="#d4af37" stroke-width="4"/>
-        <circle cx="32" cy="32" r="20" fill="#ffd700"/>
-        <circle cx="32" cy="32" r="10" stroke="#d4af37" stroke-width="2" fill="none"/>
-      </svg>
-      ${t('coinsLabel')}: ${coins}
-    `;
-  }
-
-  // Update badge display
-  function updateBadgeDisplay() {
-    if (goldenBadgeOwned) {
-      badgeDisplay.classList.add('visible');
-      badgeDisplay.querySelector('span').textContent = t('badgesLabel') + ': Golden Badge';
-    } else {
-      badgeDisplay.classList.remove('visible');
-    }
-  }
-
-  // Shuffle array utility
-  function shuffleArray(array) {
-    for (let i = array.length -1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i+1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-  }
-
-  // Start quiz
-  function startQuiz() {
-    currentQuestionIndex = 0;
-    score = 0;
-    coinsThisRound = 0;
-    questionTime = questionTimeDefault;
-    updateCoinsDisplay();
-    updateBadgeDisplay();
-    resultContainer.classList.add('hide');
-    nextBtn.style.display = 'none';
-    questionEl.parentElement.style.display = 'block';
-    hintBtn.style.display = 'inline-block';
-    hintText.textContent = '';
-    hintVisible = false;
-    hintBtn.setAttribute('aria-expanded', 'false');
-    shuffleArray(questions);
-    showQuestion(questions[currentQuestionIndex]);
-    resetTimer();
-    startTimer();
-  }
-
-  // Show question
-  function showQuestion(question) {
-    questionEl.textContent = question.question[currentLang];
-    hintText.textContent = '';
-    hintVisible = false;
-    hintBtn.textContent = t('showHint');
-    hintBtn.setAttribute('aria-expanded', 'false');
-    answerButtons.innerHTML = '';
-    nextBtn.style.display = 'none';
-
-    // Shuffle answers
-    currentAnswers = [...question.answers];
-    shuffleArray(currentAnswers);
-
-    currentAnswers.forEach((answer, i) => {
-      const btn = document.createElement('button');
-      btn.classList.add('btn');
-      btn.textContent = answer.text[currentLang];
-      btn.setAttribute('role', 'listitem');
-      btn.setAttribute('tabindex', '0');
-      btn.addEventListener('click', () => selectAnswer(btn, answer.correct));
-      answerButtons.appendChild(btn);
-    });
-
-    updateProgressBar();
-    resetTimer();
-    startTimer();
-  }
-
-  // Update progress bar
-  function updateProgressBar() {
-    const percent = (currentQuestionIndex / questions.length) * 100;
-    progressBar.style.width = percent + '%';
-  }
-
-  // Select answer
-  function selectAnswer(button, correct) {
-    stopTimer();
-    if (correct) {
-      button.classList.add('correct');
-      score++;
-      coins += coinsPerCorrect;
-      coinsThisRound += coinsPerCorrect;
-      saveGameData();
+    // Initialize game
+    function startQuiz() {
+      currentQuestionIndex = 0;
+      score = 0;
+      questionTime = questionTimeDefault; // reset timer (can be extended by reward)
       updateCoinsDisplay();
-      playSound('correct');
-      animateCoin(button);
-    } else {
-      button.classList.add('wrong');
-      playSound('wrong');
-    }
-    // Disable all buttons and highlight correct answer
-    Array.from(answerButtons.children).forEach(btn => {
-      btn.disabled = true;
-      const ansText = btn.textContent;
-      const correctAnswer = currentAnswers.find(a => a.correct).text[currentLang];
-      if (ansText === correctAnswer) {
-        btn.classList.add('correct');
-      }
-    });
-    nextBtn.style.display = 'inline-block';
-    nextBtn.focus();
-  }
-
-  // Timer functions
-  function startTimer() {
-    timeLeft = questionTime;
-    updateTimerUI();
-    timerInterval = setInterval(() => {
-      timeLeft--;
-      updateTimerUI();
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        timerText.textContent = t('timeUp');
-        disableAnswers();
-        revealCorrectAnswer();
-        nextBtn.style.display = 'inline-block';
-        nextBtn.focus();
-        playSound('wrong');
-      }
-    }, 1000);
-  }
-  function resetTimer() {
-    clearInterval(timerInterval);
-    timerProgress.style.strokeDashoffset = 0;
-  }
-  function stopTimer() {
-    clearInterval(timerInterval);
-  }
-  function updateTimerUI() {
-    timerText.textContent = `${timeLeft}`;
-    const offset = circumference - (timeLeft / questionTime) * circumference;
-    timerProgress.style.strokeDashoffset = offset;
-  }
-  function disableAnswers() {
-    Array.from(answerButtons.children).forEach(btn => btn.disabled = true);
-  }
-  function revealCorrectAnswer() {
-    const correctAnswer = currentAnswers.find(a => a.correct).text[currentLang];
-    Array.from(answerButtons.children).forEach(btn => {
-      if (btn.textContent === correctAnswer) {
-        btn.classList.add('correct');
-      }
-    });
-  }
-
-  // Animate coin flying
-  function animateCoin(button) {
-    const coin = document.createElement('div');
-    coin.classList.add('coin-fly');
-    document.body.appendChild(coin);
-    const btnRect = button.getBoundingClientRect();
-    const coinsRect = coinsEl.getBoundingClientRect();
-    coin.style.left = `${btnRect.left + btnRect.width / 2 - 15}px`;
-    coin.style.top = `${btnRect.top + btnRect.height / 2 - 15}px`;
-    coin.animate([
-      { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-      { transform: `translate(${coinsRect.left - btnRect.left}px, ${coinsRect.top - btnRect.top}px) scale(0.2)`, opacity: 0 }
-    ], { duration: 800, easing: 'ease-in-out' });
-    setTimeout(() => coin.remove(), 800);
-  }
-
-  // Play sounds
-  const sounds = {
-    correct: new Audio('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg'),
-    wrong: new Audio('https://actions.google.com/sounds/v1/cartoon/boing.ogg'),
-    click: new Audio('https://actions.google.com/sounds/v1/ui/click.ogg')
-  };
-  function playSound(type) {
-    const sound = sounds[type];
-    if (sound) {
-      sound.currentTime = 0;
-      sound.play().catch(() => {});
-    }
-  }
-
-  // Show results
-  function showResults() {
-    questionEl.parentElement.style.display = 'none';
-    hintBtn.style.display = 'none';
-    nextBtn.style.display = 'none';
-    progressBar.style.width = '100%';
-    timerText.textContent = '';
-    resultContainer.classList.remove('hide');
-    scoreEl.textContent = `${score} / ${questions.length}`;
-    finalCoinsEl.textContent = coinsThisRound;
-    saveLeaderboard(score);
-    launchConfetti();
-  }
-
-  // Confetti animation
-  function launchConfetti() {
-    const count = 100;
-    for(let i=0; i<count; i++) createConfetti();
-  }
-  function createConfetti() {
-    const confetti = document.createElement('div');
-    confetti.classList.add('confetti');
-    confetti.style.left = `${Math.random() * 100}vw`;
-    confetti.style.animationDuration = `${2 + Math.random() * 3}s`;
-    confetti.style.backgroundColor = randomColor();
-    const size = 5 + Math.random() * 5;
-    confetti.style.width = confetti.style.height = `${size}px`;
-    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '3%';
-    document.body.appendChild(confetti);
-    confetti.addEventListener('animationend', () => confetti.remove());
-  }
-  function randomColor() {
-    const colors = ['#ffb700', '#ff6f61', '#28a745', '#17a2b8', '#ffc107', '#e83e8c'];
-    return colors[Math.floor(Math.random() * colors.length)];
-  }
-
-  // Next question handler
-  nextBtn.addEventListener('click', () => {
-    playSound('click');
-    currentQuestionIndex++;
-    if (currentQuestionIndex < questions.length) {
+      resultContainer.classList.add('hide');
+      nextButton.style.display = 'none';
+      questionContainer.classList.remove('hide');
+      progressBar.style.width = '0%';
       showQuestion(questions[currentQuestionIndex]);
-    } else {
-      showResults();
+      resetTimer();
+      startTimer();
     }
-  });
 
-  // Restart quiz handler
-  restartBtn.addEventListener('click', () => {
-    playSound('click');
-    resultContainer.classList.add('hide');
-    startQuiz();
-  });
+    // Show question and answers
+    function showQuestion(question) {
+      questionElement.innerText = question.question;
+      answerButtons.innerHTML = '';
+      nextButton.style.display = 'none';
 
-  // Hint button toggle
-  hintBtn.addEventListener('click', () => {
-    hintVisible = !hintVisible;
-    hintBtn.textContent = hintVisible ? t('hideHint') : t('showHint');
-    hintBtn.setAttribute('aria-expanded', hintVisible.toString());
-    if (hintVisible) {
-      hintText.textContent = questions[currentQuestionIndex].hint[currentLang];
-    } else {
-      hintText.textContent = '';
+      question.answers.forEach(answer => {
+        const button = document.createElement('button');
+        button.innerText = answer.text;
+        button.classList.add('btn');
+        button.setAttribute('role', 'listitem');
+        button.addEventListener('click', () => selectAnswer(button, answer.correct));
+        answerButtons.appendChild(button);
+      });
+
+      updateProgressBar();
+      resetTimer();
+      startTimer();
     }
-  });
 
-  // Redeem modal logic
-  redeemBtn.addEventListener('click', () => {
-    populateRewards();
-    redeemModal.classList.add('active');
-    redeemModal.querySelector('.modal-content').focus();
-  });
-  closeModalBtn.addEventListener('click', () => {
-    redeemModal.classList.remove('active');
-    redeemBtn.focus();
-  });
-  redeemModal.addEventListener('click', e => {
-    if (e.target === redeemModal) {
-      redeemModal.classList.remove('active');
-      redeemBtn.focus();
+    // Update progress bar
+    function updateProgressBar() {
+      const progressPercent = ((currentQuestionIndex) / questions.length) * 100;
+      progressBar.style.width = `${progressPercent}%`;
     }
-  });
 
-  // Populate rewards list
-  function populateRewards() {
-    rewardsList.innerHTML = '';
-    rewards.forEach(reward => {
-      const li = document.createElement('li');
-      li.tabIndex = 0;
-      li.setAttribute('role', 'button');
-      li.setAttribute('aria-label', `${reward.name[currentLang]}, costs ${reward.cost} coins. ${reward.description[currentLang]}`);
-      li.innerHTML = `
-        <span>${reward.name[currentLang]}</span>
-        <span class="cost">${reward.cost} 🪙</span>
-      `;
-      li.addEventListener('click', () => redeemReward(reward));
-      li.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          redeemReward(reward);
+    // Select answer logic
+    function selectAnswer(selectedButton, correct) {
+      stopTimer();
+
+      if (correct) {
+        selectedButton.classList.add('correct');
+        score++;
+        coins += coinsPerCorrect;
+        saveCoins();
+        updateCoinsDisplay();
+        playSound(soundCorrect);
+        animateCoin(selectedButton);
+        showNotification("Great job! +10 coins 🎉");
+      } else {
+        selectedButton.classList.add('wrong');
+        playSound(soundWrong);
+        showNotification("Oops! That's not correct. Try the next one!");
+      }
+
+      Array.from(answerButtons.children).forEach(button => {
+        button.disabled = true;
+        if (button !== selectedButton) {
+          const isCorrect = questions[currentQuestionIndex].answers.find(a => a.text === button.innerText).correct;
+          if (isCorrect) button.classList.add('correct');
         }
       });
-      rewardsList.appendChild(li);
-    });
-  }
 
-  // Redeem reward
-  function redeemReward(reward) {
-    if (coins >= reward.cost) {
-      coins -= reward.cost;
-      saveGameData();
-      updateCoinsDisplay();
-      showNotification(`${t('redeemed')} ${reward.name[currentLang]}! 🎉`);
-      if (reward.id === 1) { // Golden Badge
-        goldenBadgeOwned = true;
-        saveGameData();
-        updateBadgeDisplay();
-      } else if (reward.id === 2) { // Extra time
-        questionTime = questionTimeDefault + 30;
-        showNotification(t('extraTimeMsg'));
+      nextButton.style.display = 'inline-block';
+      nextButton.focus();
+    }
+
+    // Update coins display
+    function updateCoinsDisplay() {
+      coinsElement.innerHTML = `
+        <svg class="coin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#ffb700" aria-hidden="true">
+          <circle cx="32" cy="32" r="30" stroke="#d4af37" stroke-width="4"/>
+          <circle cx="32" cy="32" r="20" fill="#ffd700"/>
+          <circle cx="32" cy="32" r="10" stroke="#d4af37" stroke-width="2" fill="none"/>
+        </svg>
+        Coins: ${coins}
+      `;
+    }
+
+    // Animate coin flying to coin counter
+    function animateCoin(button) {
+      const coin = document.createElement('div');
+      coin.classList.add('coin-fly');
+      document.body.appendChild(coin);
+
+      const btnRect = button.getBoundingClientRect();
+      const coinsRect = coinsElement.getBoundingClientRect();
+
+      // Position the coin over the clicked button
+      coin.style.left = `${btnRect.left + btnRect.width / 2 - 16}px`;
+      coin.style.top = `${btnRect.top + btnRect.height / 2 - 16}px`;
+
+      // Animate to coins display
+      coin.animate([
+        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+        { transform: `translate(${coinsRect.left - btnRect.left}px, ${coinsRect.top - btnRect.top}px) scale(0.2)`, opacity: 0 }
+      ], {
+        duration: 800,
+        easing: 'ease-in-out'
+      });
+
+      setTimeout(() => {
+        coin.remove();
+      }, 800);
+    }
+
+    // Play sound helper
+    function playSound(sound) {
+      sound.currentTime = 0;
+      sound.play().catch(() => {}); // Catch promise rejection if user hasn't interacted yet
+    }
+
+    // Next question button handler
+    nextButton.addEventListener('click', () => {
+      playSound(soundClick);
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length) {
+        showQuestion(questions[currentQuestionIndex]);
+      } else {
+        showResults();
       }
+    });
+
+    // Restart quiz button handler
+    restartButton.addEventListener('click', () => {
+      playSound(soundClick);
+      startQuiz();
+    });
+
+    // Show final results with confetti
+    function showResults() {
+      questionContainer.classList.add('hide');
+      nextButton.style.display = 'none';
+      progressBar.style.width = '100%';
+      timerElement.innerText = '';
+      resultContainer.classList.remove('hide');
+      scoreElement.innerText = `${score} / ${questions.length}`;
+      finalCoinsElement.innerText = coins;
+      restartButton.focus();
+      launchConfetti();
+
+      if(score === questions.length) {
+        showNotification("Perfect score! You're a Quiz Master! 🏆");
+      } else if(score >= questions.length / 2) {
+        showNotification("Well done! Keep it up! 👍");
+      } else {
+        showNotification("Good try! Practice makes perfect! 💪");
+      }
+    }
+
+    // Timer functions
+    function startTimer() {
+      timeLeft = questionTime;
+      timerElement.innerText = `Time left: ${timeLeft}s`;
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerElement.innerText = `Time left: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          timerElement.innerText = 'Time is up!';
+          disableAnswers();
+          nextButton.style.display = 'inline-block';
+          nextButton.focus();
+          playSound(soundWrong);
+          revealCorrectAnswer();
+          showNotification("Time's up! Don't give up, next question!");
+        }
+      }, 1000);
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timerElement.innerText = `Time left: ${questionTime}s`;
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
+
+    function disableAnswers() {
+      Array.from(answerButtons.children).forEach(button => button.disabled = true);
+    }
+
+    function revealCorrectAnswer() {
+      Array.from(answerButtons.children).forEach(button => {
+        const isCorrect = questions[currentQuestionIndex].answers.find(a => a.text === button.innerText).correct;
+        if (isCorrect) button.classList.add('correct');
+      });
+    }
+
+    // Confetti effect on quiz completion
+    function launchConfetti() {
+      const confettiCount = 100;
+      for (let i = 0; i < confettiCount; i++) {
+        createConfetti();
+      }
+    }
+
+    function createConfetti() {
+      const confetti = document.createElement('div');
+      confetti.classList.add('confetti');
+      confetti.style.left = `${Math.random() * 100}vw`;
+      confetti.style.animationDuration = `${2 + Math.random() * 3}s`;
+      confetti.style.backgroundColor = randomColor();
+      confetti.style.width = confetti.style.height = `${5 + Math.random() * 5}px`;
+      confetti.style.borderRadius = `${Math.random() > 0.5 ? 50 : 3}%`;
+      document.body.appendChild(confetti);
+
+      confetti.addEventListener('animationend', () => {
+        confetti.remove();
+      });
+    }
+
+    function randomColor() {
+      const colors = ['#ffb700', '#ff6f61', '#28a745', '#17a2b8', '#ffc107', '#e83e8c'];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    // Redeem modal logic
+    redeemBtn.addEventListener('click', () => {
+      populateRewards();
+      redeemModal.classList.add('active');
+      redeemModal.querySelector('.modal-content').focus();
+    });
+
+    closeModalBtn.addEventListener('click', () => {
       redeemModal.classList.remove('active');
       redeemBtn.focus();
-    } else {
-      showNotification(t('notEnoughCoins'), true);
-    }
-  }
+    });
 
-  // Notification helper
-  function showNotification(msg, isError = false) {
-    notification.textContent = msg;
-    notification.style.backgroundColor = isError ? '#dc3545' : '#28a745';
-    notification.classList.add('show');
-    setTimeout(() => notification.classList.remove('show'), 3500);
-  }
+    // Close modal on outside click
+    redeemModal.addEventListener('click', (e) => {
+      if (e.target === redeemModal) {
+        redeemModal.classList.remove('active');
+        redeemBtn.focus();
+      }
+    });
 
-  // Language toggle
-  langToggleBtn.addEventListener('click', () => {
-    currentLang = currentLang === 'en' ? 'es' : 'en';
-    updateLanguageText();
-    // Refresh question and hint text if quiz in progress
-    if (!resultContainer.classList.contains('hide')) return;
-    showQuestion(questions[currentQuestionIndex]);
-    if (hintVisible) {
-      hintText.textContent = questions[currentQuestionIndex].hint[currentLang];
-    }
-  });
-
-  // Social share buttons
-  shareTwitterBtn.addEventListener('click', () => {
-    const msg = getShareMessage();
-    const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent(msg);
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
-  });
-  shareWhatsappBtn.addEventListener('click', () => {
-    const msg = encodeURIComponent(getShareMessage());
-    window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
-  });
-  shareFacebookBtn.addEventListener('click', () => {
-    const url = encodeURIComponent(window.location.href);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
-  });
-  shareInstagramBtn.addEventListener('click', () => {
-    const msg = getShareMessage() + "\n\nCopy this message and share it on Instagram Stories or posts!";
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(msg).then(() => {
-        alert('Score message copied! Paste it in your Instagram story or post.');
-      }, () => {
-        alert('Copy failed! Please copy manually:\n\n' + msg);
+    // Populate rewards list
+    function populateRewards() {
+      rewardsList.innerHTML = '';
+      rewards.forEach(reward => {
+        const li = document.createElement('li');
+        li.tabIndex = 0;
+        li.setAttribute('role', 'button');
+        li.setAttribute('aria-label', `${reward.name}, costs ${reward.cost} coins. ${reward.description}`);
+        li.innerHTML = `
+          <span>${reward.name}</span>
+          <span class="cost">${reward.cost} 🪙</span>
+        `;
+        li.addEventListener('click', () => redeemReward(reward));
+        li.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            redeemReward(reward);
+          }
+        });
+        rewardsList.appendChild(li);
       });
-    } else {
-      alert('Copy this message and share it on Instagram:\n\n' + msg);
     }
-  });
 
-  // Compose share message
-  function getShareMessage() {
-    return `${t('yourScore')}: ${score} / ${questions.length} - I earned ${coinsThisRound} coins! Try it yourself: ${window.location.href}`;
-  }
+    // Redeem reward function
+    function redeemReward(reward) {
+      if (coins >= reward.cost) {
+        coins -= reward.cost;
+        saveCoins();
+        updateCoinsDisplay();
+        showNotification(`You redeemed: ${reward.name}! 🎉`);
 
-  // Leaderboard save (top 5)
-  function saveLeaderboard(score) {
-    const date = new Date().toLocaleDateString();
-    leaderboard.push({ score, date });
-    leaderboard.sort((a,b) => b.score - a.score);
-    if (leaderboard.length > 5) leaderboard.pop();
-    localStorage.setItem('quizLeaderboard', JSON.stringify(leaderboard));
-  }
+        // Implement reward effects here:
+        if (reward.id === 2) {
+          // Extra 30s timer for next quizzes
+          questionTime = questionTimeDefault + 30;
+          showNotification("Extra 30 seconds added to each question for next quizzes!");
+        }
+        // Other rewards can trigger different effects or just show messages
 
-  // Initialization
-  function init() {
-    loadGameData();
-    updateLanguageText();
-    startQuiz();
-  }
+        redeemModal.classList.remove('active');
+        redeemBtn.focus();
+      } else {
+        showNotification("Not enough coins to redeem this reward.", true);
+      }
+    }
 
-  window.onload = init;
+    // Notification helper
+    function showNotification(message, isError = false) {
+      notification.textContent = message;
+      notification.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+      notification.classList.add('show');
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 4000);
+    }
 
-})();
-</script>
+    // Initialize game on page load
+    window.onload = () => {
+      loadCoins();
+      updateCoinsDisplay();
+      startQuiz();
+    };
+  </script>
 </body>
 </html>
