@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>8-Ball Pool Game with Turn Controls</title>
+<title>8-Ball Pool Game with Break Shot</title>
 <style>
+  /* (Keep all previous styles unchanged) */
   html, body {
     margin: 0; padding: 0;
     height: 100%;
@@ -250,10 +251,11 @@
   let ballsPocketed = {solids: 0, stripes: 0};
   const ballsPerGroup = 7;
   let gameOver = false;
-  let cueBallInHand = false;
+  let cueBallInHand = true; // Start with ball in hand for break shot
   let ballsMoving = false;
   let pocketedThisShot = [];
   let cueBallScratch = false;
+  let breakShotDone = false;
 
   let isAiming = false;
   let aimStart = null;
@@ -578,10 +580,12 @@
   function onCueBallPlace(e) {
     if (!cueBallInHand) return;
     const pos = getPointerPos(e);
+    const rect = table.getBoundingClientRect();
+    const headStringX = rect.width * 0.3; // Define head string (behind which cue ball must be placed for break)
     const leftBound = BALL_RADIUS;
-    const rightBound = table.clientWidth - BALL_RADIUS;
+    const rightBound = headStringX - BALL_RADIUS; // restrict cue ball behind head string
     const topBound = BALL_RADIUS;
-    const bottomBound = table.clientHeight - BALL_RADIUS;
+    const bottomBound = rect.height - BALL_RADIUS;
     let x = Math.min(Math.max(pos.x, leftBound), rightBound);
     let y = Math.min(Math.max(pos.y, topBound), bottomBound);
     resetCueBallPosition(x, y);
@@ -592,6 +596,36 @@
 
   function onShotEnd() {
     ballsMoving = false;
+
+    if (!breakShotDone) {
+      // After break shot, assign groups if possible
+      breakShotDone = true;
+      if (!playerGroups[currentPlayer]) {
+        // Assign groups based on first ball pocketed or first hit ball
+        const solidsPocketed = pocketedThisShot.some(b => b.group === 'solids');
+        const stripesPocketed = pocketedThisShot.some(b => b.group === 'stripes');
+        if (solidsPocketed && !stripesPocketed) {
+          playerGroups[currentPlayer] = 'solids';
+          playerGroups[currentPlayer === 1 ? 2 : 1] = 'stripes';
+        } else if (stripesPocketed && !solidsPocketed) {
+          playerGroups[currentPlayer] = 'stripes';
+          playerGroups[currentPlayer === 1 ? 2 : 1] = 'solids';
+        } else {
+          // If no balls pocketed, groups remain unassigned until first ball pocketed later
+          playerGroups[currentPlayer] = null;
+          playerGroups[currentPlayer === 1 ? 2 : 1] = null;
+        }
+      }
+      showMessage(`Break shot complete. Player ${currentPlayer}'s turn.`);
+      updateTurnIndicator();
+      if (!pocketedThisShot.length || cueBallScratch) {
+        switchTurn();
+      }
+      pocketedThisShot = [];
+      cueBallScratch = false;
+      cueStick.style.display = 'block';
+      return;
+    }
 
     if (pocketedThisShot.length === 0 && !cueBallScratch) {
       switchTurn();
@@ -791,19 +825,20 @@
 
   function init() {
     gameOver = false;
-    cueBallInHand = false;
+    cueBallInHand = true; // Start with ball in hand for break shot
     ballsMoving = false;
     pocketedThisShot = [];
     cueBallScratch = false;
     playerGroups = {1: null, 2: null};
     ballsPocketed = {solids: 0, stripes: 0};
     currentPlayer = 1;
+    breakShotDone = false;
     initBalls();
     const rect = table.getBoundingClientRect();
-    resetCueBallPosition(rect.width * 0.4, rect.height * 0.6);
+    resetCueBallPosition(rect.width * 0.15, rect.height * 0.6); // Start cue ball behind head string
     cueStick.style.display = 'block';
     updateCueStick(0);
-    showMessage(`Player 1's turn. Aim and shoot.`);
+    showMessage(`Player 1, place the cue ball behind the head string and break.`);
     updateTurnIndicator();
   }
 
