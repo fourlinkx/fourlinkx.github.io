@@ -105,6 +105,16 @@
       100% { transform: rotate(360deg);}
     }
 
+    /* Live score display */
+    #live-score {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #28a745;
+      margin-bottom: 15px;
+      text-shadow: 0 0 8px #28a745;
+      user-select: none;
+    }
+
     #progress-bar-container {
       width: 100%;
       background: #33334d;
@@ -611,6 +621,11 @@
       Coins: 0
     </div>
 
+    <!-- Live score display -->
+    <div id="live-score" aria-live="polite" aria-atomic="true">
+      Score: 0
+    </div>
+
     <button id="redeem-btn" aria-label="Redeem your coins">Redeem Your Coins & Unlock Rewards</button>
 
     <div id="progress-bar-container" aria-hidden="true">
@@ -723,6 +738,7 @@
     const rewardsList = document.getElementById('rewards-list');
     const closeModalBtn = document.getElementById('close-modal-btn');
     const notification = document.getElementById('notification');
+    const liveScoreElement = document.getElementById('live-score');
 
     // Game variables
     let currentQuestionIndex = 0;
@@ -750,12 +766,18 @@
     const soundWrong = new Audio('https://actions.google.com/sounds/v1/cartoon/boing.ogg');
     const soundClick = new Audio('https://actions.google.com/sounds/v1/ui/click.ogg');
 
+    // Update live score display
+    function updateLiveScore() {
+      liveScoreElement.textContent = `Score: ${score}`;
+    }
+
     // Initialize game
     function startQuiz() {
       currentQuestionIndex = 0;
       score = 0;
       questionTime = questionTimeDefault; // reset timer (can be extended by reward)
       updateCoinsDisplay();
+      updateLiveScore();
       resultContainer.classList.add('hide');
       nextButton.style.display = 'none';
       questionContainer.classList.remove('hide');
@@ -801,6 +823,7 @@
         coins += coinsPerCorrect;
         saveCoins();
         updateCoinsDisplay();
+        updateLiveScore(); // Update live score immediately
         playSound(soundCorrect);
         animateCoin(selectedButton);
         showNotification("Great job! +10 coins 🎉");
@@ -973,11 +996,18 @@
       return colors[Math.floor(Math.random() * colors.length)];
     }
 
-    // Redeem modal logic
+    // Redeem modal logic with coin check
     redeemBtn.addEventListener('click', () => {
-      populateRewards();
-      redeemModal.classList.add('active');
-      redeemModal.querySelector('.modal-content').focus();
+      if (coins <= 0) {
+        showNotification("You have no coins yet! Let's start the quiz to earn some.", true);
+        redeemModal.classList.remove('active'); // ensure modal is closed
+        startQuiz(); // start the quiz so user can earn coins
+        redeemBtn.blur(); // remove focus from redeem button for better UX
+      } else {
+        populateRewards();
+        redeemModal.classList.add('active');
+        redeemModal.querySelector('.modal-content').focus();
+      }
     });
 
     closeModalBtn.addEventListener('click', () => {
