@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>8-Ball Pool Game</title>
+<title>8-Ball Pool Game with Turn Controls</title>
 <style>
   html, body {
     margin: 0; padding: 0;
@@ -24,6 +24,7 @@
     border: 7px solid #25c6fc;
     box-shadow: 0 0 30px 8px #2196f3, 0 6px 24px #000a;
     overflow: hidden;
+    font-family: Arial, sans-serif;
   }
   #pool-table {
     position: relative;
@@ -118,6 +119,11 @@
     pointer-events: auto;
     transition: box-shadow 0.15s;
   }
+  #cue-stick.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: default;
+  }
   #cue-stick .cue-tip {
     position: absolute;
     left: 0; top: 1px;
@@ -136,7 +142,6 @@
     text-shadow: 0 2px 8px #000b;
     z-index: 100;
     pointer-events: none;
-    font-family: Arial, sans-serif;
   }
   #aimCanvas {
     position: absolute;
@@ -152,6 +157,39 @@
     pointer-events: none;
     z-index: 1000;
   }
+  #turn-indicator {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-shadow: 0 2px 6px #000;
+    z-index: 100;
+    user-select: none;
+  }
+  #end-turn-btn {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: bold;
+    background: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px #0008;
+    z-index: 100;
+    user-select: none;
+  }
+  #end-turn-btn:disabled {
+    background: #555;
+    cursor: default;
+  }
   @media (max-width: 500px) {
     #game-container { width: 98vw; aspect-ratio: 16 / 9; }
     #logo { font-size: 1.5rem; letter-spacing: 0.4rem; }
@@ -159,6 +197,8 @@
     #cue-stick { width: 160px; height: 5px; }
     #cue-stick .cue-tip { width: 20px; height: 3px; }
     #message { font-size: 0.9rem; }
+    #turn-indicator { font-size: 1rem; bottom: 8px; }
+    #end-turn-btn { font-size: 0.9rem; padding: 6px 12px; bottom: 40px; }
   }
 </style>
 </head>
@@ -177,6 +217,8 @@
     <div id="cue-stick"><div class="cue-tip"></div></div>
     <canvas id="aimCanvas"></canvas>
     <div id="message"></div>
+    <div id="turn-indicator"></div>
+    <button id="end-turn-btn" disabled>End Turn</button>
   </div>
 </div>
 <canvas id="confetti"></canvas>
@@ -190,11 +232,17 @@
   const aimCtx = aimCanvas.getContext('2d');
   const confettiCanvas = document.getElementById('confetti');
   const confettiCtx = confettiCanvas.getContext('2d');
+  const turnIndicator = document.getElementById('turn-indicator');
+  const endTurnBtn = document.getElementById('end-turn-btn');
 
   const BALL_RADIUS = 11;
   const FRICTION = 0.98;
   const MIN_VELOCITY = 0.05;
   const POCKET_RADIUS = 28;
+
+  // Sound effects
+  const collisionSound = new Audio('https://freesound.org/data/previews/66/66717_634166-lq.mp3');
+  const pocketSound = new Audio('https://freesound.org/data/previews/146/146726_2615110-lq.mp3');
 
   let balls = [];
   let currentPlayer = 1;
@@ -211,7 +259,6 @@
   let aimStart = null;
   let aimCurrent = null;
 
-  // Responsive canvas sizes
   function resize() {
     const rect = table.getBoundingClientRect();
     aimCanvas.width = rect.width;
@@ -225,7 +272,6 @@
   window.addEventListener('resize', resize);
   resize();
 
-  // Pocket positions relative to table
   function getPocketPositions() {
     const rect = table.getBoundingClientRect();
     return [
@@ -343,6 +389,10 @@
       b1.vy = v1nAfter * ny + v1t * ty;
       b2.vx = v2nAfter * nx + v2t * tx;
       b2.vy = v2nAfter * ny + v2t * ty;
+
+      // Play collision sound
+      collisionSound.currentTime = 0;
+      collisionSound.play();
     }
   }
 
@@ -362,6 +412,10 @@
     ball.vx = 0;
     ball.vy = 0;
     ball.updatePosition();
+
+    // Play pocket sound
+    pocketSound.currentTime = 0;
+    pocketSound.play();
   }
 
   function resetCueBallPosition(x, y) {
@@ -382,19 +436,36 @@
     msg.textContent = text;
   }
 
+  function updateTurnIndicator() {
+    if (gameOver) {
+      turnIndicator.textContent = "Game Over";
+      endTurnBtn.disabled = true;
+      cueStick.classList.add('disabled');
+      return;
+    }
+    const group = playerGroups[currentPlayer];
+    const groupText = group ? (group.charAt(0).toUpperCase() + group.slice(1)) : "Unassigned";
+    turnIndicator.textContent = `Player ${currentPlayer}'s turn — ${groupText}`;
+    endTurnBtn.disabled = ballsMoving || cueBallInHand;
+    cueStick.classList.toggle('disabled', ballsMoving || cueBallInHand);
+  }
+
   function switchTurn() {
     currentPlayer = currentPlayer === 1 ? 2 : 1;
+    updateTurnIndicator();
   }
 
   function enableCueBallPlacement() {
     showMessage(`Player ${currentPlayer}, place the cue ball.`);
     cueStick.style.display = 'none';
     cueBallInHand = true;
+    updateTurnIndicator();
   }
 
   function disableCueBallPlacement() {
     cueBallInHand = false;
     cueStick.style.display = 'block';
+    updateTurnIndicator();
   }
 
   function updateCueStick(angle) {
@@ -420,6 +491,7 @@
     pocketedThisShot = [];
     cueBallScratch = false;
     cueStick.style.display = 'none';
+    updateTurnIndicator();
   }
 
   function updateAimVisual() {
@@ -526,14 +598,14 @@
       showMessage(`Player ${currentPlayer}'s turn`);
     } else {
       if (cueBallScratch) {
-        showMessage(`Foul! Player ${currentPlayer} scratched. Player ${currentPlayer === 1 ? 2 : 1} ball in hand.`);
         switchTurn();
         cueBallInHand = true;
         enableCueBallPlacement();
+        showMessage(`Foul! Player ${currentPlayer} scratched. Player ${currentPlayer === 1 ? 2 : 1} ball in hand.`);
       } else {
         if (!playerGroups[currentPlayer]) {
-          const firstBall = pocketedThisShot[0];
-          if (firstBall.group === 'solids' || firstBall.group === 'stripes') {
+          const firstBall = pocketedThisShot.find(b => b.group === 'solids' || b.group === 'stripes');
+          if (firstBall) {
             playerGroups[currentPlayer] = firstBall.group;
             playerGroups[currentPlayer === 1 ? 2 : 1] = firstBall.group === 'solids' ? 'stripes' : 'solids';
             showMessage(`Player ${currentPlayer} is ${playerGroups[currentPlayer]}. Player ${currentPlayer === 1 ? 2 : 1} is ${playerGroups[currentPlayer === 1 ? 2 : 1]}. Player ${currentPlayer} continues.`);
@@ -552,11 +624,13 @@
               showMessage(`Player ${currentPlayer} wins! 🎉`);
               cueStick.style.display = 'none';
               startConfetti();
+              endTurnBtn.disabled = true;
               return;
             } else {
               gameOver = true;
               showMessage(`Player ${currentPlayer} lost by pocketing 8-ball too early.`);
               cueStick.style.display = 'none';
+              endTurnBtn.disabled = true;
               return;
             }
           }
@@ -574,6 +648,7 @@
     pocketedThisShot = [];
     cueBallScratch = false;
     if (!gameOver && !cueBallInHand) cueStick.style.display = 'block';
+    updateTurnIndicator();
   }
 
   function gameLoop() {
@@ -648,7 +723,72 @@
   }
   drawConfetti();
 
-  // Initialize game
+  // Initialize balls and rack them properly
+  function initBalls() {
+    balls.forEach(b => b.el.remove());
+    balls = [];
+
+    const rect = table.getBoundingClientRect();
+    const cueStartX = rect.width * 0.4;
+    const cueStartY = rect.height * 0.6;
+
+    balls.push(new Ball(0, 'cue', 'cue', 0, cueStartX, cueStartY));
+
+    const rackX = rect.width * 0.7;
+    const rackY = rect.height * 0.5;
+    const ballDiameter = BALL_RADIUS * 2;
+    const rowHeight = Math.sqrt(3) * BALL_RADIUS;
+
+    // Balls order for rack
+    const rackBallsInfo = [
+      {number: 1, group: 'solids', color: 'red'},
+      {number: 14, group: 'stripes', color: 'blue'},
+      {number: 7, group: 'solids', color: 'brown'},
+      {number: 9, group: 'stripes', color: 'red'},
+      {number: 8, group: 'eight', color: 'eight'},
+      {number: 3, group: 'solids', color: 'green'},
+      {number: 13, group: 'stripes', color: 'purple'},
+      {number: 2, group: 'solids', color: 'yellow'},
+      {number: 12, group: 'stripes', color: 'orange'},
+      {number: 6, group: 'solids', color: 'blue'},
+      {number: 11, group: 'stripes', color: 'green'},
+      {number: 5, group: 'solids', color: 'purple'},
+      {number: 10, group: 'stripes', color: 'yellow'},
+      {number: 4, group: 'solids', color: 'orange'},
+      {number: 15, group: 'stripes', color: 'brown'}
+    ];
+
+    // Positions for 15 balls in triangle
+    const positions = [];
+    for (let row = 0; row < 5; row++) {
+      const ballsInRow = row + 1;
+      const y = rackY + row * rowHeight;
+      const rowWidth = ballsInRow * ballDiameter;
+      const startX = rackX - rowWidth / 2 + BALL_RADIUS;
+      for (let i = 0; i < ballsInRow; i++) {
+        positions.push({x: startX + i * ballDiameter, y: y});
+      }
+    }
+
+    // Place 8-ball in center (index 5)
+    const eightBallIndex = 5;
+    const eightBall = rackBallsInfo.find(b => b.number === 8);
+    rackBallsInfo.splice(rackBallsInfo.indexOf(eightBall), 1);
+    rackBallsInfo.splice(eightBallIndex, 0, eightBall);
+
+    // Place one solid and one stripe in rear corners (indices 10 and 14)
+    const solidBall = rackBallsInfo.find(b => b.group === 'solids' && b.number !== 8);
+    const stripeBall = rackBallsInfo.find(b => b.group === 'stripes' && b.number !== 8);
+    [rackBallsInfo[10], rackBallsInfo[rackBallsInfo.indexOf(solidBall)]] = [solidBall, rackBallsInfo[10]];
+    [rackBallsInfo[14], rackBallsInfo[rackBallsInfo.indexOf(stripeBall)]] = [stripeBall, rackBallsInfo[14]];
+
+    // Create ball objects and assign positions
+    rackBallsInfo.forEach((info, i) => {
+      const ball = new Ball(info.number, info.group, info.color, info.number, positions[i].x, positions[i].y);
+      balls.push(ball);
+    });
+  }
+
   function init() {
     gameOver = false;
     cueBallInHand = false;
@@ -658,23 +798,32 @@
     playerGroups = {1: null, 2: null};
     ballsPocketed = {solids: 0, stripes: 0};
     currentPlayer = 1;
-    createBalls();
-    resetCueBallPosition(cueStartX, cueStartY);
+    initBalls();
+    const rect = table.getBoundingClientRect();
+    resetCueBallPosition(rect.width * 0.4, rect.height * 0.6);
     cueStick.style.display = 'block';
     updateCueStick(0);
     showMessage(`Player 1's turn. Aim and shoot.`);
+    updateTurnIndicator();
   }
+
+  // Manual End Turn Button
+  endTurnBtn.addEventListener('click', () => {
+    if (ballsMoving || cueBallInHand || gameOver) return;
+    switchTurn();
+    showMessage(`Player ${currentPlayer}'s turn.`);
+    updateTurnIndicator();
+  });
 
   init();
   requestAnimationFrame(gameLoop);
 
-  // Input listeners
   table.addEventListener('mousedown', onPointerDown);
   window.addEventListener('mousemove', onPointerMove);
   window.addEventListener('mouseup', onPointerUp);
   table.addEventListener('touchstart', e => { e.preventDefault(); onPointerDown(e); }, {passive:false});
-  window.addEventListener('touchmove', e => { e.preventDefault(); onPointerMove(e); }, {passive:false});
-  window.addEventListener('touchend', onPointerUp);
+  window.addEventListener('touchmove', e => { e.preventDefault(); if(isAiming){ aimCurrent = getPointerPos(e); updateAimVisual(); } }, {passive:false});
+  window.addEventListener('touchend', e => { if(isAiming){ isAiming = false; clearAimVisual(); onPointerUp(e); } });
 })();
 </script>
 </body>
