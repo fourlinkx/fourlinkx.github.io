@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Quiz Game with Redeemable Coins</title>
+  <title>Quiz Game with Redeemable Coins & Badge</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
@@ -43,7 +43,7 @@
     #coins {
       font-weight: 700;
       color: #ffb700;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       font-size: 1.2rem;
       user-select: text;
       display: flex;
@@ -61,6 +61,31 @@
     @keyframes spin {
       0% { transform: rotate(0deg);}
       100% { transform: rotate(360deg);}
+    }
+
+    /* Badge display */
+    #badge-display {
+      margin-bottom: 15px;
+      display: none; /* hidden by default */
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: #ffd700;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-shadow: 0 0 8px #ffd700;
+      user-select: none;
+      flex-wrap: wrap;
+    }
+
+    #badge-display.visible {
+      display: flex;
+    }
+
+    #badge-display svg {
+      width: 32px;
+      height: 32px;
+      filter: drop-shadow(0 0 4px #ffd700);
     }
 
     #progress-bar-container {
@@ -398,6 +423,15 @@
       </svg>
       Coins: 0
     </div>
+
+    <!-- Badge display -->
+    <div id="badge-display" aria-live="polite" aria-atomic="true" aria-label="Your badges">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="#ffd700" viewBox="0 0 64 64" aria-hidden="true" role="img">
+        <path d="M32 2L39.09 21.26L59 22.27L42 36.14L48.18 55.02L32 44.77L15.82 55.02L22 36.14L5 22.27L24.91 21.26L32 2Z"/>
+      </svg>
+      <span>Golden Badge</span>
+    </div>
+
     <button id="redeem-btn" aria-label="Redeem your coins">Redeem Coins</button>
     <div id="progress-bar-container" aria-hidden="true">
       <div id="progress-bar"></div>
@@ -505,6 +539,7 @@
     const rewardsList = document.getElementById('rewards-list');
     const closeModalBtn = document.getElementById('close-modal-btn');
     const notification = document.getElementById('notification');
+    const badgeDisplay = document.getElementById('badge-display');
 
     // Game variables
     let currentQuestionIndex = 0;
@@ -516,15 +551,37 @@
     let timeLeft = questionTime;
     let timerInterval = null;
 
-    // Load coins from localStorage or start at 0
-    function loadCoins() {
-      const stored = localStorage.getItem('quizCoins');
-      coins = stored ? parseInt(stored, 10) : 0;
+    // Load coins and badges from localStorage or start fresh
+    function loadGameData() {
+      const storedCoins = localStorage.getItem('quizCoins');
+      coins = storedCoins ? parseInt(storedCoins, 10) : 0;
+
+      const badgeOwned = localStorage.getItem('goldenBadgeOwned');
+      if (badgeOwned === 'true') {
+        showBadge();
+      } else {
+        hideBadge();
+      }
     }
 
     // Save coins to localStorage
     function saveCoins() {
       localStorage.setItem('quizCoins', coins);
+    }
+
+    // Save badge ownership
+    function saveBadgeOwnership() {
+      localStorage.setItem('goldenBadgeOwned', 'true');
+    }
+
+    // Show badge UI
+    function showBadge() {
+      badgeDisplay.classList.add('visible');
+    }
+
+    // Hide badge UI
+    function hideBadge() {
+      badgeDisplay.classList.remove('visible');
     }
 
     // Sounds
@@ -796,7 +853,11 @@
         showNotification(`You redeemed: ${reward.name}! 🎉`);
 
         // Implement reward effects here:
-        if (reward.id === 2) {
+        if (reward.id === 1) {
+          // Golden Badge reward
+          saveBadgeOwnership();
+          showBadge();
+        } else if (reward.id === 2) {
           // Extra 30s timer for next quizzes
           questionTime = questionTimeDefault + 30;
           showNotification("Extra 30 seconds added to each question for next quizzes!");
@@ -822,7 +883,7 @@
 
     // Initialize game on page load
     window.onload = () => {
-      loadCoins();
+      loadGameData();
       updateCoinsDisplay();
       startQuiz();
     };
