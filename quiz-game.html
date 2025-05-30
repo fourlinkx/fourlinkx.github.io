@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🚀 Coin Quest: Trivia with Rewards!</title>
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/616/616408.png" sizes="32x32" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+    /* === BODY with background image + gradient overlay + subtle animation === */
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background:
+        linear-gradient(
+          135deg,
+          rgba(106, 17, 203, 0.7) 0%,
+          rgba(37, 117, 252, 0.7) 100%
+        ),
+        url('kids.jpg') no-repeat center center fixed;
+      background-size: cover;
+      animation: backgroundShift 20s ease-in-out infinite alternate;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      padding: 10px;
+      overflow-x: hidden;
+      user-select: none;
+      color: #fff;
+      transition: background 0.5s ease;
+    }
+
+    @keyframes backgroundShift {
+      0% {
+        background-position: center center;
+      }
+      100% {
+        background-position: center top;
+      }
+    }
+
+    /* === Quiz container === */
+    .quiz-container {
+      border-radius: 20px;
+      width: 100%;
+      max-width: 460px;
+      padding: 30px 35px;
+      box-shadow:
+        0 0 20px rgba(255, 183, 0, 0.4),
+        0 8px 30px rgba(0, 0, 0, 0.7);
+      text-align: center;
+      position: relative;
+      background: rgba(30, 30, 47, 0.85);
+      backdrop-filter: blur(10px);
+      transition: box-shadow 0.3s ease;
+    }
+    .quiz-container:hover {
+      box-shadow:
+        0 0 40px rgba(255, 183, 0, 0.8),
+        0 12px 40px rgba(0, 0, 0, 0.8);
+    }
+
+    h1 {
+      margin-bottom: 15px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      font-size: 3rem;
+      background: linear-gradient(45deg, #ffb700, #ffd700);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      user-select: none;
+      text-shadow: 0 0 12px #ffb700;
+      text-transform: uppercase;
+      filter: drop-shadow(0 0 5px #ffb700);
+    }
+
+    #coins {
+      font-weight: 700;
+      color: #ffb700;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      user-select: text;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      animation: coin-bounce 2s infinite;
+      filter: drop-shadow(0 0 6px #ffb700);
+    }
+
+    #coins .coin-icon {
+      width: 32px;
+      height: 32px;
+      animation: spin 2s linear infinite;
+      user-select: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+
+    @keyframes coin-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    #progress-bar-container {
+      width: 100%;
+      background: #22223b;
+      border-radius: 12px;
+      height: 14px;
+      margin-bottom: 25px;
+      overflow: hidden;
+      box-shadow: inset 0 0 10px rgba(255, 183, 0, 0.6);
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ffb700, #ffd700);
+      border-radius: 12px;
+      transition: width 0.5s ease;
+      box-shadow:
+        0 0 15px #ffb700,
+        0 0 30px #ffd700;
+    }
+
+    #timer {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      font-weight: 700;
+      color: #ff6f61;
+      text-shadow: 0 0 10px #ff6f61;
+      user-select: none;
+    }
+
+    #question {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      min-height: 80px;
+      line-height: 1.4;
+      text-shadow: 0 0 10px rgba(0,0,0,0.8);
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 15px;
+    }
+
+    .btn {
+      padding: 18px;
+      font-size: 18px;
+      border: none;
+      border-radius: 16px;
+      background: #3a3a5a;
+      color: #fff;
+      cursor: pointer;
+      box-shadow:
+        0 4px 15px rgba(0,0,0,0.5);
+      transition:
+        background 0.4s ease,
+        transform 0.2s ease,
+        box-shadow 0.4s ease;
+      user-select: none;
+      font-weight: 700;
+      filter: drop-shadow(0 0 4px rgba(0,0,0,0.5));
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:hover:not(:disabled),
+    .btn:focus:not(:disabled) {
+      background: #ffb700;
+      color: #1e1e2f;
+      outline: none;
+      transform: scale(1.08);
+      box-shadow:
+        0 0 25px #ffb700,
+        0 0 40px #ffd700;
+      z-index: 2;
+    }
+    .btn:disabled {
+      cursor: default;
+      opacity: 0.6;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .correct {
+      background-color: #28a745 !important;
+      color: white !important;
+      box-shadow:
+        0 0 25px #28a745 !important,
+        0 0 40px #28a745 !important;
+    }
+
+    .wrong {
+      background-color: #dc3545 !important;
+      color: white !important;
+      box-shadow:
+        0 0 25px #dc3545 !important,
+        0 0 40px #dc3545 !important;
+    }
+
+    .next-btn {
+      margin-top: 30px;
+      display: none;
+      width: 100%;
+      background: #ffb700;
+      color: #1e1e2f;
+      font-weight: 800;
+      font-size: 1.3rem;
+      box-shadow:
+        0 0 28px #ffb700,
+        0 0 45px #ffd700;
+      transition: background 0.3s ease, transform 0.2s ease;
+      user-select: none;
+      border-radius: 16px;
+    }
+    .next-btn:hover,
+    .next-btn:focus {
+      background: #e6a700;
+      outline: none;
+      transform: scale(1.1);
+      box-shadow:
+        0 0 35px #e6a700,
+        0 0 50px #ffd700;
+    }
+
+    #result-container {
+      color: #fff;
+      margin-top: 30px;
+    }
+    #result-container.hide {
+      display: none;
+    }
+    #result-container h2 {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      text-shadow: 0 0 15px #ffb700;
+      user-select: none;
+      font-weight: 800;
+    }
+    #result-container h3 {
+      font-size: 1.5rem;
+      margin-bottom: 30px;
+      color: #ffb700;
+      text-shadow: 0 0 12px #ffb700;
+      user-select: none;
+      font-weight: 700;
+    }
+    #restart-btn {
+      background: #28a745;
+      font-weight: 800;
+      font-size: 1.3rem;
+      box-shadow:
+        0 0 28px #28a745,
+        0 0 45px #28a745;
+      transition: background 0.3s ease, transform 0.2s ease;
+      width: 100%;
+      border-radius: 16px;
+      user-select: none;
+    }
+    #restart-btn:hover,
+    #restart-btn:focus {
+      background: #1e7e34;
+      outline: none;
+      transform: scale(1.1);
+      box-shadow:
+        0 0 35px #1e7e34,
+        0 0 50px #28a745;
+    }
+
+    /* Coin fly animation */
+    .coin-fly {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      background: url('https://cdn-icons-png.flaticon.com/512/616/616408.png') no-repeat center center / contain;
+      pointer-events: none;
+      animation: flyToCoin 0.8s forwards ease-in-out;
+      z-index: 9999;
+      user-select: none;
+      filter: drop-shadow(0 0 6px #ffb700);
+    }
+    @keyframes flyToCoin {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(calc(100vw - 50px), -120px) scale(0.2);
+      }
+    }
+
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #ffb700;
+      opacity: 0.9;
+      top: 0;
+      left: 50%;
+      pointer-events: none;
+      animation: confetti-fall linear forwards;
+      border-radius: 3px;
+      box-shadow: 0 0 5px #ffb700;
+      z-index: 10000;
+      user-select: none;
+    }
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Notification */
+    #notification {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #28a745;
+      color: white;
+      padding: 14px 26px;
+      border-radius: 24px;
+      box-shadow: 0 0 18px #28a745;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      z-index: 30000;
+      user-select: none;
+      font-size: 1.1rem;
+      max-width: 90vw;
+      text-align: center;
+    }
+    #notification.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Redeem button */
+    #redeem-btn {
+      margin-top: 20px;
+      background: #17a2b8;
+      font-weight: 700;
+      font-size: 1.2rem;
+      box-shadow: 0 0 20px #17a2b8;
+      color: #fff;
+      border-radius: 16px;
+      padding: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.15s ease;
+      user-select: none;
+      width: 100%;
+      border: none;
+    }
+    #redeem-btn:hover,
+    #redeem-btn:focus {
+      background: #117a8b;
+      outline: none;
+      transform: scale(1.05);
+      box-shadow: 0 0 30px #117a8b;
+    }
+    #redeem-btn:hover::after {
+      content: " →";
+      animation: arrow-bounce 0.5s infinite;
+    }
+    @keyframes arrow-bounce {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(5px); }
+    }
+
+    /* Redeem modal */
+    #redeem-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 20000;
+      user-select: none;
+    }
+    #redeem-modal.active {
+      display: flex;
+    }
+    #redeem-modal .modal-content {
+      background: #2c2c44;
+      border-radius: 20px;
+      padding: 30px 35px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(255, 183, 0, 0.8);
+      color: #fff;
+      outline: none;
+    }
+    #redeem-modal h2 {
+      margin-bottom: 20px;
+      font-weight: 800;
+      font-size: 2rem;
+      color: #ffb700;
+      text-shadow: 0 0 15px #ffb700;
+      user-select: none;
+    }
+    #redeem-modal p {
+      margin-bottom: 25px;
+      font-size: 1.1rem;
+      user-select: none;
+    }
+    #redeem-modal ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 30px;
+      text-align: left;
+      max-height: 260px;
+      overflow-y: auto;
+      user-select: none;
+      border-radius: 12px;
+    }
+    #redeem-modal ul li {
+      background: #444466;
+      margin-bottom: 15px;
+      padding: 16px 20px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      outline-offset: 4px;
+    }
+    #redeem-modal ul li:hover,
+    #redeem-modal ul li:focus {
+      background: #ffb700;
+      color: #1e1e2f;
+      outline: none;
+    }
+    #redeem-modal ul li span.cost {
+      font-weight: 800;
+      color: #fff;
+      background: #1e1e2f;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 1rem;
+      min-width: 60px;
+      text-align: center;
+      user-select: none;
+    }
+    #close-modal-btn {
+      background: #dc3545;
+      border: none;
+      color: white;
+      font-weight: 800;
+      padding: 14px 28px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: background 0.3s ease;
+      width: 100%;
+      user-select: none;
+    }
+    #close-modal-btn:hover,
+    #close-modal-btn:focus {
+      background: #a71d2a;
+      outline: none;
+      transform: scale(1.05);
+    }
+
+    /* Share modal */
+    #share-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 25000;
+      user-select: none;
+    }
+    #share-modal.active {
+      display: flex;
+    }
+    #share-modal .modal-content {
+      background: #22223b;
+      border-radius: 20px;
+      padding: 35px 40px;
+      max-width: 450px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 0 50px #ffb700;
+      color: #fff;
+      outline: none;
+    }
+    #share-modal h2 {
+      font-weight: 800;
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      color: #ffb700;
+      text-shadow: 0 0 20px #ffb700;
+      user-select: none;
+    }
+    #share-modal p {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      user-select: none;
+    }
+    #share-modal .share-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 25px;
+    }
+    #share-modal .share-btn {
+      background: #ffb700;
+      color: #1e1e2f;
+      font-weight: 800;
+      font-size: 1.2rem;
+      padding: 14px 26px;
+      border-radius: 16px;
+      cursor: pointer;
+      box-shadow: 0 0 20px #ffb700;
+      text-decoration: none;
+      user-select: none;
+      transition: background 0.3s ease, transform 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #share-modal .share-btn:hover,
+    #share-modal .share-btn:focus {
+      background: #e6a700;
+      outline: none;
+      transform: scale(1.1);
+    }
+    #share-modal .close-share-btn {
+      background: #dc3545;
+      color: white;
+      font-weight: 800;
+      padding: 14px 28px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: background 0.3s ease;
+      user-select: none;
+      border: none;
+      width: 100%;
+    }
+    #share-modal .close-share-btn:hover,
+    #share-modal .close-share-btn:focus {
+      background: #a71d2a;
+      outline: none;
+      transform: scale(1.1);
+    }
+
+    /* Not Enough Coins Modal */
+    #not-enough-coins-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 21000;
+      user-select: none;
+    }
+    #not-enough-coins-modal.active {
+      display: flex;
+    }
+    #not-enough-coins-modal .modal-content {
+      max-width: 320px;
+      background: #2c2c44;
+      border-radius: 20px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(255, 183, 0, 0.8);
+      color: #fff;
+      outline: none;
+    }
+    #not-enough-coins-modal h2 {
+      color: #ffb700;
+      font-weight: 800;
+      margin-bottom: 15px;
+      user-select: none;
+    }
+    #not-enough-coins-modal p {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      user-select: none;
+    }
+    #close-not-enough-btn {
+      background: #dc3545;
+      border: none;
+      color: white;
+      font-weight: 800;
+      padding: 14px 28px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      width: 100%;
+      user-select: none;
+      transition: background 0.3s ease;
+    }
+    #close-not-enough-btn:hover,
+    #close-not-enough-btn:focus {
+      background: #a71d2a;
+      outline: none;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container" role="main" aria-label="Fun Quiz Game">
+    <h1>Fun Quiz Game</h1>
+    <div id="coins" aria-live="polite" aria-atomic="true" title="Coins collected" tabindex="0">
+      <svg class="coin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#ffb700" aria-hidden="true" focusable="false">
+        <circle cx="32" cy="32" r="30" stroke="#d4af37" stroke-width="4"/>
+        <circle cx="32" cy="32" r="20" fill="#ffd700"/>
+        <circle cx="32" cy="32" r="10" stroke="#d4af37" stroke-width="2" fill="none"/>
+      </svg>
+      Coins: 0
+    </div>
+    <button id="redeem-btn" aria-label="Redeem your coins" title="Redeem your coins for rewards">Redeem Coins</button>
+    <div id="progress-bar-container" aria-hidden="true">
+      <div id="progress-bar"></div>
+    </div>
+    <div id="timer" aria-live="polite" aria-atomic="true" aria-label="Time remaining" tabindex="0">Time left: 15s</div>
+    <div id="question-container">
+      <div id="question" tabindex="0">Question text</div>
+      <div id="answer-buttons" class="btn-grid" role="list"></div>
+    </div>
+    <button id="next-btn" class="next-btn btn" aria-label="Next question">Next</button>
+    <div id="result-container" class="hide" role="region" aria-live="polite" tabindex="0">
+      <h2>Your Score: <span id="score"></span></h2>
+      <h3>Total Coins Earned This Round: <span id="final-coins"></span></h3>
+      <button id="restart-btn" class="btn" aria-label="Restart Quiz">Restart Quiz</button>
+    </div>
+  </div>
+
+  <!-- Redeem Modal -->
+  <div id="redeem-modal" role="dialog" aria-modal="true" aria-labelledby="redeem-title" aria-describedby="redeem-desc" tabindex="-1">
+    <div class="modal-content" tabindex="0">
+      <h2 id="redeem-title">Redeem Your Coins</h2>
+      <p id="redeem-desc">Select a reward to redeem your coins!</p>
+      <ul id="rewards-list" tabindex="0"></ul>
+      <button id="close-modal-btn" aria-label="Close redeem modal">Close</button>
+    </div>
+  </div>
+
+  <!-- Share Modal -->
+  <div id="share-modal" role="dialog" aria-modal="true" aria-labelledby="share-title" aria-describedby="share-desc" tabindex="-1">
+    <div class="modal-content" tabindex="0">
+      <h2 id="share-title">Enjoyed the game?</h2>
+      <p id="share-desc">Share your achievement with friends!</p>
+      <div class="share-buttons">
+        <a href="#" id="share-facebook" class="share-btn" target="_blank" rel="noopener" aria-label="Share on Facebook" title="Share on Facebook">Facebook</a>
+        <a href="#" id="share-whatsapp" class="share-btn" target="_blank" rel="noopener" aria-label="Share on WhatsApp" title="Share on WhatsApp">WhatsApp</a>
+        <a href="#" id="share-twitter" class="share-btn" target="_blank" rel="noopener" aria-label="Share on Twitter" title="Share on Twitter">Twitter</a>
+      </div>
+      <button id="close-share-btn" class="close-share-btn" aria-label="Close share modal">Close</button>
+    </div>
+  </div>
+
+  <!-- Not Enough Coins Modal -->
+  <div id="not-enough-coins-modal" role="dialog" aria-modal="true" aria-labelledby="not-enough-title" aria-describedby="not-enough-desc" tabindex="-1">
+    <div class="modal-content" tabindex="0">
+      <h2 id="not-enough-title">Not Enough Coins</h2>
+      <p id="not-enough-desc">You don't have enough coins play game to earn coins.</p>
+      <button id="close-not-enough-btn" aria-label="Close not enough coins modal">Close</button>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div id="notification" role="alert" aria-live="assertive"></div>
+
+  <!-- Sound effects -->
+  <audio id="win-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
+  <audio id="lose-sound" src="https://actions.google.com/sounds/v1/cartoon/boing.ogg" preload="auto"></audio>
+
+  <script>
+    (() => {
+      const questions = [
+        {
+          question: "What is the capital of France?",
+          answers: [
+            { text: "Paris", correct: true },
+            { text: "Berlin", correct: false },
+            { text: "Madrid", correct: false },
+            { text: "Rome", correct: false }
+          ]
+        },
+        {
+          question: "Which planet is known as the Red Planet?",
+          answers: [
+            { text: "Venus", correct: false },
+            { text: "Mars", correct: true },
+            { text: "Jupiter", correct: false },
+            { text: "Saturn", correct: false }
+          ]
+        },
+        {
+          question: "Who wrote 'Hamlet'?",
+          answers: [
+            { text: "Charles Dickens", correct: false },
+            { text: "William Shakespeare", correct: true },
+            { text: "Leo Tolstoy", correct: false },
+            { text: "Mark Twain", correct: false }
+          ]
+        },
+        {
+          question: "What is the chemical symbol for water?",
+          answers: [
+            { text: "O2", correct: false },
+            { text: "H2O", correct: true },
+            { text: "CO2", correct: false },
+            { text: "NaCl", correct: false }
+          ]
+        },
+        {
+          question: "Which language is primarily used for Android app development?",
+          answers: [
+            { text: "Swift", correct: false },
+            { text: "Kotlin", correct: true },
+            { text: "Ruby", correct: false },
+            { text: "PHP", correct: false }
+          ]
+        },
+        {
+          question: "Which car company produces the Mustang?",
+          answers: [
+            { text: "Ford", correct: true },
+            { text: "Chevrolet", correct: false },
+            { text: "Dodge", correct: false },
+            { text: "Tesla", correct: false }
+          ]
+        },
+        {
+          question: "Who was the first woman to serve as a head of government?",
+          answers: [
+            { text: "Indira Gandhi", correct: true },
+            { text: "Margaret Thatcher", correct: false },
+            { text: "Golda Meir", correct: false },
+            { text: "Angela Merkel", correct: false }
+          ]
+        },
+        {
+          question: "Which lifestyle habit is linked to better mental health?",
+          answers: [
+            { text: "Regular exercise", correct: true },
+            { text: "Eating fast food daily", correct: false },
+            { text: "Excessive screen time", correct: false },
+            { text: "Skipping sleep", correct: false }
+          ]
+        },
+        {
+          question: "What does SUV stand for in cars?",
+          answers: [
+            { text: "Sport Utility Vehicle", correct: true },
+            { text: "Super Urban Vehicle", correct: false },
+            { text: "Standard Utility Van", correct: false },
+            { text: "Sport Unique Vehicle", correct: false }
+          ]
+        },
+        {
+          question: "Which country elected the first female president in Africa?",
+          answers: [
+            { text: "Liberia", correct: true },
+            { text: "South Africa", correct: false },
+            { text: "Kenya", correct: false },
+            { text: "Nigeria", correct: false }
+          ]
+        }
+      ];
+
+      const rewards = [
+        { name: "Coffee Voucher", cost: 10 },
+        { name: "Movie Ticket", cost: 20 },
+        { name: "Gift Card", cost: 30 },
+        { name: "Headphones", cost: 50 }
+      ];
+
+      const questionContainer = document.getElementById('question-container');
+      const questionElement = document.getElementById('question');
+      const answerButtonsElement = document.getElementById('answer-buttons');
+      const nextButton = document.getElementById('next-btn');
+      const coinsDisplay = document.getElementById('coins');
+      const progressBar = document.getElementById('progress-bar');
+      const timerElement = document.getElementById('timer');
+      const resultContainer = document.getElementById('result-container');
+      const scoreElement = document.getElementById('score');
+      const finalCoinsElement = document.getElementById('final-coins');
+      const restartButton = document.getElementById('restart-btn');
+      const redeemBtn = document.getElementById('redeem-btn');
+      const redeemModal = document.getElementById('redeem-modal');
+      const rewardsList = document.getElementById('rewards-list');
+      const closeModalBtn = document.getElementById('close-modal-btn');
+      const notification = document.getElementById('notification');
+      const shareModal = document.getElementById('share-modal');
+      const closeShareBtn = document.getElementById('close-share-btn');
+      const shareFacebook = document.getElementById('share-facebook');
+      const shareWhatsapp = document.getElementById('share-whatsapp');
+      const shareTwitter = document.getElementById('share-twitter');
+      const notEnoughCoinsModal = document.getElementById('not-enough-coins-modal');
+      const closeNotEnoughBtn = document.getElementById('close-not-enough-btn');
+
+      // Sound elements
+      const winSound = document.getElementById('win-sound');
+      const loseSound = document.getElementById('lose-sound');
+
+      let currentQuestionIndex = 0;
+      let score = 0;
+      let coins = 0;
+      let timer;
+      const timePerQuestion = 15;
+      let timeLeft = timePerQuestion;
+
+      function startQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        coins = 0;
+        updateCoinsDisplay();
+        resultContainer.classList.add('hide');
+        questionContainer.style.display = 'block';
+        nextButton.style.display = 'none';
+        progressBar.style.width = '0%';
+        setNextQuestion();
+      }
+
+      function setNextQuestion() {
+        resetState();
+        showQuestion(questions[currentQuestionIndex]);
+        startTimer();
+        updateProgressBar();
+      }
+
+      function showQuestion(question) {
+        questionElement.textContent = question.question;
+        questionElement.focus();
+        question.answers.forEach(answer => {
+          const button = document.createElement('button');
+          button.textContent = answer.text;
+          button.classList.add('btn');
+          button.setAttribute('role', 'listitem');
+          if (answer.correct) {
+            button.dataset.correct = answer.correct;
+          }
+          button.addEventListener('click', selectAnswer);
+          answerButtonsElement.appendChild(button);
+        });
+      }
+
+      function resetState() {
+        clearStatusClass(document.body);
+        nextButton.style.display = 'none';
+        while (answerButtonsElement.firstChild) {
+          answerButtonsElement.removeChild(answerButtonsElement.firstChild);
+        }
+        clearInterval(timer);
+        timeLeft = timePerQuestion;
+        updateTimerDisplay();
+      }
+
+      function selectAnswer(e) {
+        const selectedButton = e.target;
+        const correct = selectedButton.dataset.correct === "true";
+
+        setStatusClass(selectedButton, correct);
+        Array.from(answerButtonsElement.children).forEach(button => {
+          button.disabled = true;
+          if (button.dataset.correct === "true") {
+            setStatusClass(button, true);
+          }
+        });
+
+        if (correct) {
+          // Start coins at 500 on first win if coins < 500
+          if (coins < 250) {
+            coins = 250;
+          } else {
+            coins += 5; // existing increment
+          }
+          updateCoinsDisplay();
+          showCoinFlyAnimation(e.clientX, e.clientY);
+          launchConfetti();
+          playSound(winSound);
+        } else {
+          // On lose, reduce coins by 220 if possible, else show modal
+          if (coins >= 100) {
+            coins -= 100;
+            updateCoinsDisplay();
+            playSound(loseSound);
+          } else {
+            // Show "Not enough coins" modal
+            openNotEnoughCoinsModal();
+            playSound(loseSound);
+          }
+        }
+
+        clearInterval(timer);
+        nextButton.style.display = 'block';
+        nextButton.focus();
+      }
+
+      function playSound(sound) {
+        sound.currentTime = 0;
+        sound.play();
+      }
+
+      function updateCoinsDisplay() {
+        coinsDisplay.innerHTML = `
+          <svg class="coin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#ffb700" aria-hidden="true" focusable="false">
+            <circle cx="32" cy="32" r="30" stroke="#d4af37" stroke-width="4"/>
+            <circle cx="32" cy="32" r="20" fill="#ffd700"/>
+            <circle cx="32" cy="32" r="10" stroke="#d4af37" stroke-width="2" fill="none"/>
+          </svg>
+          Coins: ${coins}
+        `;
+      }
+
+      function updateProgressBar() {
+        const progressPercent = ((currentQuestionIndex) / questions.length) * 100;
+        progressBar.style.width = `${progressPercent}%`;
+      }
+
+      function startTimer() {
+        updateTimerDisplay();
+        timer = setInterval(() => {
+          timeLeft--;
+          updateTimerDisplay();
+          if (timeLeft <= 0) {
+            clearInterval(timer);
+            disableAnswers();
+            nextButton.style.display = 'block';
+            nextButton.focus();
+          }
+        }, 1000);
+      }
+
+      function updateTimerDisplay() {
+        timerElement.textContent = `Time left: ${timeLeft}s`;
+      }
+
+      function disableAnswers() {
+        Array.from(answerButtonsElement.children).forEach(button => {
+          button.disabled = true;
+          if (button.dataset.correct === "true") {
+            setStatusClass(button, true);
+          }
+        });
+      }
+
+      function setStatusClass(element, correct) {
+        clearStatusClass(element);
+        if (correct) {
+          element.classList.add('correct');
+        } else {
+          element.classList.add('wrong');
+        }
+      }
+
+      function clearStatusClass(element) {
+        element.classList.remove('correct');
+        element.classList.remove('wrong');
+      }
+
+      nextButton.addEventListener('click', () => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+          setNextQuestion();
+        } else {
+          showResults();
+          onQuizEnd();
+        }
+      });
+
+      function showResults() {
+        questionContainer.style.display = 'none';
+        nextButton.style.display = 'none';
+        resultContainer.classList.remove('hide');
+        scoreElement.textContent = `${score} / ${questions.length}`;
+        finalCoinsElement.textContent = coins;
+        progressBar.style.width = '100%';
+      }
+
+      restartButton.addEventListener('click', () => {
+        startQuiz();
+        shareModal.classList.remove('active');
+      });
+
+      redeemBtn.addEventListener('click', () => {
+        populateRewards();
+        redeemModal.classList.add('active');
+        redeemModal.querySelector('.modal-content').focus();
+      });
+
+      closeModalBtn.addEventListener('click', () => {
+        redeemModal.classList.remove('active');
+        redeemBtn.focus();
+      });
+
+      redeemModal.addEventListener('click', (e) => {
+        if (e.target === redeemModal) {
+          redeemModal.classList.remove('active');
+          redeemBtn.focus();
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && redeemModal.classList.contains('active')) {
+          redeemModal.classList.remove('active');
+          redeemBtn.focus();
+        }
+      });
+
+      function populateRewards() {
+        rewardsList.innerHTML = '';
+        rewards.forEach(reward => {
+          const li = document.createElement('li');
+          li.tabIndex = 0;
+          li.textContent = reward.name;
+          const costSpan = document.createElement('span');
+          costSpan.classList.add('cost');
+          costSpan.textContent = `${reward.cost} coins`;
+          li.appendChild(costSpan);
+
+          li.addEventListener('click', () => {
+            redeemReward(reward);
+          });
+          li.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              redeemReward(reward);
+            }
+          });
+          rewardsList.appendChild(li);
+        });
+      }
+
+      function redeemReward(reward) {
+        if (coins >= reward.cost) {
+          coins -= reward.cost;
+          updateCoinsDisplay();
+          showNotification(`You redeemed: ${reward.name}!`);
+          redeemModal.classList.remove('active');
+          redeemBtn.focus();
+        } else {
+          showNotification(`Not enough coins for ${reward.name}`, true);
+        }
+      }
+
+      let notificationTimeout;
+      function showNotification(message, isError = false) {
+        notification.textContent = message;
+        notification.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+        notification.classList.add('show');
+        clearTimeout(notificationTimeout);
+        notificationTimeout = setTimeout(() => {
+          notification.classList.remove('show');
+        }, 3000);
+      }
+
+      function showCoinFlyAnimation(x, y) {
+        const coinFly = document.createElement('div');
+        coinFly.classList.add('coin-fly');
+        document.body.appendChild(coinFly);
+        coinFly.style.left = `${x}px`;
+        coinFly.style.top = `${y}px`;
+        coinFly.addEventListener('animationend', () => {
+          coinFly.remove();
+        });
+      }
+
+      function launchConfetti() {
+        const confettiCount = 25;
+        for (let i = 0; i < confettiCount; i++) {
+          const confetti = document.createElement('div');
+          confetti.classList.add('confetti');
+          confetti.style.left = `${Math.random() * 100}vw`;
+          confetti.style.animationDuration = `${2 + Math.random() * 2}s`;
+          confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 65%)`;
+          document.body.appendChild(confetti);
+          confetti.addEventListener('animationend', () => confetti.remove());
+        }
+      }
+
+      function openShareModal() {
+        updateShareLinks();
+        shareModal.classList.add('active');
+        shareModal.querySelector('.modal-content').focus();
+      }
+      function closeShareModal() {
+        shareModal.classList.remove('active');
+        restartButton.focus();
+      }
+      closeShareBtn.addEventListener('click', closeShareModal);
+      shareModal.addEventListener('click', (e) => {
+        if (e.target === shareModal) {
+          closeShareModal();
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && shareModal.classList.contains('active')) {
+          closeShareModal();
+        }
+      });
+
+      function updateShareLinks() {
+        const shareText = encodeURIComponent(`Love this Game I just scored ${score} on this awesome quiz! Give it a try: ${location.href}`);
+        shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.href)}`;
+        shareWhatsapp.href = `https://api.whatsapp.com/send?text=${shareText}`;
+        shareTwitter.href = `https://twitter.com/intent/tweet?text=${shareText}`;
+      }
+
+      function onQuizEnd() {
+        openShareModal();
+      }
+
+      // Not Enough Coins Modal handlers
+      function openNotEnoughCoinsModal() {
+        notEnoughCoinsModal.style.display = 'flex';
+        notEnoughCoinsModal.classList.add('active');
+        notEnoughCoinsModal.querySelector('.modal-content').focus();
+      }
+
+      function closeNotEnoughCoinsModal() {
+        notEnoughCoinsModal.style.display = 'none';
+        notEnoughCoinsModal.classList.remove('active');
+        nextButton.focus();
+      }
+
+      closeNotEnoughBtn.addEventListener('click', closeNotEnoughCoinsModal);
+      notEnoughCoinsModal.addEventListener('click', (e) => {
+        if (e.target === notEnoughCoinsModal) {
+          closeNotEnoughCoinsModal();
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && notEnoughCoinsModal.classList.contains('active')) {
+          closeNotEnoughCoinsModal();
+        }
+      });
+
+      startQuiz();
+    })();
+  </script>
+</body>
+</html>
