@@ -4,6 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fourlinkx Information Technology Services</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Fourlinkx Information Technology Services - Your trusted partner for IT training, entertainment, and custom technology solutions." />
+  <meta name="keywords" content="IT training, technology services, entertainment, web development, computer networking, solar inverter systems" />
+  <meta name="author" content="Fourlinkx" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Fourlinkx Information Technology Services" />
+  <meta property="og:description" content="Your trusted partner for IT training, entertainment, and custom technology solutions." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://fourlinkx.github.io" />
+  <meta property="og:image" content="https://fourlinkx.github.io/og-image.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Fourlinkx Information Technology Services" />
+  <meta name="twitter:description" content="Your trusted partner for IT training, entertainment, and custom technology solutions." />
+  <meta name="twitter:image" content="https://fourlinkx.github.io/twitter-image.png" />
+
+  <!-- Favicon: Blue background with white "F" -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%234361ee'/><text x='32' y='44' font-size='40' font-family='Arial, sans-serif' fill='white' text-anchor='middle' font-weight='bold'>F</text></svg>" />
+
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
     rel="stylesheet"
@@ -251,6 +273,20 @@
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 2rem;
     }
+    /* Anchor wrapping card */
+    .card-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-radius: 16px;
+    }
+    .card-link:hover .card {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+      background: rgba(255, 255, 255, 0.3);
+    }
     .card {
       background: var(--glass);
       border: 1px solid var(--glass-border);
@@ -264,11 +300,6 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
-    }
-    .card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-      background: rgba(255, 255, 255, 0.3);
     }
     .card i {
       font-size: 2.5rem;
@@ -465,61 +496,79 @@
     <section id="training" class="section">
       <h2>Training</h2>
       <div class="cards">
-        <div class="card">
-          <i class="fas fa-code"></i>
-          <h3>Web Development</h3>
-          <p>Master modern web technologies and frameworks.</p>
-        </div>
-        <div class="card">
-          <i class="fas fa-network-wired"></i>
-          <h3>Computer Networking</h3>
-          <p>Learn networking fundamentals and advanced concepts.</p>
-        </div>
-        <div class="card">
-          <i class="fas fa-video"></i>
-          <h3>Surveillance Cameras</h3>
-          <p>Install and configure security camera systems.</p>
-        </div>
-        <div class="card">
-          <i class="fas fa-phone-volume"></i>
-          <h3>Intercom Installation</h3>
-          <p>Set up and maintain intercom systems.</p>
-        </div>
+        <a href="web-development.html" class="card-link">
+          <div class="card">
+            <i class="fas fa-code"></i>
+            <h3>Web Development</h3>
+            <p>Master modern web technologies and frameworks.</p>
+          </div>
+        </a>
+        <a href="computer-networking.html" class="card-link">
+          <div class="card">
+            <i class="fas fa-network-wired"></i>
+            <h3>Computer Networking</h3>
+            <p>Learn networking fundamentals and advanced concepts.</p>
+          </div>
+        </a>
+        <a href="surveillance-cameras.html" class="card-link">
+          <div class="card">
+            <i class="fas fa-video"></i>
+            <h3>Surveillance Cameras</h3>
+            <p>Install and configure security camera systems.</p>
+          </div>
+        </a>
+        <a href="intercom-installation.html" class="card-link">
+          <div class="card">
+            <i class="fas fa-phone-volume"></i>
+            <h3>Intercom Installation</h3>
+            <p>Set up and maintain intercom systems.</p>
+          </div>
+        </a>
       </div>
     </section>
     <section id="entertainment" class="section">
       <h2>Entertainment</h2>
       <div class="cards">
-        <div class="card">
-          <i class="fas fa-gamepad"></i>
-          <h3>Games</h3>
-          <p>Engage in fun and interactive gaming experiences.</p>
-        </div>
-        <div class="card">
-          <i class="fas fa-film"></i>
-          <h3>Movies</h3>
-          <p>Enjoy a wide selection of movies and digital content.</p>
-        </div>
+        <a href="games.html" class="card-link">
+          <div class="card">
+            <i class="fas fa-gamepad"></i>
+            <h3>Games</h3>
+            <p>Engage in fun and interactive gaming experiences.</p>
+          </div>
+        </a>
+        <a href="movies.html" class="card-link">
+          <div class="card">
+            <i class="fas fa-film"></i>
+            <h3>Movies</h3>
+            <p>Enjoy a wide selection of movies and digital content.</p>
+          </div>
+        </a>
       </div>
     </section>
     <section id="services" class="section">
       <h2>Services</h2>
       <div class="cards">
-        <div class="card">
-          <i class="fas fa-laptop-code"></i>
-          <h3>Website Projects</h3>
-          <p>Custom web solutions tailored to your needs.</p>
-        </div>
-        <div class="card">
-          <i class="fas fa-server"></i>
-          <h3>Computer Networking</h3>
-          <p>Professional networking setup and support.</p>
-        </div>
-        <div class="card">
-          <i class="fas fa-solar-panel"></i>
-          <h3>Solar Inverter Systems</h3>
-          <p>Installation and maintenance of solar power solutions.</p>
-        </div>
+        <a href="website-projects.html" class="card-link">
+          <div class="card">
+            <i class="fas fa-laptop-code"></i>
+            <h3>Website Projects</h3>
+            <p>Custom web solutions tailored to your needs.</p>
+          </div>
+        </a>
+        <a href="networking-support.html" class="card-link">
+          <div class="card">
+            <i class="fas fa-server"></i>
+            <h3>Computer Networking</h3>
+            <p>Professional networking setup and support.</p>
+          </div>
+        </a>
+        <a href="solar-inverter.html" class="card-link">
+          <div class="card">
+            <i class="fas fa-solar-panel"></i>
+            <h3>Solar Inverter Systems</h3>
+            <p>Installation and maintenance of solar power solutions.</p>
+          </div>
+        </a>
       </div>
     </section>
     <section id="contact" class="section">
@@ -538,7 +587,7 @@
   </footer>
 
   <a
-    href="https://wa.me/7069154020"
+    href="https://wa.me/+2347069154020"
     class="live-chat-btn"
     target="_blank"
     rel="noopener noreferrer"
