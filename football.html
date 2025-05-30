@@ -1,865 +1,831 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>8-Ball Pool Game with Break Shot</title>
-<style>
-  /* (Keep all previous styles unchanged) */
-  html, body {
-    margin: 0; padding: 0;
-    height: 100%;
-    background: #18153a;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    user-select: none;
-  }
-  #game-container {
-    position: relative;
-    width: 90vw;
-    max-width: 600px;
-    aspect-ratio: 16 / 9;
-    background: linear-gradient(145deg, #3ac6ff 60%, #0d47a1 100%);
-    border-radius: 22px;
-    border: 7px solid #25c6fc;
-    box-shadow: 0 0 30px 8px #2196f3, 0 6px 24px #000a;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
-  }
-  #pool-table {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
-  .pocket {
-    position: absolute;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 60% 40%, #222 60%, #000 100%);
-    box-shadow: 0 0 18px #000b, 0 0 0 4px #1b1836;
-    z-index: 2;
-  }
-  .pocket.tl { left: -7px; top: -7px; }
-  .pocket.tr { right: -7px; top: -7px; }
-  .pocket.bl { left: -7px; bottom: -7px; }
-  .pocket.br { right: -7px; bottom: -7px; }
-  .pocket.tc { left: 50%; top: -7px; transform: translateX(-50%);}
-  .pocket.bc { left: 50%; bottom: -7px; transform: translateX(-50%);}
-  #logo {
-    position: absolute;
-    top: 5%;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: 'Luckiest Guy', cursive;
-    font-size: 2.5rem;
-    color: #e0f6ff;
-    letter-spacing: 0.6rem;
-    text-shadow: 0 3px 10px #0008, 0 1px 0 #2196f3;
-    user-select: none;
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    z-index: 3;
-  }
-  #logo .eight-ball {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 60% 40%, #444 55%, #111 100%);
-    margin: 0 5px;
-    box-shadow: 0 0 10px #000a, 0 4px 10px #0008;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-weight: bold;
-    font-family: Arial, sans-serif;
-    font-size: 1.2rem;
-    text-shadow: 0 2px 4px #000a;
-  }
-  .ball {
-    position: absolute;
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    box-shadow: 0 2px 8px #000a, 0 0 0 2px #fff3;
-    border: 2px solid #fff8;
-    z-index: 4;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-family: Arial, sans-serif;
-    user-select: none;
-    transition: none;
-  }
-  .ball.cue { background: radial-gradient(circle at 60% 40%, #fff 80%, #e0e0e0 100%);}
-  .ball.eight {
-    background: radial-gradient(circle at 60% 40%, #444 70%, #111 100%);
-    color: #fff;
-    font-size: 1.1rem;
-    text-shadow: 0 2px 4px #000a;
-  }
-  .ball.red { background: radial-gradient(circle at 60% 40%, #ff4b4b 70%, #a60000 100%);}
-  .ball.yellow { background: radial-gradient(circle at 60% 40%, #ffe44b 70%, #bba600 100%);}
-  .ball.blue { background: radial-gradient(circle at 60% 40%, #4b7bff 70%, #0033a6 100%);}
-  .ball.green { background: radial-gradient(circle at 60% 40%, #4bff7b 70%, #00a64b 100%);}
-  .ball.purple { background: radial-gradient(circle at 60% 40%, #c44bff 70%, #6a00a6 100%);}
-  .ball.orange { background: radial-gradient(circle at 60% 40%, #ffb84b 70%, #a66a00 100%);}
-  #cue-stick {
-    position: absolute;
-    width: 210px;
-    height: 7px;
-    background: linear-gradient(90deg, #ffb84b 0%, #d48a1b 60%, #333 100%);
-    border-radius: 4px;
-    box-shadow: 0 2px 8px #000a;
-    z-index: 10;
-    transform-origin: 30px 50%;
-    cursor: pointer;
-    user-select: none;
-    pointer-events: auto;
-    transition: box-shadow 0.15s;
-  }
-  #cue-stick.disabled {
-    pointer-events: none;
-    opacity: 0.5;
-    cursor: default;
-  }
-  #cue-stick .cue-tip {
-    position: absolute;
-    left: 0; top: 1px;
-    width: 28px; height: 5px;
-    background: linear-gradient(90deg, #eee 60%, #2196f3 100%);
-    border-radius: 3px 0 0 3px;
-    box-shadow: 1px 0 3px #2196f3;
-  }
-  #message {
-    position: absolute;
-    top: 5px;
-    width: 100%;
-    text-align: center;
-    color: #fff;
-    font-size: 1.1rem;
-    text-shadow: 0 2px 8px #000b;
-    z-index: 100;
-    pointer-events: none;
-  }
-  #aimCanvas {
-    position: absolute;
-    left: 0; top: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 20;
-  }
-  #confetti {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    pointer-events: none;
-    z-index: 1000;
-  }
-  #turn-indicator {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #fff;
-    font-size: 1.2rem;
-    font-weight: bold;
-    text-shadow: 0 2px 6px #000;
-    z-index: 100;
-    user-select: none;
-  }
-  #end-turn-btn {
-    position: absolute;
-    bottom: 50px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 8px 16px;
-    font-size: 1rem;
-    font-weight: bold;
-    background: #2196f3;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 2px 8px #0008;
-    z-index: 100;
-    user-select: none;
-  }
-  #end-turn-btn:disabled {
-    background: #555;
-    cursor: default;
-  }
-  @media (max-width: 500px) {
-    #game-container { width: 98vw; aspect-ratio: 16 / 9; }
-    #logo { font-size: 1.5rem; letter-spacing: 0.4rem; }
-    .ball { width: 18px; height: 18px; font-size: 0.8rem; }
-    #cue-stick { width: 160px; height: 5px; }
-    #cue-stick .cue-tip { width: 20px; height: 3px; }
-    #message { font-size: 0.9rem; }
-    #turn-indicator { font-size: 1rem; bottom: 8px; }
-    #end-turn-btn { font-size: 0.9rem; padding: 6px 12px; bottom: 40px; }
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quiz Game with Redeemable Coins</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      padding: 10px;
+      overflow-x: hidden;
+      user-select: none;
+      color: #fff;
+    }
+
+    .quiz-container {
+      background: #1e1e2f;
+      border-radius: 15px;
+      width: 100%;
+      max-width: 420px;
+      padding: 25px 30px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      position: relative;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      font-size: 2rem;
+      text-shadow: 0 0 10px #ffb700;
+    }
+
+    #coins {
+      font-weight: 700;
+      color: #ffb700;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+      user-select: text;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    #coins .coin-icon {
+      width: 24px;
+      height: 24px;
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+
+    #progress-bar-container {
+      width: 100%;
+      background: #33334d;
+      border-radius: 10px;
+      height: 10px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #ffb700;
+      border-radius: 10px;
+      transition: width 0.4s ease;
+      box-shadow: 0 0 10px #ffb700;
+    }
+
+    #timer {
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      font-weight: 600;
+      color: #ff6f61;
+      text-shadow: 0 0 5px #ff6f61;
+    }
+
+    #question {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      min-height: 60px;
+      line-height: 1.3;
+      text-shadow: 0 0 5px rgba(0,0,0,0.7);
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      padding: 16px;
+      font-size: 17px;
+      border: none;
+      border-radius: 12px;
+      background: #3a3a5a;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: background 0.3s ease, transform 0.15s ease;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:hover:not(:disabled),
+    .btn:focus:not(:disabled) {
+      background: #ffb700;
+      color: #1e1e2f;
+      outline: none;
+      transform: scale(1.05);
+      box-shadow: 0 0 15px #ffb700;
+      z-index: 1;
+    }
+
+    .btn:disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+
+    .correct {
+      background-color: #28a745 !important;
+      color: white !important;
+      box-shadow: 0 0 15px #28a745 !important;
+    }
+
+    .wrong {
+      background-color: #dc3545 !important;
+      color: white !important;
+      box-shadow: 0 0 15px #dc3545 !important;
+    }
+
+    .next-btn {
+      margin-top: 25px;
+      display: none;
+      width: 100%;
+      background: #ffb700;
+      color: #1e1e2f;
+      font-weight: 700;
+      font-size: 1.1rem;
+      box-shadow: 0 0 15px #ffb700;
+      transition: background 0.3s ease;
+    }
+
+    .next-btn:hover,
+    .next-btn:focus {
+      background: #e6a700;
+      outline: none;
+      transform: scale(1.05);
+    }
+
+    #result-container {
+      color: #fff;
+    }
+
+    #result-container h2 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px #ffb700;
+    }
+
+    #result-container h3 {
+      font-size: 1.3rem;
+      margin-bottom: 25px;
+      color: #ffb700;
+      text-shadow: 0 0 8px #ffb700;
+    }
+
+    #restart-btn {
+      background: #28a745;
+      font-weight: 700;
+      font-size: 1.1rem;
+      box-shadow: 0 0 15px #28a745;
+      transition: background 0.3s ease;
+      width: 100%;
+    }
+
+    #restart-btn:hover,
+    #restart-btn:focus {
+      background: #1e7e34;
+      outline: none;
+      transform: scale(1.05);
+    }
+
+    /* Coin animation */
+    .coin-fly {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Gold_coin_icon.svg/1024px-Gold_coin_icon.svg.png') no-repeat center center / contain;
+      pointer-events: none;
+      animation: flyToCoin 0.8s forwards ease-in-out;
+      z-index: 9999;
+    }
+
+    @keyframes flyToCoin {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(calc(100vw - 50px), -100px) scale(0.2);
+      }
+    }
+
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #ffb700;
+      opacity: 0.9;
+      top: 0;
+      left: 50%;
+      pointer-events: none;
+      animation: confetti-fall linear forwards;
+      border-radius: 3px;
+      box-shadow: 0 0 5px #ffb700;
+      z-index: 10000;
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Redeem button */
+    #redeem-btn {
+      margin-top: 15px;
+      background: #17a2b8;
+      font-weight: 700;
+      font-size: 1rem;
+      box-shadow: 0 0 15px #17a2b8;
+      color: #fff;
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.15s ease;
+      user-select: none;
+      width: 100%;
+    }
+    #redeem-btn:hover,
+    #redeem-btn:focus {
+      background: #117a8b;
+      outline: none;
+      transform: scale(1.05);
+    }
+
+    /* Modal styles */
+    #redeem-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 20000;
+    }
+
+    #redeem-modal.active {
+      display: flex;
+    }
+
+    #redeem-modal .modal-content {
+      background: #2c2c44;
+      border-radius: 15px;
+      padding: 25px 30px;
+      max-width: 350px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(255, 183, 0, 0.7);
+      color: #fff;
+    }
+
+    #redeem-modal h2 {
+      margin-bottom: 15px;
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: #ffb700;
+      text-shadow: 0 0 10px #ffb700;
+    }
+
+    #redeem-modal ul {
+      list-style: none;
+      padding: 0;
+      margin: 15px 0 25px;
+      text-align: left;
+    }
+
+    #redeem-modal ul li {
+      background: #444466;
+      margin-bottom: 10px;
+      padding: 12px 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #redeem-modal ul li:hover,
+    #redeem-modal ul li:focus {
+      background: #ffb700;
+      color: #1e1e2f;
+      outline: none;
+    }
+
+    #redeem-modal ul li span.cost {
+      font-weight: 700;
+      color: #fff;
+      background: #1e1e2f;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      min-width: 40px;
+      text-align: center;
+    }
+
+    #close-modal-btn {
+      background: #dc3545;
+      border: none;
+      color: white;
+      font-weight: 700;
+      padding: 10px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s ease;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    #close-modal-btn:hover,
+    #close-modal-btn:focus {
+      background: #a71d2a;
+      outline: none;
+      transform: scale(1.05);
+    }
+
+    /* Notification */
+    #notification {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #28a745;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 15px #28a745;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      z-index: 30000;
+    }
+
+    #notification.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  </style>
 </head>
 <body>
-<div id="game-container">
-  <div id="pool-table">
-    <div class="pocket tl"></div>
-    <div class="pocket tr"></div>
-    <div class="pocket bl"></div>
-    <div class="pocket br"></div>
-    <div class="pocket tc"></div>
-    <div class="pocket bc"></div>
-    <div id="logo">
-      P<span class="eight-ball"><span>8</span></span>OL
+  <div class="quiz-container" role="main" aria-label="Fun Quiz Game">
+    <h1>Fun Quiz Game</h1>
+    <div id="coins" aria-live="polite" aria-atomic="true" title="Coins collected">
+      <svg class="coin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#ffb700" aria-hidden="true">
+        <circle cx="32" cy="32" r="30" stroke="#d4af37" stroke-width="4"/>
+        <circle cx="32" cy="32" r="20" fill="#ffd700"/>
+        <circle cx="32" cy="32" r="10" stroke="#d4af37" stroke-width="2" fill="none"/>
+      </svg>
+      Coins: 0
     </div>
-    <div id="cue-stick"><div class="cue-tip"></div></div>
-    <canvas id="aimCanvas"></canvas>
-    <div id="message"></div>
-    <div id="turn-indicator"></div>
-    <button id="end-turn-btn" disabled>End Turn</button>
+    <button id="redeem-btn" aria-label="Redeem your coins">Redeem Coins</button>
+    <div id="progress-bar-container" aria-hidden="true">
+      <div id="progress-bar"></div>
+    </div>
+    <div id="timer" aria-live="polite" aria-atomic="true" aria-label="Time remaining">Time left: 15s</div>
+    <div id="question-container">
+      <div id="question" tabindex="0">Question text</div>
+      <div id="answer-buttons" class="btn-grid" role="list"></div>
+    </div>
+    <button id="next-btn" class="next-btn btn" aria-label="Next question">Next</button>
+    <div id="result-container" class="hide" role="region" aria-live="polite">
+      <h2>Your Score: <span id="score"></span></h2>
+      <h3>Total Coins Earned This Round: <span id="final-coins"></span></h3>
+      <button id="restart-btn" class="btn" aria-label="Restart Quiz">Restart Quiz</button>
+    </div>
   </div>
-</div>
-<canvas id="confetti"></canvas>
 
-<script>
-(() => {
-  const table = document.getElementById('pool-table');
-  const msg = document.getElementById('message');
-  const cueStick = document.getElementById('cue-stick');
-  const aimCanvas = document.getElementById('aimCanvas');
-  const aimCtx = aimCanvas.getContext('2d');
-  const confettiCanvas = document.getElementById('confetti');
-  const confettiCtx = confettiCanvas.getContext('2d');
-  const turnIndicator = document.getElementById('turn-indicator');
-  const endTurnBtn = document.getElementById('end-turn-btn');
+  <!-- Redeem Modal -->
+  <div id="redeem-modal" role="dialog" aria-modal="true" aria-labelledby="redeem-title" aria-describedby="redeem-desc">
+    <div class="modal-content">
+      <h2 id="redeem-title">Redeem Your Coins</h2>
+      <p id="redeem-desc">Select a reward to redeem your coins!</p>
+      <ul id="rewards-list" tabindex="0">
+        <!-- Rewards will be inserted here -->
+      </ul>
+      <button id="close-modal-btn" aria-label="Close redeem modal">Close</button>
+    </div>
+  </div>
 
-  const BALL_RADIUS = 11;
-  const FRICTION = 0.98;
-  const MIN_VELOCITY = 0.05;
-  const POCKET_RADIUS = 28;
+  <!-- Notification -->
+  <div id="notification" role="alert" aria-live="assertive"></div>
 
-  // Sound effects
-  const collisionSound = new Audio('https://freesound.org/data/previews/66/66717_634166-lq.mp3');
-  const pocketSound = new Audio('https://freesound.org/data/previews/146/146726_2615110-lq.mp3');
-
-  let balls = [];
-  let currentPlayer = 1;
-  let playerGroups = {1: null, 2: null};
-  let ballsPocketed = {solids: 0, stripes: 0};
-  const ballsPerGroup = 7;
-  let gameOver = false;
-  let cueBallInHand = true; // Start with ball in hand for break shot
-  let ballsMoving = false;
-  let pocketedThisShot = [];
-  let cueBallScratch = false;
-  let breakShotDone = false;
-
-  let isAiming = false;
-  let aimStart = null;
-  let aimCurrent = null;
-
-  function resize() {
-    const rect = table.getBoundingClientRect();
-    aimCanvas.width = rect.width;
-    aimCanvas.height = rect.height;
-    aimCanvas.style.width = rect.width + 'px';
-    aimCanvas.style.height = rect.height + 'px';
-
-    confettiCanvas.width = window.innerWidth;
-    confettiCanvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resize);
-  resize();
-
-  function getPocketPositions() {
-    const rect = table.getBoundingClientRect();
-    return [
-      {x: 0, y: 0},
-      {x: rect.width / 2, y: 0},
-      {x: rect.width, y: 0},
-      {x: 0, y: rect.height},
-      {x: rect.width / 2, y: rect.height},
-      {x: rect.width, y: rect.height}
+  <script>
+    // Questions data
+    const questions = [
+      {
+        question: "What is the capital of France?",
+        answers: [
+          { text: "Paris", correct: true },
+          { text: "London", correct: false },
+          { text: "Berlin", correct: false },
+          { text: "Madrid", correct: false }
+        ]
+      },
+      {
+        question: "Which planet is known as the Red Planet?",
+        answers: [
+          { text: "Venus", correct: false },
+          { text: "Mars", correct: true },
+          { text: "Jupiter", correct: false },
+          { text: "Saturn", correct: false }
+        ]
+      },
+      {
+        question: "Who wrote 'Hamlet'?",
+        answers: [
+          { text: "Charles Dickens", correct: false },
+          { text: "William Shakespeare", correct: true },
+          { text: "Leo Tolstoy", correct: false },
+          { text: "Mark Twain", correct: false }
+        ]
+      },
+      {
+        question: "What is the smallest prime number?",
+        answers: [
+          { text: "1", correct: false },
+          { text: "2", correct: true },
+          { text: "3", correct: false },
+          { text: "0", correct: false }
+        ]
+      },
+      {
+        question: "Which language is primarily used for Android app development?",
+        answers: [
+          { text: "Swift", correct: false },
+          { text: "Kotlin", correct: true },
+          { text: "JavaScript", correct: false },
+          { text: "Ruby", correct: false }
+        ]
+      }
     ];
-  }
 
-  class Ball {
-    constructor(id, group, color, number, x, y) {
-      this.id = id;
-      this.group = group;
-      this.color = color;
-      this.number = number;
-      this.x = x;
-      this.y = y;
-      this.vx = 0;
-      this.vy = 0;
-      this.pocketed = false;
+    // Rewards data
+    const rewards = [
+      { id: 1, name: "Golden Badge", cost: 50, description: "Show off your achievement with a shiny badge!" },
+      { id: 2, name: "Extra 30s Timer", cost: 100, description: "Get extra time on each question for your next quiz." },
+      { id: 3, name: "Secret Quiz Theme", cost: 150, description: "Unlock a cool secret theme for the quiz." },
+      { id: 4, name: "Custom Avatar", cost: 200, description: "Unlock a custom avatar for your profile." }
+    ];
 
-      this.el = document.createElement('div');
-      this.el.classList.add('ball');
-      if (this.group === 'cue') this.el.classList.add('cue');
-      else if (this.group === 'eight') this.el.classList.add('eight');
-      else this.el.classList.add(this.color);
+    // DOM Elements
+    const questionContainer = document.getElementById('question-container');
+    const questionElement = document.getElementById('question');
+    const answerButtons = document.getElementById('answer-buttons');
+    const nextButton = document.getElementById('next-btn');
+    const resultContainer = document.getElementById('result-container');
+    const scoreElement = document.getElementById('score');
+    const restartButton = document.getElementById('restart-btn');
+    const coinsElement = document.getElementById('coins');
+    const finalCoinsElement = document.getElementById('final-coins');
+    const progressBar = document.getElementById('progress-bar');
+    const timerElement = document.getElementById('timer');
+    const redeemBtn = document.getElementById('redeem-btn');
+    const redeemModal = document.getElementById('redeem-modal');
+    const rewardsList = document.getElementById('rewards-list');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const notification = document.getElementById('notification');
 
-      if (this.number > 0) this.el.textContent = this.number;
+    // Game variables
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let coins = 0;
+    const coinsPerCorrect = 10;
+    const questionTimeDefault = 15; // seconds per question
+    let questionTime = questionTimeDefault;
+    let timeLeft = questionTime;
+    let timerInterval = null;
 
-      table.appendChild(this.el);
-      this.updatePosition();
-    }
-    updatePosition() {
-      this.el.style.left = (this.x - BALL_RADIUS) + 'px';
-      this.el.style.top = (this.y - BALL_RADIUS) + 'px';
-      this.el.style.display = this.pocketed ? 'none' : 'flex';
-    }
-    move() {
-      if (this.pocketed) return;
-      this.x += this.vx;
-      this.y += this.vy;
-
-      const leftBound = BALL_RADIUS;
-      const rightBound = table.clientWidth - BALL_RADIUS;
-      const topBound = BALL_RADIUS;
-      const bottomBound = table.clientHeight - BALL_RADIUS;
-
-      if (this.x < leftBound) {
-        this.x = leftBound;
-        this.vx = -this.vx * 0.9;
-      }
-      if (this.x > rightBound) {
-        this.x = rightBound;
-        this.vx = -this.vx * 0.9;
-      }
-      if (this.y < topBound) {
-        this.y = topBound;
-        this.vy = -this.vy * 0.9;
-      }
-      if (this.y > bottomBound) {
-        this.y = bottomBound;
-        this.vy = -this.vy * 0.9;
-      }
-
-      this.vx *= FRICTION;
-      this.vy *= FRICTION;
-
-      if (Math.abs(this.vx) < MIN_VELOCITY) this.vx = 0;
-      if (Math.abs(this.vy) < MIN_VELOCITY) this.vy = 0;
-
-      this.updatePosition();
-    }
-    isMoving() {
-      return Math.abs(this.vx) > 0 || Math.abs(this.vy) > 0;
-    }
-  }
-
-  function dist(x1, y1, x2, y2) {
-    return Math.hypot(x1 - x2, y1 - y2);
-  }
-
-  function resolveCollision(b1, b2) {
-    if (b1.pocketed || b2.pocketed) return;
-
-    const dx = b2.x - b1.x;
-    const dy = b2.y - b1.y;
-    const distance = Math.hypot(dx, dy);
-    if (distance === 0) return;
-
-    if (distance < BALL_RADIUS * 2) {
-      const overlap = BALL_RADIUS * 2 - distance;
-      const nx = dx / distance;
-      const ny = dy / distance;
-
-      b1.x -= nx * overlap / 2;
-      b1.y -= ny * overlap / 2;
-      b2.x += nx * overlap / 2;
-      b2.y += ny * overlap / 2;
-
-      const tx = -ny;
-      const ty = nx;
-
-      const v1n = b1.vx * nx + b1.vy * ny;
-      const v1t = b1.vx * tx + b1.vy * ty;
-      const v2n = b2.vx * nx + b2.vy * ny;
-      const v2t = b2.vx * tx + b2.vy * ty;
-
-      const v1nAfter = v2n;
-      const v2nAfter = v1n;
-
-      b1.vx = v1nAfter * nx + v1t * tx;
-      b1.vy = v1nAfter * ny + v1t * ty;
-      b2.vx = v2nAfter * nx + v2t * tx;
-      b2.vy = v2nAfter * ny + v2t * ty;
-
-      // Play collision sound
-      collisionSound.currentTime = 0;
-      collisionSound.play();
-    }
-  }
-
-  function checkPocket(ball) {
-    if (ball.pocketed) return false;
-    const pockets = getPocketPositions();
-    for (const p of pockets) {
-      if (dist(ball.x, ball.y, p.x, p.y) < POCKET_RADIUS) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function pocketBall(ball) {
-    ball.pocketed = true;
-    ball.vx = 0;
-    ball.vy = 0;
-    ball.updatePosition();
-
-    // Play pocket sound
-    pocketSound.currentTime = 0;
-    pocketSound.play();
-  }
-
-  function resetCueBallPosition(x, y) {
-    const cueBall = balls.find(b => b.group === 'cue');
-    cueBall.x = x;
-    cueBall.y = y;
-    cueBall.vx = 0;
-    cueBall.vy = 0;
-    cueBall.pocketed = false;
-    cueBall.updatePosition();
-  }
-
-  function ballsAreMoving() {
-    return balls.some(b => b.isMoving());
-  }
-
-  function showMessage(text) {
-    msg.textContent = text;
-  }
-
-  function updateTurnIndicator() {
-    if (gameOver) {
-      turnIndicator.textContent = "Game Over";
-      endTurnBtn.disabled = true;
-      cueStick.classList.add('disabled');
-      return;
-    }
-    const group = playerGroups[currentPlayer];
-    const groupText = group ? (group.charAt(0).toUpperCase() + group.slice(1)) : "Unassigned";
-    turnIndicator.textContent = `Player ${currentPlayer}'s turn — ${groupText}`;
-    endTurnBtn.disabled = ballsMoving || cueBallInHand;
-    cueStick.classList.toggle('disabled', ballsMoving || cueBallInHand);
-  }
-
-  function switchTurn() {
-    currentPlayer = currentPlayer === 1 ? 2 : 1;
-    updateTurnIndicator();
-  }
-
-  function enableCueBallPlacement() {
-    showMessage(`Player ${currentPlayer}, place the cue ball.`);
-    cueStick.style.display = 'none';
-    cueBallInHand = true;
-    updateTurnIndicator();
-  }
-
-  function disableCueBallPlacement() {
-    cueBallInHand = false;
-    cueStick.style.display = 'block';
-    updateTurnIndicator();
-  }
-
-  function updateCueStick(angle) {
-    const cueBall = balls.find(b => b.group === 'cue');
-    if (!cueBall || cueBall.pocketed) return;
-    const ballX = cueBall.x;
-    const ballY = cueBall.y;
-    const gap = BALL_RADIUS * 3.5;
-    const stickX = ballX - Math.cos(angle) * gap;
-    const stickY = ballY - Math.sin(angle) * gap;
-    cueStick.style.left = (stickX - cueStick.offsetWidth * 0.15) + 'px';
-    cueStick.style.top = (stickY - cueStick.offsetHeight / 2) + 'px';
-    cueStick.style.transform = `rotate(${angle * 180 / Math.PI}deg)`;
-  }
-
-  function shoot(power, angle) {
-    if (ballsMoving || gameOver || cueBallInHand) return;
-    const cueBall = balls.find(b => b.group === 'cue');
-    if (!cueBall || cueBall.pocketed) return;
-    cueBall.vx = Math.cos(angle) * power;
-    cueBall.vy = Math.sin(angle) * power;
-    ballsMoving = true;
-    pocketedThisShot = [];
-    cueBallScratch = false;
-    cueStick.style.display = 'none';
-    updateTurnIndicator();
-  }
-
-  function updateAimVisual() {
-    aimCtx.clearRect(0, 0, aimCanvas.width, aimCanvas.height);
-    if (!isAiming) return;
-    aimCtx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-    aimCtx.lineWidth = 3;
-    aimCtx.beginPath();
-    aimCtx.moveTo(aimStart.x, aimStart.y);
-    aimCtx.lineTo(aimCurrent.x, aimCurrent.y);
-    aimCtx.stroke();
-
-    const angle = Math.atan2(aimStart.y - aimCurrent.y, aimStart.x - aimCurrent.x);
-    updateCueStick(angle);
-  }
-
-  function clearAimVisual() {
-    aimCtx.clearRect(0, 0, aimCanvas.width, aimCanvas.height);
-  }
-
-  function getPointerPos(e) {
-    const rect = table.getBoundingClientRect();
-    let clientX, clientY;
-    if (e.touches) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
-    };
-  }
-
-  function onPointerDown(e) {
-    if (ballsMoving || gameOver) return;
-    if (cueBallInHand) {
-      onCueBallPlace(e);
-      return;
-    }
-    const pos = getPointerPos(e);
-    const cueBall = balls.find(b => b.group === 'cue');
-    if (!cueBall || cueBall.pocketed) return;
-    if (dist(pos.x, pos.y, cueBall.x, cueBall.y) <= BALL_RADIUS * 1.5) {
-      isAiming = true;
-      aimStart = {x: cueBall.x, y: cueBall.y};
-      aimCurrent = pos;
-      updateAimVisual();
-    }
-  }
-
-  function onPointerMove(e) {
-    if (!isAiming) return;
-    aimCurrent = getPointerPos(e);
-    updateAimVisual();
-  }
-
-  function onPointerUp(e) {
-    if (!isAiming) return;
-    isAiming = false;
-    clearAimVisual();
-    const cueBall = balls.find(b => b.group === 'cue');
-    if (!cueBall || cueBall.pocketed) return;
-
-    const dx = aimStart.x - aimCurrent.x;
-    const dy = aimStart.y - aimCurrent.y;
-    const distance = dist(aimStart.x, aimStart.y, aimCurrent.x, aimCurrent.y);
-
-    if (distance < 5) {
-      showMessage(`Drag further to shoot.`);
-      updateCueStick(0);
-      return;
+    // Load coins from localStorage or start at 0
+    function loadCoins() {
+      const stored = localStorage.getItem('quizCoins');
+      coins = stored ? parseInt(stored, 10) : 0;
     }
 
-    const maxPower = 15;
-    const power = Math.min(distance / 10, maxPower);
-    const angle = Math.atan2(dy, dx);
-
-    shoot(power, angle);
-  }
-
-  function onCueBallPlace(e) {
-    if (!cueBallInHand) return;
-    const pos = getPointerPos(e);
-    const rect = table.getBoundingClientRect();
-    const headStringX = rect.width * 0.3; // Define head string (behind which cue ball must be placed for break)
-    const leftBound = BALL_RADIUS;
-    const rightBound = headStringX - BALL_RADIUS; // restrict cue ball behind head string
-    const topBound = BALL_RADIUS;
-    const bottomBound = rect.height - BALL_RADIUS;
-    let x = Math.min(Math.max(pos.x, leftBound), rightBound);
-    let y = Math.min(Math.max(pos.y, topBound), bottomBound);
-    resetCueBallPosition(x, y);
-    disableCueBallPlacement();
-    showMessage(`Player ${currentPlayer}'s turn. Aim and shoot.`);
-    updateCueStick(0);
-  }
-
-  function onShotEnd() {
-    ballsMoving = false;
-
-    if (!breakShotDone) {
-      // After break shot, assign groups if possible
-      breakShotDone = true;
-      if (!playerGroups[currentPlayer]) {
-        // Assign groups based on first ball pocketed or first hit ball
-        const solidsPocketed = pocketedThisShot.some(b => b.group === 'solids');
-        const stripesPocketed = pocketedThisShot.some(b => b.group === 'stripes');
-        if (solidsPocketed && !stripesPocketed) {
-          playerGroups[currentPlayer] = 'solids';
-          playerGroups[currentPlayer === 1 ? 2 : 1] = 'stripes';
-        } else if (stripesPocketed && !solidsPocketed) {
-          playerGroups[currentPlayer] = 'stripes';
-          playerGroups[currentPlayer === 1 ? 2 : 1] = 'solids';
-        } else {
-          // If no balls pocketed, groups remain unassigned until first ball pocketed later
-          playerGroups[currentPlayer] = null;
-          playerGroups[currentPlayer === 1 ? 2 : 1] = null;
-        }
-      }
-      showMessage(`Break shot complete. Player ${currentPlayer}'s turn.`);
-      updateTurnIndicator();
-      if (!pocketedThisShot.length || cueBallScratch) {
-        switchTurn();
-      }
-      pocketedThisShot = [];
-      cueBallScratch = false;
-      cueStick.style.display = 'block';
-      return;
+    // Save coins to localStorage
+    function saveCoins() {
+      localStorage.setItem('quizCoins', coins);
     }
 
-    if (pocketedThisShot.length === 0 && !cueBallScratch) {
-      switchTurn();
-      showMessage(`Player ${currentPlayer}'s turn`);
-    } else {
-      if (cueBallScratch) {
-        switchTurn();
-        cueBallInHand = true;
-        enableCueBallPlacement();
-        showMessage(`Foul! Player ${currentPlayer} scratched. Player ${currentPlayer === 1 ? 2 : 1} ball in hand.`);
+    // Sounds
+    const soundCorrect = new Audio('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg');
+    const soundWrong = new Audio('https://actions.google.com/sounds/v1/cartoon/boing.ogg');
+    const soundClick = new Audio('https://actions.google.com/sounds/v1/ui/click.ogg');
+
+    // Initialize game
+    function startQuiz() {
+      currentQuestionIndex = 0;
+      score = 0;
+      questionTime = questionTimeDefault; // reset timer (can be extended by reward)
+      updateCoinsDisplay();
+      resultContainer.classList.add('hide');
+      nextButton.style.display = 'none';
+      questionContainer.classList.remove('hide');
+      progressBar.style.width = '0%';
+      showQuestion(questions[currentQuestionIndex]);
+      resetTimer();
+      startTimer();
+    }
+
+    // Show question and answers
+    function showQuestion(question) {
+      questionElement.innerText = question.question;
+      answerButtons.innerHTML = '';
+      nextButton.style.display = 'none';
+
+      question.answers.forEach(answer => {
+        const button = document.createElement('button');
+        button.innerText = answer.text;
+        button.classList.add('btn');
+        button.setAttribute('role', 'listitem');
+        button.addEventListener('click', () => selectAnswer(button, answer.correct));
+        answerButtons.appendChild(button);
+      });
+
+      updateProgressBar();
+      resetTimer();
+      startTimer();
+    }
+
+    // Update progress bar
+    function updateProgressBar() {
+      const progressPercent = ((currentQuestionIndex) / questions.length) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+    }
+
+    // Select answer logic
+    function selectAnswer(selectedButton, correct) {
+      stopTimer();
+
+      if (correct) {
+        selectedButton.classList.add('correct');
+        score++;
+        coins += coinsPerCorrect;
+        saveCoins();
+        updateCoinsDisplay();
+        playSound(soundCorrect);
+        animateCoin(selectedButton);
       } else {
-        if (!playerGroups[currentPlayer]) {
-          const firstBall = pocketedThisShot.find(b => b.group === 'solids' || b.group === 'stripes');
-          if (firstBall) {
-            playerGroups[currentPlayer] = firstBall.group;
-            playerGroups[currentPlayer === 1 ? 2 : 1] = firstBall.group === 'solids' ? 'stripes' : 'solids';
-            showMessage(`Player ${currentPlayer} is ${playerGroups[currentPlayer]}. Player ${currentPlayer === 1 ? 2 : 1} is ${playerGroups[currentPlayer === 1 ? 2 : 1]}. Player ${currentPlayer} continues.`);
-          }
-        }
-
-        let pocketedOwnGroup = false;
-        for (const ball of pocketedThisShot) {
-          if (ball.group === playerGroups[currentPlayer]) {
-            ballsPocketed[ball.group]++;
-            pocketedOwnGroup = true;
-          }
-          if (ball.group === 'eight') {
-            if (ballsPocketed[playerGroups[currentPlayer]] === ballsPerGroup) {
-              gameOver = true;
-              showMessage(`Player ${currentPlayer} wins! 🎉`);
-              cueStick.style.display = 'none';
-              startConfetti();
-              endTurnBtn.disabled = true;
-              return;
-            } else {
-              gameOver = true;
-              showMessage(`Player ${currentPlayer} lost by pocketing 8-ball too early.`);
-              cueStick.style.display = 'none';
-              endTurnBtn.disabled = true;
-              return;
-            }
-          }
-        }
-
-        if (pocketedOwnGroup) {
-          showMessage(`Player ${currentPlayer} continues.`);
-        } else {
-          switchTurn();
-          showMessage(`Player ${currentPlayer}'s turn.`);
-        }
+        selectedButton.classList.add('wrong');
+        playSound(soundWrong);
       }
+
+      Array.from(answerButtons.children).forEach(button => {
+        button.disabled = true;
+        if (button !== selectedButton) {
+          const isCorrect = questions[currentQuestionIndex].answers.find(a => a.text === button.innerText).correct;
+          if (isCorrect) button.classList.add('correct');
+        }
+      });
+
+      nextButton.style.display = 'inline-block';
+      nextButton.focus();
     }
 
-    pocketedThisShot = [];
-    cueBallScratch = false;
-    if (!gameOver && !cueBallInHand) cueStick.style.display = 'block';
-    updateTurnIndicator();
-  }
-
-  function gameLoop() {
-    if (!ballsMoving) {
-      requestAnimationFrame(gameLoop);
-      return;
+    // Update coins display
+    function updateCoinsDisplay() {
+      coinsElement.innerHTML = `
+        <svg class="coin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#ffb700" aria-hidden="true">
+          <circle cx="32" cy="32" r="30" stroke="#d4af37" stroke-width="4"/>
+          <circle cx="32" cy="32" r="20" fill="#ffd700"/>
+          <circle cx="32" cy="32" r="10" stroke="#d4af37" stroke-width="2" fill="none"/>
+        </svg>
+        Coins: ${coins}
+      `;
     }
 
-    balls.forEach(b => b.move());
+    // Animate coin flying to coin counter
+    function animateCoin(button) {
+      const coin = document.createElement('div');
+      coin.classList.add('coin-fly');
+      document.body.appendChild(coin);
 
-    for (let i = 0; i < balls.length; i++) {
-      for (let j = i + 1; j < balls.length; j++) {
-        resolveCollision(balls[i], balls[j]);
-      }
+      const btnRect = button.getBoundingClientRect();
+      const coinsRect = coinsElement.getBoundingClientRect();
+
+      // Position the coin over the clicked button
+      coin.style.left = `${btnRect.left + btnRect.width / 2 - 15}px`;
+      coin.style.top = `${btnRect.top + btnRect.height / 2 - 15}px`;
+
+      // Animate to coins display
+      coin.animate([
+        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+        { transform: `translate(${coinsRect.left - btnRect.left}px, ${coinsRect.top - btnRect.top}px) scale(0.2)`, opacity: 0 }
+      ], {
+        duration: 800,
+        easing: 'ease-in-out'
+      });
+
+      setTimeout(() => {
+        coin.remove();
+      }, 800);
     }
 
-    balls.forEach(ball => {
-      if (!ball.pocketed && checkPocket(ball)) {
-        pocketBall(ball);
-        pocketedThisShot.push(ball);
-        if (ball.group === 'cue') cueBallScratch = true;
+    // Play sound helper
+    function playSound(sound) {
+      sound.currentTime = 0;
+      sound.play().catch(() => {}); // Catch promise rejection if user hasn't interacted yet
+    }
+
+    // Next question button handler
+    nextButton.addEventListener('click', () => {
+      playSound(soundClick);
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length) {
+        showQuestion(questions[currentQuestionIndex]);
+      } else {
+        showResults();
       }
     });
 
-    if (!ballsAreMoving()) {
-      onShotEnd();
-      if (!cueBallInHand && !gameOver) cueStick.style.display = 'block';
+    // Restart quiz button handler
+    restartButton.addEventListener('click', () => {
+      playSound(soundClick);
+      startQuiz();
+    });
+
+    // Show final results with confetti
+    function showResults() {
+      questionContainer.classList.add('hide');
+      nextButton.style.display = 'none';
+      progressBar.style.width = '100%';
+      timerElement.innerText = '';
+      resultContainer.classList.remove('hide');
+      scoreElement.innerText = `${score} / ${questions.length}`;
+      finalCoinsElement.innerText = coins;
+      restartButton.focus();
+      launchConfetti();
     }
 
-    requestAnimationFrame(gameLoop);
-  }
+    // Timer functions
+    function startTimer() {
+      timeLeft = questionTime;
+      timerElement.innerText = `Time left: ${timeLeft}s`;
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerElement.innerText = `Time left: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          timerElement.innerText = 'Time is up!';
+          disableAnswers();
+          nextButton.style.display = 'inline-block';
+          nextButton.focus();
+          playSound(soundWrong);
+          revealCorrectAnswer();
+        }
+      }, 1000);
+    }
 
-  // Confetti effect
-  let confettiPieces = [];
-  let confettiActive = false;
-  function startConfetti() {
-    confettiActive = true;
-    createConfetti();
-  }
-  function createConfetti() {
-    confettiPieces = [];
-    for(let i=0;i<100;i++) {
-      confettiPieces.push({
-        x: Math.random()*confettiCanvas.width,
-        y: Math.random()*confettiCanvas.height,
-        r: Math.random()*6+4,
-        c: `hsl(${Math.random()*360}, 100%, 70%)`,
-        s: Math.random()*3+1,
-        d: Math.random()*2*Math.PI
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timerElement.innerText = `Time left: ${questionTime}s`;
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
+
+    function disableAnswers() {
+      Array.from(answerButtons.children).forEach(button => button.disabled = true);
+    }
+
+    function revealCorrectAnswer() {
+      Array.from(answerButtons.children).forEach(button => {
+        const isCorrect = questions[currentQuestionIndex].answers.find(a => a.text === button.innerText).correct;
+        if (isCorrect) button.classList.add('correct');
       });
     }
-  }
-  function drawConfetti() {
-    confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-    if (!confettiActive) return;
-    for(let p of confettiPieces) {
-      confettiCtx.save();
-      confettiCtx.translate(p.x,p.y);
-      confettiCtx.rotate(p.d);
-      confettiCtx.fillStyle = p.c;
-      confettiCtx.beginPath();
-      confettiCtx.arc(0,0,p.r,0,2*Math.PI);
-      confettiCtx.fill();
-      confettiCtx.restore();
-      p.y += p.s;
-      p.x += Math.sin(p.d)*1.5;
-      if(p.y > confettiCanvas.height) p.y = -10;
-      if(p.x > confettiCanvas.width) p.x = 0;
-      if(p.x < 0) p.x = confettiCanvas.width;
-    }
-    requestAnimationFrame(drawConfetti);
-  }
-  drawConfetti();
 
-  // Initialize balls and rack them properly
-  function initBalls() {
-    balls.forEach(b => b.el.remove());
-    balls = [];
-
-    const rect = table.getBoundingClientRect();
-    const cueStartX = rect.width * 0.4;
-    const cueStartY = rect.height * 0.6;
-
-    balls.push(new Ball(0, 'cue', 'cue', 0, cueStartX, cueStartY));
-
-    const rackX = rect.width * 0.7;
-    const rackY = rect.height * 0.5;
-    const ballDiameter = BALL_RADIUS * 2;
-    const rowHeight = Math.sqrt(3) * BALL_RADIUS;
-
-    // Balls order for rack
-    const rackBallsInfo = [
-      {number: 1, group: 'solids', color: 'red'},
-      {number: 14, group: 'stripes', color: 'blue'},
-      {number: 7, group: 'solids', color: 'brown'},
-      {number: 9, group: 'stripes', color: 'red'},
-      {number: 8, group: 'eight', color: 'eight'},
-      {number: 3, group: 'solids', color: 'green'},
-      {number: 13, group: 'stripes', color: 'purple'},
-      {number: 2, group: 'solids', color: 'yellow'},
-      {number: 12, group: 'stripes', color: 'orange'},
-      {number: 6, group: 'solids', color: 'blue'},
-      {number: 11, group: 'stripes', color: 'green'},
-      {number: 5, group: 'solids', color: 'purple'},
-      {number: 10, group: 'stripes', color: 'yellow'},
-      {number: 4, group: 'solids', color: 'orange'},
-      {number: 15, group: 'stripes', color: 'brown'}
-    ];
-
-    // Positions for 15 balls in triangle
-    const positions = [];
-    for (let row = 0; row < 5; row++) {
-      const ballsInRow = row + 1;
-      const y = rackY + row * rowHeight;
-      const rowWidth = ballsInRow * ballDiameter;
-      const startX = rackX - rowWidth / 2 + BALL_RADIUS;
-      for (let i = 0; i < ballsInRow; i++) {
-        positions.push({x: startX + i * ballDiameter, y: y});
+    // Confetti effect on quiz completion
+    function launchConfetti() {
+      const confettiCount = 100;
+      for (let i = 0; i < confettiCount; i++) {
+        createConfetti();
       }
     }
 
-    // Place 8-ball in center (index 5)
-    const eightBallIndex = 5;
-    const eightBall = rackBallsInfo.find(b => b.number === 8);
-    rackBallsInfo.splice(rackBallsInfo.indexOf(eightBall), 1);
-    rackBallsInfo.splice(eightBallIndex, 0, eightBall);
+    function createConfetti() {
+      const confetti = document.createElement('div');
+      confetti.classList.add('confetti');
+      confetti.style.left = `${Math.random() * 100}vw`;
+      confetti.style.animationDuration = `${2 + Math.random() * 3}s`;
+      confetti.style.backgroundColor = randomColor();
+      confetti.style.width = confetti.style.height = `${5 + Math.random() * 5}px`;
+      confetti.style.borderRadius = `${Math.random() > 0.5 ? 50 : 3}%`;
+      document.body.appendChild(confetti);
 
-    // Place one solid and one stripe in rear corners (indices 10 and 14)
-    const solidBall = rackBallsInfo.find(b => b.group === 'solids' && b.number !== 8);
-    const stripeBall = rackBallsInfo.find(b => b.group === 'stripes' && b.number !== 8);
-    [rackBallsInfo[10], rackBallsInfo[rackBallsInfo.indexOf(solidBall)]] = [solidBall, rackBallsInfo[10]];
-    [rackBallsInfo[14], rackBallsInfo[rackBallsInfo.indexOf(stripeBall)]] = [stripeBall, rackBallsInfo[14]];
+      confetti.addEventListener('animationend', () => {
+        confetti.remove();
+      });
+    }
 
-    // Create ball objects and assign positions
-    rackBallsInfo.forEach((info, i) => {
-      const ball = new Ball(info.number, info.group, info.color, info.number, positions[i].x, positions[i].y);
-      balls.push(ball);
+    function randomColor() {
+      const colors = ['#ffb700', '#ff6f61', '#28a745', '#17a2b8', '#ffc107', '#e83e8c'];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    // Redeem modal logic
+    redeemBtn.addEventListener('click', () => {
+      populateRewards();
+      redeemModal.classList.add('active');
+      redeemModal.querySelector('.modal-content').focus();
     });
-  }
 
-  function init() {
-    gameOver = false;
-    cueBallInHand = true; // Start with ball in hand for break shot
-    ballsMoving = false;
-    pocketedThisShot = [];
-    cueBallScratch = false;
-    playerGroups = {1: null, 2: null};
-    ballsPocketed = {solids: 0, stripes: 0};
-    currentPlayer = 1;
-    breakShotDone = false;
-    initBalls();
-    const rect = table.getBoundingClientRect();
-    resetCueBallPosition(rect.width * 0.15, rect.height * 0.6); // Start cue ball behind head string
-    cueStick.style.display = 'block';
-    updateCueStick(0);
-    showMessage(`Player 1, place the cue ball behind the head string and break.`);
-    updateTurnIndicator();
-  }
+    closeModalBtn.addEventListener('click', () => {
+      redeemModal.classList.remove('active');
+      redeemBtn.focus();
+    });
 
-  // Manual End Turn Button
-  endTurnBtn.addEventListener('click', () => {
-    if (ballsMoving || cueBallInHand || gameOver) return;
-    switchTurn();
-    showMessage(`Player ${currentPlayer}'s turn.`);
-    updateTurnIndicator();
-  });
+    // Close modal on outside click
+    redeemModal.addEventListener('click', (e) => {
+      if (e.target === redeemModal) {
+        redeemModal.classList.remove('active');
+        redeemBtn.focus();
+      }
+    });
 
-  init();
-  requestAnimationFrame(gameLoop);
+    // Populate rewards list
+    function populateRewards() {
+      rewardsList.innerHTML = '';
+      rewards.forEach(reward => {
+        const li = document.createElement('li');
+        li.tabIndex = 0;
+        li.setAttribute('role', 'button');
+        li.setAttribute('aria-label', `${reward.name}, costs ${reward.cost} coins. ${reward.description}`);
+        li.innerHTML = `
+          <span>${reward.name}</span>
+          <span class="cost">${reward.cost} 🪙</span>
+        `;
+        li.addEventListener('click', () => redeemReward(reward));
+        li.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            redeemReward(reward);
+          }
+        });
+        rewardsList.appendChild(li);
+      });
+    }
 
-  table.addEventListener('mousedown', onPointerDown);
-  window.addEventListener('mousemove', onPointerMove);
-  window.addEventListener('mouseup', onPointerUp);
-  table.addEventListener('touchstart', e => { e.preventDefault(); onPointerDown(e); }, {passive:false});
-  window.addEventListener('touchmove', e => { e.preventDefault(); if(isAiming){ aimCurrent = getPointerPos(e); updateAimVisual(); } }, {passive:false});
-  window.addEventListener('touchend', e => { if(isAiming){ isAiming = false; clearAimVisual(); onPointerUp(e); } });
-})();
-</script>
+    // Redeem reward function
+    function redeemReward(reward) {
+      if (coins >= reward.cost) {
+        coins -= reward.cost;
+        saveCoins();
+        updateCoinsDisplay();
+        showNotification(`You redeemed: ${reward.name}! 🎉`);
+
+        // Implement reward effects here:
+        if (reward.id === 2) {
+          // Extra 30s timer for next quizzes
+          questionTime = questionTimeDefault + 30;
+          showNotification("Extra 30 seconds added to each question for next quizzes!");
+        }
+        // Other rewards can trigger different effects or just show messages
+
+        redeemModal.classList.remove('active');
+        redeemBtn.focus();
+      } else {
+        showNotification("Not enough coins to redeem this reward.", true);
+      }
+    }
+
+    // Notification helper
+    function showNotification(message, isError = false) {
+      notification.textContent = message;
+      notification.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+      notification.classList.add('show');
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3500);
+    }
+
+    // Initialize game on page load
+    window.onload = () => {
+      loadCoins();
+      updateCoinsDisplay();
+      startQuiz();
+    };
+  </script>
 </body>
 </html>
