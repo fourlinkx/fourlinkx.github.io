@@ -3,185 +3,149 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fun Quiz Game - Earn & Redeem Coins!</title>
+  <title>🚀 Coin Quest: Trivia with Rewards!</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
-    /* Reset and base */
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
-    body, html {
-      margin: 0; padding: 0;
-      height: 100%;
+    /* === BODY & LAYOUT === */
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
       background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-      font-family: 'Poppins', sans-serif;
-      color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
-      user-select: none;
+      height: 100vh;
+      margin: 0;
+      padding: 10px;
       overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      min-height: 100vh;
+      user-select: none;
+      color: #fff;
+      transition: background 0.5s ease;
     }
 
-    /* Container */
     .quiz-container {
-      background: linear-gradient(145deg, #1f1f38, #2a2a55);
-      border-radius: 25px;
-      box-shadow:
-        0 4px 15px rgba(255, 183, 0, 0.4),
-        inset 0 0 30px rgba(255, 255, 255, 0.1);
+      background: #1e1e2f;
+      border-radius: 15px;
       width: 100%;
-      max-width: 480px;
-      padding: 35px 30px 40px;
+      max-width: 420px;
+      padding: 25px 30px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
       text-align: center;
       position: relative;
-      transition: transform 0.3s ease;
-    }
-    .quiz-container:hover {
-      transform: scale(1.02);
-      box-shadow:
-        0 8px 40px rgba(255, 183, 0, 0.7),
-        inset 0 0 40px rgba(255, 255, 255, 0.15);
     }
 
-    /* Heading */
+    /* === HEADER === */
     h1 {
+      margin-bottom: 10px;
       font-weight: 700;
-      font-size: 2.8rem;
-      margin-bottom: 5px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #ffd700;
-      text-shadow:
-        0 0 10px #ffd700,
-        0 0 20px #ffb700;
-    }
-    h2.subtitle {
-      font-weight: 600;
-      font-size: 1.2rem;
-      margin-bottom: 25px;
-      color: #ffc107;
-      text-shadow: 0 0 8px #ffc107;
-    }
-    #welcome-msg {
-      font-style: italic;
-      color: #ddd;
-      margin-bottom: 30px;
-      font-size: 1rem;
-      text-shadow: 0 0 5px rgba(255,255,255,0.2);
+      letter-spacing: 1.5px;
+      font-size: 2.5rem;
+      /* Gradient text */
+      background: linear-gradient(45deg, #ffb700, #ffd700);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      user-select: none;
+      text-shadow: 0 0 10px #ffb700;
     }
 
-    /* Coins display */
+    /* === COINS DISPLAY === */
     #coins {
+      font-weight: 700;
+      color: #ffb700;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+      user-select: text;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
-      font-weight: 700;
-      font-size: 1.4rem;
-      color: #ffcc00;
-      margin-bottom: 20px;
-      user-select: text;
-      animation: pulseGlow 3s ease-in-out infinite alternate;
+      gap: 10px;
+      animation: coin-bounce 2s infinite;
     }
-    #coins svg.coin-icon {
-      width: 32px;
-      height: 32px;
-      animation: spin 3s linear infinite;
-      filter: drop-shadow(0 0 5px #ffcc00);
+
+    /* Coin icon spinning */
+    #coins .coin-icon {
+      width: 28px;
+      height: 28px;
+      animation: spin 2s linear infinite;
+      user-select: none;
     }
 
     @keyframes spin {
       0% { transform: rotate(0deg);}
       100% { transform: rotate(360deg);}
     }
-    @keyframes pulseGlow {
-      0% { text-shadow: 0 0 8px #ffcc00; }
-      100% { text-shadow: 0 0 20px #ffe066; }
+
+    @keyframes coin-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
     }
 
-    /* Live score */
-    #live-score {
-      font-weight: 700;
-      font-size: 1.3rem;
-      color: #28a745;
-      margin-bottom: 25px;
-      text-shadow: 0 0 12px #28a745;
-      user-select: none;
-    }
-
-    /* Progress bar */
+    /* === PROGRESS BAR === */
     #progress-bar-container {
       width: 100%;
-      height: 14px;
-      background: #222244;
-      border-radius: 12px;
-      box-shadow: inset 0 0 8px rgba(0,0,0,0.7);
-      margin-bottom: 30px;
+      background: #33334d;
+      border-radius: 10px;
+      height: 12px;
+      margin-bottom: 20px;
       overflow: hidden;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
     }
+
     #progress-bar {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #ffb700, #ffdd57);
-      border-radius: 12px;
-      box-shadow: 0 0 15px #ffd700;
-      transition: width 0.5s ease;
+      background: #ffb700;
+      border-radius: 10px;
+      transition: width 0.4s ease;
+      box-shadow: 0 0 12px #ffb700;
     }
 
-    /* Timer */
+    /* === TIMER === */
     #timer {
-      font-weight: 700;
-      font-size: 1.3rem;
-      margin-bottom: 30px;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      font-weight: 600;
       color: #ff6f61;
-      text-shadow: 0 0 10px #ff6f61;
+      text-shadow: 0 0 7px #ff6f61;
       user-select: none;
     }
 
-    /* Question */
+    /* === QUESTION === */
     #question {
-      font-weight: 700;
-      font-size: 1.5rem;
-      margin-bottom: 30px;
-      min-height: 80px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      min-height: 70px;
       line-height: 1.3;
-      text-shadow: 0 0 10px rgba(0,0,0,0.8);
-      user-select: text;
+      text-shadow: 0 0 7px rgba(0,0,0,0.7);
+      user-select: none;
     }
 
-    /* Answer buttons grid */
+    /* === ANSWER BUTTONS GRID === */
     .btn-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 18px;
-      margin-bottom: 30px;
-      transition: all 0.3s ease;
+      gap: 14px;
+      margin-top: 10px;
     }
 
-    /* Buttons */
+    /* === BUTTONS === */
     .btn {
-      background: #3a3a5a;
-      border-radius: 16px;
+      padding: 16px;
+      font-size: 17px;
       border: none;
-      padding: 18px;
-      font-size: 1.1rem;
-      font-weight: 600;
+      border-radius: 12px;
+      background: #3a3a5a;
       color: #fff;
       cursor: pointer;
-      box-shadow:
-        0 6px 12px rgba(0,0,0,0.4);
-      transition:
-        background-color 0.3s ease,
-        transform 0.15s ease,
-        box-shadow 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: background 0.3s ease, transform 0.15s ease;
       user-select: none;
       position: relative;
       overflow: hidden;
+      font-weight: 600;
+      outline-offset: 3px;
     }
 
     .btn:hover:not(:disabled),
@@ -189,105 +153,103 @@
       background: #ffb700;
       color: #1e1e2f;
       outline: none;
-      transform: scale(1.07);
-      box-shadow: 0 0 30px #ffb700;
+      transform: scale(1.05);
+      box-shadow: 0 0 18px #ffb700;
       z-index: 1;
     }
 
     .btn:disabled {
       cursor: default;
-      opacity: 0.6;
+      opacity: 0.7;
     }
 
+    /* Correct & Wrong answer styles */
     .correct {
       background-color: #28a745 !important;
       color: white !important;
-      box-shadow: 0 0 25px #28a745 !important;
+      box-shadow: 0 0 18px #28a745 !important;
     }
 
     .wrong {
       background-color: #dc3545 !important;
       color: white !important;
-      box-shadow: 0 0 25px #dc3545 !important;
+      box-shadow: 0 0 18px #dc3545 !important;
     }
 
-    /* Next button */
+    /* === NEXT BUTTON === */
     .next-btn {
+      margin-top: 25px;
+      display: none;
+      width: 100%;
       background: #ffb700;
       color: #1e1e2f;
       font-weight: 700;
-      font-size: 1.3rem;
-      padding: 18px;
-      border-radius: 16px;
-      width: 100%;
-      box-shadow: 0 0 30px #ffb700;
-      border: none;
-      cursor: pointer;
+      font-size: 1.2rem;
+      box-shadow: 0 0 18px #ffb700;
+      transition: background 0.3s ease;
       user-select: none;
-      transition: background-color 0.3s ease, transform 0.15s ease;
-      display: none;
+      border-radius: 12px;
     }
+
     .next-btn:hover,
     .next-btn:focus {
       background: #e6a700;
       outline: none;
-      transform: scale(1.07);
+      transform: scale(1.05);
     }
 
-    /* Results container */
+    /* === RESULT CONTAINER === */
     #result-container {
-      display: none;
       color: #fff;
-      user-select: none;
-      animation: fadeIn 0.7s ease forwards;
+      margin-top: 20px;
     }
-    #result-container.show {
-      display: block;
-    }
+
     #result-container h2 {
-      font-size: 2.4rem;
-      margin-bottom: 15px;
-      color: #ffd700;
-      text-shadow: 0 0 20px #ffd700;
+      font-size: 1.9rem;
+      margin-bottom: 10px;
+      text-shadow: 0 0 12px #ffb700;
+      user-select: none;
     }
+
     #result-container h3 {
-      font-size: 1.6rem;
-      margin-bottom: 35px;
-      color: #ffc107;
-      text-shadow: 0 0 15px #ffc107;
+      font-size: 1.4rem;
+      margin-bottom: 25px;
+      color: #ffb700;
+      text-shadow: 0 0 10px #ffb700;
+      user-select: none;
     }
+
+    /* === RESTART BUTTON === */
     #restart-btn {
       background: #28a745;
-      color: white;
       font-weight: 700;
-      font-size: 1.3rem;
-      padding: 18px;
-      border-radius: 16px;
+      font-size: 1.2rem;
+      box-shadow: 0 0 18px #28a745;
+      transition: background 0.3s ease;
       width: 100%;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 0 30px #28a745;
+      border-radius: 12px;
       user-select: none;
-      transition: background-color 0.3s ease, transform 0.15s ease;
     }
+
     #restart-btn:hover,
     #restart-btn:focus {
       background: #1e7e34;
       outline: none;
-      transform: scale(1.07);
+      transform: scale(1.05);
     }
 
-    /* Coin fly animation */
+    /* === COIN FLY ANIMATION === */
     .coin-fly {
       position: absolute;
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Gold_coin_icon.svg/1024px-Gold_coin_icon.svg.png') no-repeat center center / contain;
       pointer-events: none;
       animation: flyToCoin 0.8s forwards ease-in-out;
       z-index: 9999;
-      filter: drop-shadow(0 0 8px #ffcc00);
+      user-select: none;
     }
+
     @keyframes flyToCoin {
       0% {
         opacity: 1;
@@ -299,7 +261,7 @@
       }
     }
 
-    /* Confetti */
+    /* === CONFETTI === */
     .confetti {
       position: fixed;
       width: 10px;
@@ -311,9 +273,11 @@
       pointer-events: none;
       animation: confetti-fall linear forwards;
       border-radius: 3px;
-      box-shadow: 0 0 8px #ffb700;
+      box-shadow: 0 0 5px #ffb700;
       z-index: 10000;
+      user-select: none;
     }
+
     @keyframes confetti-fall {
       0% {
         transform: translateY(0) rotate(0deg);
@@ -325,225 +289,159 @@
       }
     }
 
-    /* Redeem button */
+    /* === REDEEM BUTTON === */
     #redeem-btn {
-      margin-bottom: 25px;
+      margin-top: 15px;
       background: #17a2b8;
-      font-weight: 800;
+      font-weight: 700;
       font-size: 1.1rem;
-      box-shadow: 0 0 30px #17a2b8;
+      box-shadow: 0 0 18px #17a2b8;
       color: #fff;
-      border-radius: 16px;
-      padding: 16px;
+      border-radius: 12px;
+      padding: 14px;
       cursor: pointer;
-      transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
+      transition: background 0.3s ease, transform 0.15s ease;
       user-select: none;
       width: 100%;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      border: none;
     }
     #redeem-btn:hover,
     #redeem-btn:focus {
       background: #117a8b;
       outline: none;
-      transform: scale(1.07);
-      box-shadow: 0 0 40px #17a2b8;
+      transform: scale(1.05);
+    }
+    #redeem-btn:hover::after {
+      content: " →";
+      animation: arrow-bounce 0.5s infinite;
+    }
+    @keyframes arrow-bounce {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(5px); }
     }
 
-    /* Redeem Modal */
+    /* === REDEEM MODAL === */
     #redeem-modal {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.7);
       display: none;
       justify-content: center;
       align-items: center;
       z-index: 20000;
-      backdrop-filter: blur(6px);
+      user-select: none;
     }
+
     #redeem-modal.active {
       display: flex;
     }
+
     #redeem-modal .modal-content {
       background: #2c2c44;
-      border-radius: 20px;
-      padding: 30px 35px;
-      max-width: 400px;
+      border-radius: 15px;
+      padding: 25px 30px;
+      max-width: 380px;
       width: 90%;
       text-align: center;
-      box-shadow: 0 0 40px rgba(255, 183, 0, 0.9);
+      box-shadow: 0 0 30px rgba(255, 183, 0, 0.7);
       color: #fff;
+      outline: none;
+    }
+
+    #redeem-modal h2 {
+      margin-bottom: 15px;
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: #ffb700;
+      text-shadow: 0 0 12px #ffb700;
       user-select: none;
     }
-    #redeem-modal h2 {
-      margin-bottom: 20px;
-      font-weight: 800;
-      font-size: 2rem;
-      color: #ffb700;
-      text-shadow: 0 0 15px #ffb700;
-      letter-spacing: 0.05em;
-    }
+
     #redeem-modal p {
-      font-size: 1.1rem;
-      margin-bottom: 25px;
-      color: #ffd966;
-      text-shadow: 0 0 8px #ffd966;
-      font-style: italic;
+      margin-bottom: 20px;
+      font-size: 1rem;
+      user-select: none;
     }
+
     #redeem-modal ul {
       list-style: none;
       padding: 0;
-      margin: 15px 0 30px;
+      margin: 0 0 25px;
       text-align: left;
       max-height: 220px;
       overflow-y: auto;
+      user-select: none;
     }
+
     #redeem-modal ul li {
       background: #444466;
-      margin-bottom: 14px;
-      padding: 15px 20px;
-      border-radius: 14px;
+      margin-bottom: 12px;
+      padding: 14px 18px;
+      border-radius: 12px;
       cursor: pointer;
-      transition: background 0.3s ease, color 0.3s ease;
+      transition: background 0.3s ease;
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-weight: 600;
-      letter-spacing: 0.03em;
+      font-size: 1rem;
+      outline-offset: 3px;
     }
+
     #redeem-modal ul li:hover,
     #redeem-modal ul li:focus {
       background: #ffb700;
       color: #1e1e2f;
       outline: none;
-      box-shadow: 0 0 15px #ffb700;
-      transform: scale(1.03);
-      font-weight: 700;
     }
+
     #redeem-modal ul li span.cost {
       font-weight: 700;
       color: #fff;
       background: #1e1e2f;
-      padding: 5px 12px;
-      border-radius: 10px;
-      font-size: 1rem;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.95rem;
       min-width: 50px;
       text-align: center;
       user-select: none;
-      box-shadow: 0 0 10px rgba(0,0,0,0.7);
     }
+
+    /* Reward preview badge */
+    .reward-preview {
+      width: 36px;
+      height: 36px;
+      background: gold;
+      border-radius: 50%;
+      display: inline-block;
+      margin-left: 10px;
+      box-shadow: 0 0 12px gold;
+      user-select: none;
+    }
+
+    /* === CLOSE MODAL BUTTON === */
     #close-modal-btn {
       background: #dc3545;
       border: none;
       color: white;
-      font-weight: 800;
-      padding: 14px 25px;
-      border-radius: 14px;
+      font-weight: 700;
+      padding: 12px 24px;
+      border-radius: 12px;
       cursor: pointer;
       font-size: 1.1rem;
-      transition: background 0.3s ease, transform 0.15s ease;
+      transition: background 0.3s ease;
       margin-top: 10px;
       width: 100%;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      box-shadow: 0 0 25px #dc3545;
+      user-select: none;
     }
+
     #close-modal-btn:hover,
     #close-modal-btn:focus {
       background: #a71d2a;
       outline: none;
-      transform: scale(1.07);
-      box-shadow: 0 0 35px #dc3545;
+      transform: scale(1.05);
     }
 
-    /* Share Progress Modal */
-    #share-progress-modal {
-      display: none;
-      position: fixed;
-      top:0; left:0; right:0; bottom:0;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(6px);
-      z-index: 30000;
-      justify-content: center;
-      align-items: center;
-    }
-    #share-progress-modal.active {
-      display: flex;
-    }
-    #share-progress-modal .modal-content {
-      background: #2c2c44;
-      border-radius: 20px;
-      padding: 30px 35px;
-      max-width: 400px;
-      width: 90%;
-      text-align: center;
-      color: #fff;
-      box-shadow: 0 0 40px rgba(255, 183, 0, 0.9);
-      user-select: none;
-    }
-    #share-progress-modal h2 {
-      font-weight: 800;
-      font-size: 2rem;
-      color: #ffb700;
-      margin-bottom: 20px;
-      text-shadow: 0 0 15px #ffb700;
-      letter-spacing: 0.05em;
-    }
-    #share-progress-modal p {
-      font-size: 1.1rem;
-      margin-bottom: 25px;
-      color: #ffd966;
-      text-shadow: 0 0 8px #ffd966;
-      font-style: italic;
-    }
-    #share-progress-modal .share-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-    #share-progress-modal button.share-btn {
-      border: none;
-      border-radius: 8px;
-      padding: 10px 18px;
-      color: #fff;
-      cursor: pointer;
-      font-weight: 700;
-      transition: filter 0.3s ease;
-    }
-    #share-progress-modal button.share-btn:hover,
-    #share-progress-modal button.share-btn:focus {
-      filter: brightness(1.15);
-      outline: none;
-    }
-    #modal-share-whatsapp { background:#25D366; }
-    #modal-share-facebook { background:#3b5998; }
-    #modal-share-twitter { background:#1DA1F2; }
-    #close-share-modal-btn {
-      background:#dc3545;
-      border:none;
-      color:white;
-      font-weight:800;
-      padding: 12px 25px;
-      border-radius: 14px;
-      cursor:pointer;
-      font-size:1.1rem;
-      letter-spacing:0.05em;
-      text-transform: uppercase;
-      box-shadow: 0 0 25px #dc3545;
-      transition: background 0.3s ease, transform 0.15s ease;
-      width: 100%;
-    }
-    #close-share-modal-btn:hover,
-    #close-share-modal-btn:focus {
-      background: #a71d2a;
-      outline: none;
-      transform: scale(1.07);
-      box-shadow: 0 0 35px #dc3545;
-    }
-
-    /* Notification */
+    /* === NOTIFICATION === */
     #notification {
       position: fixed;
       bottom: 20px;
@@ -551,217 +449,72 @@
       transform: translateX(-50%);
       background: #28a745;
       color: white;
-      padding: 14px 28px;
-      border-radius: 30px;
-      box-shadow: 0 0 25px #28a745;
+      padding: 14px 26px;
+      border-radius: 24px;
+      box-shadow: 0 0 18px #28a745;
       font-weight: 700;
-      font-size: 1.1rem;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.4s ease;
       z-index: 30000;
-      letter-spacing: 0.03em;
       user-select: none;
-      text-shadow: 0 0 8px rgba(0,0,0,0.3);
+      font-size: 1.1rem;
+      max-width: 90vw;
+      text-align: center;
     }
+
     #notification.show {
       opacity: 1;
       pointer-events: auto;
     }
 
-    /* Responsive */
-    @media (max-width: 480px) {
-      body {
-        padding: 8px;
-      }
-      .quiz-container {
-        max-width: 100%;
-        padding: 20px 20px 30px;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(255, 183, 0, 0.5);
-      }
-      h1 {
-        font-size: 1.8rem;
-        letter-spacing: 1px;
-      }
-      h2.subtitle {
-        font-size: 1rem;
-        margin-bottom: 15px;
-      }
-      #welcome-msg {
-        font-size: 0.9rem;
-        margin-bottom: 20px;
-      }
-      #coins {
-        font-size: 1.1rem;
-        gap: 6px;
-      }
-      #coins .coin-icon {
-        width: 22px;
-        height: 22px;
-      }
-      #redeem-btn {
-        font-size: 1rem;
-        padding: 12px;
-        border-radius: 12px;
-      }
-      #progress-bar-container {
-        height: 8px;
-        margin-bottom: 20px;
-      }
-      #timer {
-        font-size: 1rem;
-        margin-bottom: 15px;
-      }
-      #question {
-        font-size: 1.1rem;
-        min-height: 60px;
-      }
-      .btn-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
-      .btn {
-        font-size: 16px;
-        padding: 14px;
-        border-radius: 12px;
-      }
-      .next-btn {
-        font-size: 1rem;
-        padding: 14px;
-        border-radius: 12px;
-        margin-top: 20px;
-      }
-      #result-container h2 {
-        font-size: 1.5rem;
-      }
-      #result-container h3 {
-        font-size: 1.1rem;
-        margin-bottom: 20px;
-      }
-      #restart-btn {
-        font-size: 1rem;
-        padding: 14px;
-        border-radius: 12px;
-      }
-      #redeem-modal .modal-content {
-        max-width: 95%;
-        padding: 20px 25px;
-        border-radius: 15px;
-      }
-      #redeem-modal h2 {
-        font-size: 1.5rem;
-      }
-      #redeem-modal p {
-        font-size: 1rem;
-      }
-      #redeem-modal ul li {
-        padding: 12px 15px;
-        font-size: 0.95rem;
-      }
-      #close-modal-btn {
-        font-size: 1rem;
-        padding: 12px 20px;
-        border-radius: 12px;
-      }
-      #notification {
-        font-size: 1rem;
-        padding: 10px 20px;
-        border-radius: 18px;
-      }
+    /* Scrollbar for rewards list */
+    #rewards-list::-webkit-scrollbar {
+      width: 8px;
     }
-
-    @media (max-width: 768px) {
-      .quiz-container {
-        max-width: 90%;
-        padding: 25px 30px;
-      }
-      #question {
-        font-size: 1.2rem;
-      }
-      .btn {
-        font-size: 16px;
-        padding: 16px;
-      }
-    }
-
-    @media (min-width: 1024px) {
-      .quiz-container {
-        max-width: 600px;
-        padding: 40px 50px;
-      }
-      #question {
-        font-size: 1.6rem;
-      }
-      .btn {
-        font-size: 20px;
-        padding: 20px;
-      }
+    #rewards-list::-webkit-scrollbar-thumb {
+      background-color: #ffb700;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
   <div class="quiz-container" role="main" aria-label="Fun Quiz Game">
     <h1>Fun Quiz Game</h1>
-    <h2 class="subtitle">Challenge Your Brain & Earn Rewards!</h2>
-    <div id="welcome-msg">Answer questions correctly to collect coins and unlock awesome rewards!</div>
-
-    <div id="coins" aria-live="polite" aria-atomic="true" title="Coins collected">
-      <svg class="coin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#ffb700" aria-hidden="true">
+    <div id="coins" aria-live="polite" aria-atomic="true" title="Coins collected" tabindex="0">
+      <svg class="coin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#ffb700" aria-hidden="true" focusable="false">
         <circle cx="32" cy="32" r="30" stroke="#d4af37" stroke-width="4"/>
         <circle cx="32" cy="32" r="20" fill="#ffd700"/>
         <circle cx="32" cy="32" r="10" stroke="#d4af37" stroke-width="2" fill="none"/>
       </svg>
       Coins: 0
     </div>
-
-    <div id="live-score" aria-live="polite" aria-atomic="true">
-      Score: 0
-    </div>
-
-    <button id="redeem-btn" aria-label="Redeem your coins">Redeem Your Coins & Unlock Rewards</button>
-
+    <button id="redeem-btn" aria-label="Redeem your coins" title="Redeem your coins for rewards">Redeem Coins</button>
     <div id="progress-bar-container" aria-hidden="true">
       <div id="progress-bar"></div>
     </div>
-
-    <div id="timer" aria-live="polite" aria-atomic="true" aria-label="Time remaining">Time left: 15s</div>
-
+    <div id="timer" aria-live="polite" aria-atomic="true" aria-label="Time remaining" tabindex="0">Time left: 15s</div>
     <div id="question-container">
       <div id="question" tabindex="0">Question text</div>
       <div id="answer-buttons" class="btn-grid" role="list"></div>
     </div>
-
-    <button id="next-btn" class="next-btn btn" aria-label="Next question">Next Question →</button>
-
-    <div id="result-container" class="hide" role="region" aria-live="polite">
-      <h2>Awesome Job! Your Score: <span id="score"></span></h2>
+    <button id="next-btn" class="next-btn btn" aria-label="Next question">Next</button>
+    <div id="result-container" class="hide" role="region" aria-live="polite" tabindex="0">
+      <h2>Your Score: <span id="score"></span></h2>
       <h3>Total Coins Earned This Round: <span id="final-coins"></span></h3>
-      <button id="restart-btn" class="btn" aria-label="Restart Quiz">Play Again 🔄</button>
+      <button id="restart-btn" class="btn" aria-label="Restart Quiz">Restart Quiz</button>
     </div>
   </div>
 
   <!-- Redeem Modal -->
-  <div id="redeem-modal" role="dialog" aria-modal="true" aria-labelledby="redeem-title" aria-describedby="redeem-desc">
+  <div id="redeem-modal" role="dialog" aria-modal="true" aria-labelledby="redeem-title" aria-describedby="redeem-desc" tabindex="-1">
     <div class="modal-content" tabindex="0">
       <h2 id="redeem-title">Redeem Your Coins</h2>
-      <p id="redeem-desc">Select a reward to redeem your hard-earned coins and enhance your quiz experience!</p>
-      <ul id="rewards-list" tabindex="0"></ul>
+      <p id="redeem-desc">Select a reward to redeem your coins!</p>
+      <ul id="rewards-list" tabindex="0">
+        <!-- Rewards will be inserted here dynamically -->
+      </ul>
       <button id="close-modal-btn" aria-label="Close redeem modal">Close</button>
-    </div>
-  </div>
-
-  <!-- Share Progress Modal -->
-  <div id="share-progress-modal" role="dialog" aria-modal="true" aria-labelledby="share-progress-title" aria-describedby="share-progress-desc">
-    <div class="modal-content">
-      <h2 id="share-progress-title">Share Your Progress!</h2>
-      <p id="share-progress-desc">Let your friends know how well you did!</p>
-      <div class="share-buttons">
-        <button id="modal-share-whatsapp" class="share-btn" aria-label="Share on WhatsApp">WhatsApp</button>
-        <button id="modal-share-facebook" class="share-btn" aria-label="Share on Facebook">Facebook</button>
-        <button id="modal-share-twitter" class="share-btn" aria-label="Share on Twitter">Twitter</button>
-      </div>
-      <button id="close-share-modal-btn" aria-label="Close share modal">Close</button>
     </div>
   </div>
 
@@ -769,14 +522,431 @@
   <div id="notification" role="alert" aria-live="assertive"></div>
 
   <script>
-    // [Your full JavaScript code with all previous features and the expanded questions array]
-    // Including:
-    // - Questions array with 15 fun questions
-    // - Game logic (startQuiz, showQuestion, selectAnswer, etc.)
-    // - Redeem modal logic
-    // - Share progress modal logic
-    // - Animations and event handlers
-    // For brevity, please use the full JavaScript code from previous completions with the updated questions array.
+    // === QUESTIONS DATA ===
+    const questions = [
+      {
+        question: "What is the capital of France?",
+        answers: [
+          { text: "Paris", correct: true },
+          { text: "London", correct: false },
+          { text: "Berlin", correct: false },
+          { text: "Madrid", correct: false }
+        ]
+      },
+      {
+        question: "Which planet is known as the Red Planet?",
+        answers: [
+          { text: "Venus", correct: false },
+          { text: "Mars", correct: true },
+          { text: "Jupiter", correct: false },
+          { text: "Saturn", correct: false }
+        ]
+      },
+      {
+        question: "Who wrote 'Hamlet'?",
+        answers: [
+          { text: "Charles Dickens", correct: false },
+          { text: "William Shakespeare", correct: true },
+          { text: "Leo Tolstoy", correct: false },
+          { text: "Mark Twain", correct: false }
+        ]
+      },
+      {
+        question: "What is the smallest prime number?",
+        answers: [
+          { text: "1", correct: false },
+          { text: "2", correct: true },
+          { text: "3", correct: false },
+          { text: "0", correct: false }
+        ]
+      },
+      {
+        question: "Which language is primarily used for Android app development?",
+        answers: [
+          { text: "Swift", correct: false },
+          { text: "Kotlin", correct: true },
+          { text: "JavaScript", correct: false },
+          { text: "Ruby", correct: false }
+        ]
+      }
+    ];
+
+    // === REWARDS DATA ===
+    const rewards = [
+      { id: 1, name: "Golden Badge", cost: 50, description: "Show off your achievement with a shiny badge!" },
+      { id: 2, name: "Extra 30s Timer", cost: 100, description: "Get extra time on each question for your next quiz." },
+      { id: 3, name: "Secret Quiz Theme", cost: 150, description: "Unlock a cool secret theme for the quiz." },
+      { id: 4, name: "Custom Avatar", cost: 200, description: "Unlock a custom avatar for your profile." }
+    ];
+
+    // === DOM ELEMENTS ===
+    const questionContainer = document.getElementById('question-container');
+    const questionElement = document.getElementById('question');
+    const answerButtons = document.getElementById('answer-buttons');
+    const nextButton = document.getElementById('next-btn');
+    const resultContainer = document.getElementById('result-container');
+    const scoreElement = document.getElementById('score');
+    const restartButton = document.getElementById('restart-btn');
+    const coinsElement = document.getElementById('coins');
+    const finalCoinsElement = document.getElementById('final-coins');
+    const progressBar = document.getElementById('progress-bar');
+    const timerElement = document.getElementById('timer');
+    const redeemBtn = document.getElementById('redeem-btn');
+    const redeemModal = document.getElementById('redeem-modal');
+    const rewardsList = document.getElementById('rewards-list');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const notification = document.getElementById('notification');
+    const quizContainer = document.querySelector('.quiz-container');
+    const body = document.body;
+
+    // === GAME VARIABLES ===
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let coins = 0;
+    const coinsPerCorrect = 10;
+    const questionTimeDefault = 15; // seconds per question
+    let questionTime = questionTimeDefault; // can be extended by rewards
+    let timeLeft = questionTime;
+    let timerInterval = null;
+
+    // === LOAD COINS FROM LOCAL STORAGE ===
+    function loadCoins() {
+      const stored = localStorage.getItem('quizCoins');
+      coins = stored ? parseInt(stored, 10) : 0;
+    }
+
+    // === SAVE COINS TO LOCAL STORAGE ===
+    function saveCoins() {
+      localStorage.setItem('quizCoins', coins);
+    }
+
+    // === SOUNDS ===
+    const soundCorrect = new Audio('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg');
+    const soundWrong = new Audio('https://actions.google.com/sounds/v1/cartoon/boing.ogg');
+    const soundClick = new Audio('https://actions.google.com/sounds/v1/ui/click.ogg');
+
+    // === INITIALIZE GAME ===
+    function startQuiz() {
+      currentQuestionIndex = 0;
+      score = 0;
+      questionTime = questionTimeDefault; // reset timer (can be extended by reward)
+      updateCoinsDisplay();
+      resultContainer.classList.add('hide');
+      nextButton.style.display = 'none';
+      questionContainer.classList.remove('hide');
+      progressBar.style.width = '0%';
+      showQuestion(questions[currentQuestionIndex]);
+      resetTimer();
+      startTimer();
+      // Reset theme if secret theme was active
+      body.style.background = 'linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)';
+    }
+
+    // === SHOW QUESTION & ANSWERS ===
+    function showQuestion(question) {
+      questionElement.innerText = question.question;
+      answerButtons.innerHTML = '';
+      nextButton.style.display = 'none';
+
+      question.answers.forEach(answer => {
+        const button = document.createElement('button');
+        button.innerText = answer.text;
+        button.classList.add('btn');
+        button.setAttribute('role', 'listitem');
+        button.setAttribute('tabindex', '0');
+        button.addEventListener('click', () => selectAnswer(button, answer.correct));
+        answerButtons.appendChild(button);
+      });
+
+      updateProgressBar();
+      resetTimer();
+      startTimer();
+    }
+
+    // === UPDATE PROGRESS BAR ===
+    function updateProgressBar() {
+      const progressPercent = ((currentQuestionIndex) / questions.length) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+    }
+
+    // === SELECT ANSWER LOGIC ===
+    function selectAnswer(selectedButton, correct) {
+      stopTimer();
+
+      if (correct) {
+        selectedButton.classList.add('correct');
+        score++;
+        coins += coinsPerCorrect;
+        saveCoins();
+        updateCoinsDisplay();
+        playSound(soundCorrect);
+        animateCoin(selectedButton);
+      } else {
+        selectedButton.classList.add('wrong');
+        playSound(soundWrong);
+      }
+
+      // Disable all buttons and highlight correct answers
+      Array.from(answerButtons.children).forEach(button => {
+        button.disabled = true;
+        if (button !== selectedButton) {
+          const isCorrect = questions[currentQuestionIndex].answers.find(a => a.text === button.innerText).correct;
+          if (isCorrect) button.classList.add('correct');
+        }
+      });
+
+      nextButton.style.display = 'inline-block';
+      nextButton.focus();
+    }
+
+    // === UPDATE COINS DISPLAY ===
+    function updateCoinsDisplay() {
+      coinsElement.innerHTML = `
+        <svg class="coin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#ffb700" aria-hidden="true" focusable="false">
+          <circle cx="32" cy="32" r="30" stroke="#d4af37" stroke-width="4"/>
+          <circle cx="32" cy="32" r="20" fill="#ffd700"/>
+          <circle cx="32" cy="32" r="10" stroke="#d4af37" stroke-width="2" fill="none"/>
+        </svg>
+        Coins: ${coins}
+      `;
+    }
+
+    // === COIN FLY ANIMATION ===
+    function animateCoin(button) {
+      const coin = document.createElement('div');
+      coin.classList.add('coin-fly');
+      document.body.appendChild(coin);
+
+      const btnRect = button.getBoundingClientRect();
+      const coinsRect = coinsElement.getBoundingClientRect();
+
+      // Position the coin over the clicked button
+      coin.style.left = `${btnRect.left + btnRect.width / 2 - 15}px`;
+      coin.style.top = `${btnRect.top + btnRect.height / 2 - 15}px`;
+
+      // Animate to coins display
+      coin.animate([
+        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+        { transform: `translate(${coinsRect.left - btnRect.left}px, ${coinsRect.top - btnRect.top}px) scale(0.2)`, opacity: 0 }
+      ], {
+        duration: 800,
+        easing: 'ease-in-out'
+      });
+
+      setTimeout(() => {
+        coin.remove();
+      }, 800);
+    }
+
+    // === PLAY SOUND HELPER ===
+    function playSound(sound) {
+      sound.currentTime = 0;
+      sound.play().catch(() => {}); // Catch promise rejection if user hasn't interacted yet
+    }
+
+    // === NEXT QUESTION BUTTON HANDLER ===
+    nextButton.addEventListener('click', () => {
+      playSound(soundClick);
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length) {
+        showQuestion(questions[currentQuestionIndex]);
+      } else {
+        showResults();
+      }
+    });
+
+    // === RESTART QUIZ BUTTON HANDLER ===
+    restartButton.addEventListener('click', () => {
+      playSound(soundClick);
+      startQuiz();
+    });
+
+    // === SHOW FINAL RESULTS WITH CONFETTI ===
+    function showResults() {
+      questionContainer.classList.add('hide');
+      nextButton.style.display = 'none';
+      progressBar.style.width = '100%';
+      timerElement.innerText = '';
+      resultContainer.classList.remove('hide');
+      scoreElement.innerText = `${score} / ${questions.length}`;
+      finalCoinsElement.innerText = coins;
+      restartButton.focus();
+      launchConfetti();
+    }
+
+    // === TIMER FUNCTIONS ===
+    function startTimer() {
+      timeLeft = questionTime;
+      timerElement.innerText = `Time left: ${timeLeft}s`;
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerElement.innerText = `Time left: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          timerElement.innerText = 'Time is up!';
+          disableAnswers();
+          nextButton.style.display = 'inline-block';
+          nextButton.focus();
+          playSound(soundWrong);
+          revealCorrectAnswer();
+        }
+      }, 1000);
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timerElement.innerText = `Time left: ${questionTime}s`;
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
+
+    function disableAnswers() {
+      Array.from(answerButtons.children).forEach(button => button.disabled = true);
+    }
+
+    function revealCorrectAnswer() {
+      Array.from(answerButtons.children).forEach(button => {
+        const isCorrect = questions[currentQuestionIndex].answers.find(a => a.text === button.innerText).correct;
+        if (isCorrect) button.classList.add('correct');
+      });
+    }
+
+    // === CONFETTI EFFECT ON QUIZ COMPLETION ===
+    function launchConfetti() {
+      const confettiCount = 100;
+      for (let i = 0; i < confettiCount; i++) {
+        createConfetti();
+      }
+    }
+
+    function createConfetti() {
+      const confetti = document.createElement('div');
+      confetti.classList.add('confetti');
+      confetti.style.left = `${Math.random() * 100}vw`;
+      confetti.style.animationDuration = `${2 + Math.random() * 3}s`;
+      confetti.style.backgroundColor = randomColor();
+      confetti.style.width = confetti.style.height = `${5 + Math.random() * 5}px`;
+      confetti.style.borderRadius = `${Math.random() > 0.5 ? 50 : 3}%`;
+      document.body.appendChild(confetti);
+
+      confetti.addEventListener('animationend', () => {
+        confetti.remove();
+      });
+    }
+
+    function randomColor() {
+      const colors = ['#ffb700', '#ff6f61', '#28a745', '#17a2b8', '#ffc107', '#e83e8c'];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    // === REDEEM MODAL LOGIC ===
+    redeemBtn.addEventListener('click', () => {
+      populateRewards();
+      redeemModal.classList.add('active');
+      redeemModal.querySelector('.modal-content').focus();
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      redeemModal.classList.remove('active');
+      redeemBtn.focus();
+    });
+
+    // Close modal on outside click
+    redeemModal.addEventListener('click', (e) => {
+      if (e.target === redeemModal) {
+        redeemModal.classList.remove('active');
+        redeemBtn.focus();
+      }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && redeemModal.classList.contains('active')) {
+        redeemModal.classList.remove('active');
+        redeemBtn.focus();
+      }
+    });
+
+    // Populate rewards list dynamically
+    function populateRewards() {
+      rewardsList.innerHTML = '';
+      rewards.forEach(reward => {
+        const li = document.createElement('li');
+        li.tabIndex = 0;
+        li.setAttribute('role', 'button');
+        li.setAttribute('aria-label', `${reward.name}, costs ${reward.cost} coins. ${reward.description}`);
+        li.innerHTML = `
+          <span>${reward.name}</span>
+          <span class="cost">${reward.cost} 🪙</span>
+        `;
+        li.addEventListener('click', () => redeemReward(reward));
+        li.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            redeemReward(reward);
+          }
+        });
+        rewardsList.appendChild(li);
+      });
+    }
+
+    // Redeem reward function
+    function redeemReward(reward) {
+      if (coins >= reward.cost) {
+        coins -= reward.cost;
+        saveCoins();
+        updateCoinsDisplay();
+        showNotification(`You redeemed: ${reward.name}! 🎉`);
+
+        // Implement reward effects here:
+        switch (reward.id) {
+          case 2:
+            // Extra 30s timer for next quizzes
+            questionTime = questionTimeDefault + 30;
+            showNotification("Extra 30 seconds added to each question for next quizzes!");
+            break;
+          case 3:
+            // Secret quiz theme unlock
+            body.style.background = 'linear-gradient(135deg, #ff6f61 0%, #ffb700 100%)';
+            showNotification("Secret quiz theme unlocked! Enjoy the new look!");
+            break;
+          case 1:
+            // Golden Badge - just a message here, could be extended
+            showNotification("Golden Badge awarded! Wear it with pride!");
+            break;
+          case 4:
+            // Custom Avatar - placeholder message
+            showNotification("Custom Avatar unlocked! (Feature coming soon!)");
+            break;
+          default:
+            break;
+        }
+
+        redeemModal.classList.remove('active');
+        redeemBtn.focus();
+      } else {
+        showNotification("Not enough coins to redeem this reward.", true);
+      }
+    }
+
+    // === NOTIFICATION HELPER ===
+    function showNotification(message, isError = false) {
+      notification.textContent = message;
+      notification.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+      notification.classList.add('show');
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3500);
+    }
+
+    // === INITIALIZE ON PAGE LOAD ===
+    window.onload = () => {
+      loadCoins();
+      updateCoinsDisplay();
+      startQuiz();
+    };
   </script>
 </body>
 </html>
