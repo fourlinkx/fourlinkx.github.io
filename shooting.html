@@ -2,98 +2,89 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Modern Shooting Game - Exciting Arcade Shooter</title>
-  <meta name="description" content="Play Modern Shooting Game, an exciting arcade shooter with coins, hearts, rapid shooting, and social sharing. Enjoy immersive gameplay with sound effects and vibrant backgrounds." />
-  <meta name="keywords" content="shooting game, arcade game, HTML5 game, online game, coins, hearts, rapid shoot, social sharing" />
-  <meta name="author" content="YourName or YourCompany" />
-  <meta name="robots" content="index, follow" />
-  <meta property="og:title" content="Modern Shooting Game - Exciting Arcade Shooter" />
-  <meta property="og:description" content="Play Modern Shooting Game, an exciting arcade shooter with coins, hearts, rapid shooting, and social sharing." />
-  <meta property="og:type" content="game" />
-  <meta property="og:url" content="https://yourgameurl.example.com" />
-  <meta property="og:image" content="https://yourgameurl.example.com/thumbnail.png" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Modern Shooting Game - Exciting Arcade Shooter" />
-  <meta name="twitter:description" content="Play Modern Shooting Game, an exciting arcade shooter with coins, hearts, rapid shooting, and social sharing." />
-  <meta name="twitter:image" content="https://yourgameurl.example.com/thumbnail.png" />
-
-  <!-- Favicon as inline SVG data URI -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2300bfff'/%3E%3Ccircle cx='32' cy='32' r='20' fill='%2300f6ff'/%3E%3C/svg%3E" />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Modern Shooting Game - Responsive & Dynamic</title>
+  <meta name="description" content="Play Modern Shooting Game, an exciting responsive arcade shooter with coins, hearts, power-ups, combos, and social sharing." />
   <style>
     /* Reset and base */
     * {
       box-sizing: border-box;
     }
-    body {
-      margin: 0;
+    body, html {
+      margin: 0; padding: 0;
+      height: 100%;
       background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
       color: #eee;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      overflow: hidden;
-      user-select: none;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
-      padding: 10px 0;
+      user-select: none;
+      overflow: hidden;
     }
-
-    /* Scoreboard */
     #scoreboard {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       font-weight: 600;
       text-shadow: 0 0 8px #00f6ff;
-      margin-bottom: 10px;
+      margin: 10px 0 5px;
       letter-spacing: 0.05em;
       display: flex;
       align-items: center;
       gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
-    #scoreboard .coins {
+    #scoreboard .coins, #scoreboard .hearts, #scoreboard #levelDisplay {
       display: flex;
       align-items: center;
       gap: 6px;
+    }
+    #scoreboard svg {
+      width: 24px; height: 24px;
+      filter: drop-shadow(0 0 2px currentColor);
     }
     #scoreboard .coins svg {
-      width: 24px;
-      height: 24px;
       fill: gold;
-      filter: drop-shadow(0 0 2px #ffd700);
-    }
-    #scoreboard .hearts {
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
     #scoreboard .hearts svg {
-      width: 24px;
-      height: 24px;
       fill: #ff4b4b;
-      filter: drop-shadow(0 0 2px #ff0000);
     }
-
-    /* Canvas styling */
+    #levelDisplay {
+      font-size: 1.3rem;
+      color: #00f6ff;
+      text-shadow: 0 0 8px #00f6ff;
+    }
     #gameCanvas {
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
       border-radius: 15px;
       box-shadow:
         0 0 15px #00f6ff88,
         inset 0 0 20px #00f6ff44;
-      display: block;
-      margin: 0 auto;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       touch-action: none;
       max-width: 100vw;
-      width: 480px;
-      height: 640px;
-      image-rendering: optimizeSpeed; /* speed optimization */
-      image-rendering: pixelated;
+      width: 90vw;
+      max-height: 90vh;
+      height: auto;
+      aspect-ratio: 3 / 4; /* Maintain 480x640 ratio */
+      display: block;
     }
-
-    /* Game Over Screen */
+    #comboText {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2rem;
+      font-weight: 700;
+      color: #00f6ff;
+      text-shadow: 0 0 10px #00f6ff;
+      pointer-events: none;
+      user-select: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 50;
+    }
     #gameOverScreen {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -103,7 +94,7 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      font-size: 2.5rem;
+      font-size: 2rem;
       font-weight: 700;
       z-index: 100;
       text-shadow: 0 0 15px #00f6ff;
@@ -111,9 +102,10 @@
       padding: 20px;
       text-align: center;
     }
-    #gameOverScreen #finalScore {
+    #gameOverScreen #finalScore,
+    #gameOverScreen #highScoreDisplay {
       margin-top: 15px;
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 500;
       color: #a0e9ff;
       text-shadow: none;
@@ -150,50 +142,34 @@
       transform: scale(0.95);
       box-shadow: none;
     }
-    #shareFacebook {
-      background: #3b5998;
-      color: #fff;
-    }
-    #shareFacebook:hover {
-      background: #2d4373;
-    }
-    #shareTwitter {
-      background: #1da1f2;
-      color: #fff;
-    }
-    #shareTwitter:hover {
-      background: #0d95e8;
-    }
-    #shareWhatsApp {
-      background: #25d366;
-      color: #fff;
-    }
-    #shareWhatsApp:hover {
-      background: #1da851;
-    }
+    #shareFacebook { background: #3b5998; color: #fff; }
+    #shareFacebook:hover { background: #2d4373; }
+    #shareTwitter { background: #1da1f2; color: #fff; }
+    #shareTwitter:hover { background: #0d95e8; }
+    #shareWhatsApp { background: #25d366; color: #fff; }
+    #shareWhatsApp:hover { background: #1da851; }
 
     /* Mobile Controls */
     #mobileControls {
       position: fixed;
       bottom: 20px;
       width: 100%;
+      max-width: 480px;
       display: flex;
       justify-content: space-around;
       pointer-events: auto;
       user-select: none;
       z-index: 20;
-      padding: 0 15px;
-      max-width: 480px;
+      padding: 0 10px;
       margin: 0 auto;
       left: 50%;
       transform: translateX(-50%);
     }
-
     .controlBtn {
       background: linear-gradient(145deg, #0a1a2b, #112c4a);
       border: none;
       color: #00f6ff;
-      font-size: 2.8rem;
+      font-size: 2.4rem;
       padding: 18px 28px;
       border-radius: 50%;
       box-shadow:
@@ -205,17 +181,15 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 75px;
-      height: 75px;
+      width: 70px;
+      height: 70px;
       text-shadow: 0 0 8px #00f6ff88;
       font-weight: 700;
-      user-select: none;
     }
-
     .controlBtn.shootBtn {
       border-radius: 40px;
-      width: 130px;
-      font-size: 1.6rem;
+      width: 120px;
+      font-size: 1.5rem;
       padding: 18px 0;
       font-weight: 800;
       letter-spacing: 0.05em;
@@ -226,7 +200,6 @@
       color: #fff;
       text-shadow: 0 0 12px #ff3b3b;
     }
-
     .controlBtn:hover {
       box-shadow:
         0 0 25px #00f6ff,
@@ -234,7 +207,6 @@
       color: #a0f9ff;
       transform: scale(1.1);
     }
-
     .controlBtn.shootBtn:hover {
       box-shadow:
         0 0 30px #ff6b6b,
@@ -242,32 +214,45 @@
       color: #fff;
       transform: scale(1.05);
     }
-
     .controlBtn:active {
       transform: scale(0.9);
       box-shadow: none;
       color: #00c4ff;
     }
 
-    /* Responsive canvas width */
+    /* Responsive adjustments */
     @media (max-width: 520px) {
+      #scoreboard {
+        font-size: 1.4rem;
+        gap: 12px;
+      }
       #gameCanvas {
         width: 100vw;
         height: calc(100vw * (640 / 480));
       }
       #mobileControls {
         max-width: 100vw;
-        padding: 0 10px;
+        padding: 0 5px;
       }
       .controlBtn {
-        width: 60px;
-        height: 60px;
-        font-size: 2.2rem;
+        width: 55px;
+        height: 55px;
+        font-size: 2rem;
       }
       .controlBtn.shootBtn {
-        width: 110px;
-        font-size: 1.4rem;
+        width: 100px;
+        font-size: 1.2rem;
       }
+      #comboText {
+        font-size: 1.5rem;
+        top: 60px;
+      }
+    }
+
+    /* Focus outlines for accessibility */
+    button:focus {
+      outline: 2px solid #00f6ff;
+      outline-offset: 2px;
     }
   </style>
 </head>
@@ -281,16 +266,18 @@
       </svg>
       <span id="scoreValue">0</span>
     </div>
-    <div class="hearts" aria-label="Lives in hearts" role="img" title="Lives">
-      <!-- Hearts inserted dynamically -->
-    </div>
+    <div class="hearts" aria-label="Lives in hearts" role="img" title="Lives"></div>
+    <div id="levelDisplay" aria-live="polite" aria-atomic="true" aria-label="Current level">Level: 1</div>
   </div>
 
   <canvas id="gameCanvas" width="480" height="640" aria-label="Game canvas"></canvas>
 
+  <div id="comboText" aria-live="polite" aria-atomic="true">Combo x1!</div>
+
   <div id="gameOverScreen" role="alert" aria-live="assertive" aria-hidden="true">
     <div>Game Over!</div>
     <div id="finalScore"></div>
+    <div id="highScoreDisplay"></div>
     <button id="shareFacebook" type="button" aria-label="Share your score on Facebook">Share on Facebook</button>
     <button id="shareTwitter" type="button" aria-label="Share your score on Twitter">Share on Twitter</button>
     <button id="shareWhatsApp" type="button" aria-label="Share your score on WhatsApp">Share on WhatsApp</button>
@@ -305,13 +292,17 @@
   </div>
 
   <script>
+    // === Game variables and constants ===
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const scoreboard = document.getElementById('scoreboard');
     const scoreValue = document.getElementById('scoreValue');
     const heartsContainer = scoreboard.querySelector('.hearts');
+    const levelDisplay = document.getElementById('levelDisplay');
+    const comboText = document.getElementById('comboText');
     const gameOverScreen = document.getElementById('gameOverScreen');
     const finalScoreDisplay = document.getElementById('finalScore');
+    const highScoreDisplay = document.getElementById('highScoreDisplay');
     const restartBtn = document.getElementById('restartBtn');
     const shareFacebookBtn = document.getElementById('shareFacebook');
     const shareTwitterBtn = document.getElementById('shareTwitter');
@@ -328,6 +319,18 @@
     let lives = 5;
     let gameOver = false;
     let level = 1;
+
+    // Combo system
+    let comboCount = 0;
+    let lastHitTime = 0;
+    const comboTimeout = 1500; // ms
+
+    // Enemy types
+    const enemyTypes = [
+      { name: 'fast', color: '#ff6f00', width: 25, height: 25, speed: 4, health: 1, points: 1, zigzag: true },
+      { name: 'normal', color: '#ff3b3b', width: 40, height: 40, speed: 2.5, health: 1, points: 5, zigzag: false },
+      { name: 'tank', color: '#a80000', width: 60, height: 60, speed: 1.2, health: 3, points: 15, zigzag: false }
+    ];
 
     const gun = {
       width: 40,
@@ -354,11 +357,13 @@
 
     const enemies = [];
     const particles = [];
+    const powerUps = [];
 
     let enemySpawnTimer = 0;
-    const enemySpawnInterval = 90;
+    let enemySpawnInterval = 90;
 
-    const enemySpeed = 2.5;
+    const enemyBaseSpeed = 2.5;
+    let enemySpeed = enemyBaseSpeed;
     const gunSpeed = 6;
 
     let moveLeftPressed = false;
@@ -366,9 +371,12 @@
 
     const shootSound = new Audio('https://freesound.org/data/previews/320/320181_5260877-lq.mp3');
     const hitSound = new Audio('https://freesound.org/data/previews/256/256113_4486188-lq.mp3');
+    const powerUpSound = new Audio('https://freesound.org/data/previews/331/331912_3248244-lq.mp3');
 
     const backgrounds = [
-      'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=480&q=80'
+      'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=480&q=80',
+      'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=480&q=80',
+      'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=480&q=80'
     ];
 
     const heartSVG = `
@@ -379,9 +387,12 @@
       </svg>
     `;
 
-    // Max particles to keep lightweight
     const MAX_PARTICLES = 100;
+    const MAX_POWERUPS = 3;
+    let powerUpSpawnTimer = 0;
+    const powerUpSpawnInterval = 1200; // frames
 
+    // Utility functions
     function updateHearts() {
       heartsContainer.innerHTML = '';
       for(let i = 0; i < lives; i++) {
@@ -394,61 +405,97 @@
     function updateScore() {
       scoreValue.textContent = score * 5; // 5 coins per score point
       updateHearts();
+      updateLevel();
     }
 
-    // Shoot bullet from pool + muzzle flash effect
-    function shootBullet() {
-      const bullet = bulletPool.find(b => !b.active);
-      if (!bullet) return; // no available bullet
-
-      bullet.x = gun.x + gun.width / 2;
-      bullet.y = gun.y;
-      bullet.active = true;
-
-      const soundClone = shootSound.cloneNode();
-      soundClone.volume = 0.3;
-      soundClone.play();
-
-      // Muzzle flash: short-lived bright particle at barrel
-      for (let i = 0; i < 5; i++) {
-        createMuzzleFlashParticle(gun.x + gun.width / 2, gun.y - 20);
+    function updateLevel() {
+      // Level based on score thresholds
+      const newLevel = Math.min(1 + Math.floor(score / 20), backgrounds.length);
+      if (newLevel !== level) {
+        level = newLevel;
+        setBackground(level);
+        showLevelUp();
       }
-
-      // Shooting particles (small sparks)
-      for(let i=0; i<8; i++) {
-        particles.push(createParticle(bullet.x, bullet.y, '#00f6ff'));
-      }
+      levelDisplay.textContent = `Level: ${level}`;
+      // Adjust difficulty dynamically
+      enemySpawnInterval = Math.max(30, 90 - level * 10);
+      enemySpeed = enemyBaseSpeed + level * 0.5;
     }
 
-    function createMuzzleFlashParticle(x, y) {
-      if (particles.length >= MAX_PARTICLES) return; // limit particles
-      const angle = Math.random() * Math.PI - Math.PI/2;
-      const speed = Math.random() * 2 + 1;
-      particles.push({
-        x: x,
-        y: y,
-        radius: Math.random() * 3 + 2,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        alpha: 0.7,
-        color: {r: 255, g: 255, b: 180},
-        decay: 0.05,
-        glow: true,
-      });
+    function showLevelUp() {
+      comboText.textContent = `Level ${level} reached!`;
+      comboText.style.color = '#00ffcc';
+      comboText.style.opacity = '1';
+      clearTimeout(comboText.hideTimeout);
+      comboText.hideTimeout = setTimeout(() => {
+        comboText.style.opacity = '0';
+        comboText.style.color = '#00f6ff';
+      }, 2000);
     }
 
+    // Spawn enemies with random type
     function spawnEnemy() {
-      const enemyWidth = 40;
-      const enemyHeight = 40;
-      const x = Math.random() * (WIDTH - enemyWidth);
+      const type = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
       enemies.push({
-        x: x,
-        y: -enemyHeight,
-        width: enemyWidth,
-        height: enemyHeight,
-        color: '#ff3b3b',
+        x: Math.random() * (WIDTH - type.width),
+        y: -type.height,
+        width: type.width,
+        height: type.height,
+        color: type.color,
+        speed: type.speed + (level - 1) * 0.3,
+        health: type.health,
+        points: type.points,
+        zigzag: type.zigzag,
+        zigzagDir: 1,
+        zigzagAmplitude: 40,
+        zigzagSpeed: 0.05,
+        zigzagBaseX: 0,
         active: true,
       });
+      enemies[enemies.length - 1].zigzagBaseX = enemies[enemies.length - 1].x;
+    }
+
+    // Spawn power-ups (extra life)
+    function spawnPowerUp() {
+      if (powerUps.length >= MAX_POWERUPS) return;
+      const size = 30;
+      const x = Math.random() * (WIDTH - size);
+      powerUps.push({
+        x,
+        y: -size,
+        width: size,
+        height: size,
+        color: '#00ff00',
+        type: 'extraLife',
+        active: true,
+      });
+    }
+
+    function updatePowerUps() {
+      powerUps.forEach(pu => {
+        if (!pu.active) return;
+        pu.y += 2;
+        if (pu.y > HEIGHT) pu.active = false;
+
+        if (rectRectCollision(pu, gun)) {
+          pu.active = false;
+          if (pu.type === 'extraLife' && lives < 5) {
+            lives++;
+            updateScore();
+            powerUpSound.cloneNode().play();
+          }
+        }
+      });
+      for (let i = powerUps.length - 1; i >= 0; i--) {
+        if (!powerUps[i].active) powerUps.splice(i, 1);
+      }
+    }
+
+    function rectRectCollision(r1, r2) {
+      return !(r2.x > r1.x + r1.width || 
+               r2.x + r2.width < r1.x || 
+               r2.y > r1.y + r1.height ||
+               r2.y + r2.height < r1.y);
     }
 
     function updateGunPosition() {
@@ -462,18 +509,73 @@
       }
     }
 
+    // Shoot bullet from pool + muzzle flash effect
+    function shootBullet() {
+      const bullet = bulletPool.find(b => !b.active);
+      if (!bullet) return;
+
+      bullet.x = gun.x + gun.width / 2;
+      bullet.y = gun.y;
+      bullet.active = true;
+
+      shootSound.cloneNode().play();
+
+      for(let i=0; i<8; i++) {
+        particles.push(createParticle(bullet.x, bullet.y, '#00f6ff'));
+      }
+    }
+
+    // Particle creation helper
+    function createParticle(x, y, hexColor) {
+      if (particles.length >= MAX_PARTICLES) return null;
+      const rgb = hexToRgb(hexColor);
+      return {
+        x: x + (Math.random() * 10 - 5),
+        y: y + (Math.random() * 10 - 5),
+        radius: Math.random() * 3 + 1,
+        vx: (Math.random() - 0.5) * 3,
+        vy: (Math.random() - 0.5) * 3,
+        alpha: 1,
+        color: rgb,
+        decay: 0.03,
+        glow: false,
+      };
+    }
+
+    function hexToRgb(hex) {
+      hex = hex.replace(/^#/, '');
+      if (hex.length === 3) {
+        hex = hex.split('').map(c => c + c).join('');
+      }
+      const num = parseInt(hex, 16);
+      return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255
+      };
+    }
+
     function update() {
       if (gameOver) return;
 
       updateGunPosition();
 
       enemySpawnTimer++;
+      powerUpSpawnTimer++;
+
       if (enemySpawnTimer >= enemySpawnInterval) {
         spawnEnemy();
         enemySpawnTimer = 0;
       }
 
-      // Update bullets from pool
+      if (powerUpSpawnTimer >= powerUpSpawnInterval) {
+        spawnPowerUp();
+        powerUpSpawnTimer = 0;
+      }
+
+      updatePowerUps();
+
+      // Update bullets
       bulletPool.forEach(bullet => {
         if (bullet.active) {
           bullet.y -= bulletSpeed;
@@ -481,59 +583,76 @@
         }
       });
 
+      // Update enemies
       enemies.forEach(enemy => {
-        if (enemy.active) {
-          enemy.y += enemySpeed;
-          if (enemy.y + enemy.height > HEIGHT) {
-            enemy.active = false;
-            lives--;
-            updateScore();
-            if (lives <= 0) {
-              gameOver = true;
-              showGameOver();
-            }
+        if (!enemy.active) return;
+
+        if (enemy.zigzag) {
+          enemy.x = enemy.zigzagBaseX + Math.sin(enemy.y * enemy.zigzagSpeed) * enemy.zigzagAmplitude;
+        }
+        enemy.y += enemy.speed;
+
+        if (enemy.y > HEIGHT) {
+          enemy.active = false;
+          lives--;
+          updateScore();
+          comboCount = 0;
+          updateComboText();
+          if (lives <= 0) {
+            gameOver = true;
+            saveHighScore();
+            showGameOver();
           }
         }
       });
 
+      // Bullet-enemy collisions
       bulletPool.forEach(bullet => {
         if (!bullet.active) return;
         enemies.forEach(enemy => {
           if (!enemy.active) return;
           if (circleRectCollision(bullet, enemy)) {
             bullet.active = false;
-            enemy.active = false;
-            score++;
-            updateScore();
+            enemy.health--;
+            if (enemy.health <= 0) {
+              enemy.active = false;
+              score += enemy.points;
+              updateScore();
 
-            const hitSoundClone = hitSound.cloneNode();
-            hitSoundClone.volume = 0.4;
-            hitSoundClone.play();
+              // Combo system
+              const now = performance.now();
+              if (now - lastHitTime < comboTimeout) {
+                comboCount++;
+              } else {
+                comboCount = 1;
+              }
+              lastHitTime = now;
+              updateComboText();
 
-            // Hit particles (red sparks)
-            for(let i=0; i<15; i++) {
-              if (particles.length >= MAX_PARTICLES) break;
-              particles.push(createParticle(enemy.x + enemy.width/2, enemy.y + enemy.height/2, '#ff3b3b'));
+              hitSound.cloneNode().play();
+
+              for(let i=0; i<15; i++) {
+                if (particles.length >= MAX_PARTICLES) break;
+                particles.push(createParticle(enemy.x + enemy.width/2, enemy.y + enemy.height/2, '#ff3b3b'));
+              }
             }
           }
         });
       });
 
-      // Clean dead enemies
+      // Remove inactive enemies
       for (let i = enemies.length - 1; i >= 0; i--) {
         if (!enemies[i].active) enemies.splice(i, 1);
       }
 
-      // Update particles with fade and slight gravity
+      // Update particles
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.x += p.vx;
         p.y += p.vy;
-        p.alpha -= p.decay || 0.03;
-        if (!p.glow) p.vy += 0.05; // gravity for normal particles
-        if (p.alpha <= 0) {
-          particles.splice(i, 1);
-        }
+        p.alpha -= p.decay;
+        if (!p.glow) p.vy += 0.05; // gravity
+        if (p.alpha <= 0) particles.splice(i, 1);
       }
     }
 
@@ -573,28 +692,42 @@
 
     function drawEnemies() {
       enemies.forEach(enemy => {
-        if (enemy.active) {
-          const grad = ctx.createLinearGradient(enemy.x, enemy.y, enemy.x, enemy.y + enemy.height);
-          grad.addColorStop(0, '#ff3b3b');
-          grad.addColorStop(1, '#a80000');
-          ctx.fillStyle = grad;
-          ctx.shadowColor = '#ff3b3b';
-          ctx.shadowBlur = 15;
-          ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-          ctx.shadowBlur = 0;
+        if (!enemy.active) return;
+        const grad = ctx.createLinearGradient(enemy.x, enemy.y, enemy.x, enemy.y + enemy.height);
+        grad.addColorStop(0, enemy.color);
+        grad.addColorStop(1, '#600000');
+        ctx.fillStyle = grad;
+        ctx.shadowColor = enemy.color;
+        ctx.shadowBlur = 15;
+        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+        ctx.shadowBlur = 0;
 
+        if (enemy.width >= 40) {
           ctx.fillStyle = '#fff';
           ctx.beginPath();
-          ctx.arc(enemy.x + 12, enemy.y + 15, 6, 0, Math.PI * 2);
-          ctx.arc(enemy.x + 28, enemy.y + 15, 6, 0, Math.PI * 2);
+          ctx.arc(enemy.x + enemy.width * 0.3, enemy.y + enemy.height * 0.4, enemy.width * 0.15, 0, Math.PI * 2);
+          ctx.arc(enemy.x + enemy.width * 0.7, enemy.y + enemy.height * 0.4, enemy.width * 0.15, 0, Math.PI * 2);
           ctx.fill();
 
           ctx.fillStyle = '#000';
           ctx.beginPath();
-          ctx.arc(enemy.x + 12, enemy.y + 15, 2.5, 0, Math.PI * 2);
-          ctx.arc(enemy.x + 28, enemy.y + 15, 2.5, 0, Math.PI * 2);
+          ctx.arc(enemy.x + enemy.width * 0.3, enemy.y + enemy.height * 0.4, enemy.width * 0.07, 0, Math.PI * 2);
+          ctx.arc(enemy.x + enemy.width * 0.7, enemy.y + enemy.height * 0.4, enemy.width * 0.07, 0, Math.PI * 2);
           ctx.fill();
         }
+      });
+    }
+
+    function drawPowerUps() {
+      powerUps.forEach(pu => {
+        if (!pu.active) return;
+        ctx.fillStyle = pu.color;
+        ctx.beginPath();
+        ctx.arc(pu.x + pu.width/2, pu.y + pu.height/2, pu.width/2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#004400';
+        ctx.stroke();
       });
     }
 
@@ -629,21 +762,55 @@
       return (dx * dx + dy * dy <= (circle.radius * circle.radius));
     }
 
+    // Combo display update
+    function updateComboText() {
+      if (comboCount > 1) {
+        comboText.textContent = `Combo x${comboCount}! +${comboCount * 2} bonus coins`;
+        comboText.style.opacity = '1';
+        clearTimeout(comboText.hideTimeout);
+        comboText.hideTimeout = setTimeout(() => {
+          comboText.style.opacity = '0';
+        }, 1200);
+        // Add bonus coins
+        score += comboCount * 2;
+        updateScore();
+      } else {
+        comboText.style.opacity = '0';
+      }
+    }
+
     function showGameOver() {
       const coins = score * 5;
       finalScoreDisplay.textContent = `Your score: ${coins} coins`;
+      const highScore = getHighScore();
+      highScoreDisplay.textContent = `High score: ${highScore} coins`;
       gameOverScreen.style.display = 'flex';
       gameOverScreen.setAttribute('aria-hidden', 'false');
+    }
+
+    function saveHighScore() {
+      const coins = score * 5;
+      const highScore = getHighScore();
+      if (coins > highScore) {
+        localStorage.setItem('modernShootingGameHighScore', coins);
+      }
+    }
+
+    function getHighScore() {
+      return parseInt(localStorage.getItem('modernShootingGameHighScore')) || 0;
     }
 
     function resetGame() {
       score = 0;
       lives = 5;
+      comboCount = 0;
       updateScore();
       bulletPool.forEach(b => b.active = false);
       enemies.length = 0;
+      powerUps.length = 0;
       particles.length = 0;
       enemySpawnTimer = 0;
+      powerUpSpawnTimer = 0;
       gameOver = false;
       gameOverScreen.style.display = 'none';
       gameOverScreen.setAttribute('aria-hidden', 'true');
@@ -656,39 +823,12 @@
       ctx.clearRect(0, 0, WIDTH, HEIGHT);
     }
 
-    function createParticle(x, y, hexColor) {
-      const rgb = hexToRgb(hexColor);
-      return {
-        x: x + (Math.random() * 10 - 5),
-        y: y + (Math.random() * 10 - 5),
-        radius: Math.random() * 3 + 1,
-        vx: (Math.random() - 0.5) * 3,
-        vy: (Math.random() - 0.5) * 3,
-        alpha: 1,
-        color: rgb,
-        decay: 0.03,
-        glow: false,
-      };
-    }
-
-    function hexToRgb(hex) {
-      hex = hex.replace(/^#/, '');
-      if (hex.length === 3) {
-        hex = hex.split('').map(c => c + c).join('');
-      }
-      const num = parseInt(hex, 16);
-      return {
-        r: (num >> 16) & 255,
-        g: (num >> 8) & 255,
-        b: num & 255
-      };
-    }
-
     function draw() {
       clearCanvas();
       drawGun();
       drawBullets();
       drawEnemies();
+      drawPowerUps();
       drawParticles();
     }
 
