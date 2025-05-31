@@ -59,6 +59,7 @@
       box-shadow:
         0 0 15px #00f6ff88,
         inset 0 0 20px #00f6ff44;
+      background-color: #203a43; /* fallback background */
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -278,17 +279,17 @@
     <div>Game Over!</div>
     <div id="finalScore"></div>
     <div id="highScoreDisplay"></div>
-    <button id="shareFacebook" type="button" aria-label="Share your score on Facebook">Share on Facebook</button>
-    <button id="shareTwitter" type="button" aria-label="Share your score on Twitter">Share on Twitter</button>
-    <button id="shareWhatsApp" type="button" aria-label="Share your score on WhatsApp">Share on WhatsApp</button>
-    <button id="restartBtn" type="button" aria-label="Restart game">Restart</button>
+    <button id="shareFacebook" type="button" aria-label="Share your score on Facebook" tabindex="0">Share on Facebook</button>
+    <button id="shareTwitter" type="button" aria-label="Share your score on Twitter" tabindex="0">Share on Twitter</button>
+    <button id="shareWhatsApp" type="button" aria-label="Share your score on WhatsApp" tabindex="0">Share on WhatsApp</button>
+    <button id="restartBtn" type="button" aria-label="Restart game" tabindex="0">Restart</button>
   </div>
 
   <!-- Mobile Controls -->
   <div id="mobileControls" aria-label="Mobile game controls">
-    <button id="moveLeft" class="controlBtn" aria-label="Move Left">◀</button>
-    <button id="moveRight" class="controlBtn" aria-label="Move Right">▶</button>
-    <button id="shootBtn" class="controlBtn shootBtn" aria-label="Shoot">Shoot</button>
+    <button id="moveLeft" class="controlBtn" aria-label="Move Left" tabindex="0">◀</button>
+    <button id="moveRight" class="controlBtn" aria-label="Move Right" tabindex="0">▶</button>
+    <button id="shootBtn" class="controlBtn shootBtn" aria-label="Shoot" tabindex="0">Shoot</button>
   </div>
 
   <script>
@@ -324,6 +325,7 @@
     let comboCount = 0;
     let lastHitTime = 0;
     const comboTimeout = 1500; // ms
+    let comboBonusAdded = false; // To prevent multiple bonus additions per combo
 
     // Enemy types
     const enemyTypes = [
@@ -369,6 +371,7 @@
     let moveLeftPressed = false;
     let moveRightPressed = false;
 
+    // Audio setup with error handling to avoid uncaught promise errors
     const shootSound = new Audio('https://freesound.org/data/previews/320/320181_5260877-lq.mp3');
     const hitSound = new Audio('https://freesound.org/data/previews/256/256113_4486188-lq.mp3');
     const powerUpSound = new Audio('https://freesound.org/data/previews/331/331912_3248244-lq.mp3');
@@ -482,7 +485,7 @@
           if (pu.type === 'extraLife' && lives < 5) {
             lives++;
             updateScore();
-            powerUpSound.cloneNode().play();
+            powerUpSound.cloneNode().play().catch(() => {});
           }
         }
       });
@@ -518,10 +521,11 @@
       bullet.y = gun.y;
       bullet.active = true;
 
-      shootSound.cloneNode().play();
+      shootSound.cloneNode().play().catch(() => {});
 
       for(let i=0; i<8; i++) {
-        particles.push(createParticle(bullet.x, bullet.y, '#00f6ff'));
+        const p = createParticle(bullet.x, bullet.y, '#00f6ff');
+        if (p) particles.push(p);
       }
     }
 
@@ -597,6 +601,7 @@
           lives--;
           updateScore();
           comboCount = 0;
+          comboBonusAdded = false;
           updateComboText();
           if (lives <= 0) {
             gameOver = true;
@@ -623,17 +628,20 @@
               const now = performance.now();
               if (now - lastHitTime < comboTimeout) {
                 comboCount++;
+                comboBonusAdded = false; // Reset bonus flag for new combo count
               } else {
                 comboCount = 1;
+                comboBonusAdded = false;
               }
               lastHitTime = now;
               updateComboText();
 
-              hitSound.cloneNode().play();
+              hitSound.cloneNode().play().catch(() => {});
 
               for(let i=0; i<15; i++) {
                 if (particles.length >= MAX_PARTICLES) break;
-                particles.push(createParticle(enemy.x + enemy.width/2, enemy.y + enemy.height/2, '#ff3b3b'));
+                const p = createParticle(enemy.x + enemy.width/2, enemy.y + enemy.height/2, '#ff3b3b');
+                if (p) particles.push(p);
               }
             }
           }
@@ -771,11 +779,15 @@
         comboText.hideTimeout = setTimeout(() => {
           comboText.style.opacity = '0';
         }, 1200);
-        // Add bonus coins
-        score += comboCount * 2;
-        updateScore();
+        // Add bonus coins only once per combo count increment
+        if (!comboBonusAdded) {
+          score += comboCount * 2;
+          comboBonusAdded = true;
+          updateScore();
+        }
       } else {
         comboText.style.opacity = '0';
+        comboBonusAdded = false;
       }
     }
 
@@ -804,6 +816,8 @@
       score = 0;
       lives = 5;
       comboCount = 0;
+      comboBonusAdded = false;
+      level = 1; // Reset level to 1 on restart
       updateScore();
       bulletPool.forEach(b => b.active = false);
       enemies.length = 0;
@@ -880,6 +894,7 @@
       shootBullet();
     });
 
+    // Touch controls with preventDefault on touchmove to avoid scrolling
     moveLeftBtn.addEventListener('touchstart', e => {
       e.preventDefault();
       moveLeftPressed = true;
@@ -888,6 +903,8 @@
       e.preventDefault();
       moveLeftPressed = false;
     });
+    moveLeftBtn.addEventListener('touchmove', e => e.preventDefault());
+
     moveRightBtn.addEventListener('touchstart', e => {
       e.preventDefault();
       moveRightPressed = true;
@@ -896,10 +913,13 @@
       e.preventDefault();
       moveRightPressed = false;
     });
+    moveRightBtn.addEventListener('touchmove', e => e.preventDefault());
+
     shootBtn.addEventListener('touchstart', e => {
       e.preventDefault();
       if (!gameOver) shootBullet();
     });
+    shootBtn.addEventListener('touchmove', e => e.preventDefault());
 
     window.addEventListener('keydown', e => {
       if (gameOver) return;
