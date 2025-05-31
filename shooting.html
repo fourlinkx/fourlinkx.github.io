@@ -303,8 +303,6 @@
   </div>
 
   <script>
-    // All previous JavaScript code here, unchanged except for SEO/fav icon additions
-
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const scoreboard = document.getElementById('scoreboard');
@@ -338,14 +336,26 @@
       barrelColor: '#00f6ff',
     };
 
-    const bullets = [];
+    // Bullet Pool Setup
+    const MAX_BULLETS = 30;
+    const bulletSpeed = 9;
+    const bulletPool = [];
+    for (let i = 0; i < MAX_BULLETS; i++) {
+      bulletPool.push({
+        x: 0,
+        y: 0,
+        radius: 6,
+        color: '#00f6ff',
+        active: false,
+      });
+    }
+
     const enemies = [];
     const particles = [];
 
     let enemySpawnTimer = 0;
     const enemySpawnInterval = 90;
 
-    const bulletSpeed = 9;
     const enemySpeed = 2.5;
     const gunSpeed = 6;
 
@@ -377,65 +387,25 @@
     }
 
     function updateScore() {
-      scoreValue.textContent = score * 5;
+      scoreValue.textContent = score * 5; // 5 coins per score point
       updateHearts();
     }
 
-    canvas.addEventListener('click', () => {
-      if (gameOver) return;
-      shootBullet();
-    });
-
-    restartBtn.addEventListener('click', () => {
-      resetGame();
-    });
-
-    moveLeftBtn.addEventListener('touchstart', e => {
-      e.preventDefault();
-      moveLeftPressed = true;
-    });
-    moveLeftBtn.addEventListener('touchend', e => {
-      e.preventDefault();
-      moveLeftPressed = false;
-    });
-    moveRightBtn.addEventListener('touchstart', e => {
-      e.preventDefault();
-      moveRightPressed = true;
-    });
-    moveRightBtn.addEventListener('touchend', e => {
-      e.preventDefault();
-      moveRightPressed = false;
-    });
-    shootBtn.addEventListener('touchstart', e => {
-      e.preventDefault();
-      if (!gameOver) shootBullet();
-    });
-
-    window.addEventListener('keydown', e => {
-      if (gameOver) return;
-      if (e.key === 'ArrowLeft' || e.key === 'a') moveLeftPressed = true;
-      if (e.key === 'ArrowRight' || e.key === 'd') moveRightPressed = true;
-      if (e.key === ' ' || e.key === 'ArrowUp') shootBullet();
-    });
-    window.addEventListener('keyup', e => {
-      if (e.key === 'ArrowLeft' || e.key === 'a') moveLeftPressed = false;
-      if (e.key === 'ArrowRight' || e.key === 'd') moveRightPressed = false;
-    });
-
+    // Shoot bullet from pool
     function shootBullet() {
+      const bullet = bulletPool.find(b => !b.active);
+      if (!bullet) return; // no available bullet
+
+      bullet.x = gun.x + gun.width / 2;
+      bullet.y = gun.y;
+      bullet.active = true;
+
       const soundClone = shootSound.cloneNode();
       soundClone.volume = 0.3;
       soundClone.play();
 
-      bullets.push({
-        x: gun.x + gun.width / 2,
-        y: gun.y,
-        radius: 6,
-        color: '#00f6ff',
-        active: true,
-      });
       for(let i=0; i<8; i++) {
-        particles.push(createParticle(gun.x + gun.width / 2, gun.y, '#00f6ff'));
+        particles.push(createParticle(bullet.x, bullet.y, '#00f6ff'));
       }
     }
 
@@ -475,7 +445,8 @@
         enemySpawnTimer = 0;
       }
 
-      bullets.forEach(bullet => {
+      // Update bullets from pool
+      bulletPool.forEach(bullet => {
         if (bullet.active) {
           bullet.y -= bulletSpeed;
           if (bullet.y < 0) bullet.active = false;
@@ -497,7 +468,7 @@
         }
       });
 
-      bullets.forEach(bullet => {
+      bulletPool.forEach(bullet => {
         if (!bullet.active) return;
         enemies.forEach(enemy => {
           if (!enemy.active) return;
@@ -518,13 +489,12 @@
         });
       });
 
-      for (let i = bullets.length - 1; i >= 0; i--) {
-        if (!bullets[i].active) bullets.splice(i, 1);
-      }
+      // Remove inactive enemies from array to keep it clean
       for (let i = enemies.length - 1; i >= 0; i--) {
         if (!enemies[i].active) enemies.splice(i, 1);
       }
 
+      // Update particles
       particles.forEach((p, i) => {
         p.x += p.vx;
         p.y += p.vy;
@@ -553,7 +523,7 @@
     }
 
     function drawBullets() {
-      bullets.forEach(bullet => {
+      bulletPool.forEach(bullet => {
         if (bullet.active) {
           ctx.beginPath();
           const grad = ctx.createRadialGradient(bullet.x, bullet.y, bullet.radius/2, bullet.x, bullet.y, bullet.radius);
@@ -634,7 +604,7 @@
       score = 0;
       lives = 5;
       updateScore();
-      bullets.length = 0;
+      bulletPool.forEach(b => b.active = false);
       enemies.length = 0;
       particles.length = 0;
       enemySpawnTimer = 0;
@@ -724,6 +694,48 @@
       const text = encodeURIComponent(getShareText() + ' ' + decodeURIComponent(getGameUrl()));
       const shareUrl = `https://wa.me/?text=${text}`;
       window.open(shareUrl, '_blank');
+    });
+
+    // Controls event listeners
+    canvas.addEventListener('click', () => {
+      if (gameOver) return;
+      shootBullet();
+    });
+
+    moveLeftBtn.addEventListener('touchstart', e => {
+      e.preventDefault();
+      moveLeftPressed = true;
+    });
+    moveLeftBtn.addEventListener('touchend', e => {
+      e.preventDefault();
+      moveLeftPressed = false;
+    });
+    moveRightBtn.addEventListener('touchstart', e => {
+      e.preventDefault();
+      moveRightPressed = true;
+    });
+    moveRightBtn.addEventListener('touchend', e => {
+      e.preventDefault();
+      moveRightPressed = false;
+    });
+    shootBtn.addEventListener('touchstart', e => {
+      e.preventDefault();
+      if (!gameOver) shootBullet();
+    });
+
+    window.addEventListener('keydown', e => {
+      if (gameOver) return;
+      if (e.key === 'ArrowLeft' || e.key === 'a') moveLeftPressed = true;
+      if (e.key === 'ArrowRight' || e.key === 'd') moveRightPressed = true;
+      if (e.key === ' ' || e.key === 'ArrowUp') shootBullet();
+    });
+    window.addEventListener('keyup', e => {
+      if (e.key === 'ArrowLeft' || e.key === 'a') moveLeftPressed = false;
+      if (e.key === 'ArrowRight' || e.key === 'd') moveRightPressed = false;
+    });
+
+    restartBtn.addEventListener('click', () => {
+      resetGame();
     });
 
     // Initialize
