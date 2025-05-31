@@ -1,211 +1,418 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>3D Shooting Game with Aiming and Shooting</title>
-<style>
-  body { margin: 0; overflow: hidden; background: #222; }
-  #crosshair {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    margin-left: -10px;
-    margin-top: -10px;
-    pointer-events: none;
-    z-index: 10;
-  }
-  #crosshair:before, #crosshair:after {
-    content: '';
-    position: absolute;
-    background: white;
-  }
-  #crosshair:before {
-    left: 9px;
-    top: 0;
-    width: 2px;
-    height: 20px;
-  }
-  #crosshair:after {
-    top: 9px;
-    left: 0;
-    width: 20px;
-    height: 2px;
-  }
-  #score {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    color: white;
-    font-family: Arial, sans-serif;
-    font-size: 20px;
-    z-index: 10;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <title>Mobile FPS Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { margin: 0; overflow: hidden; background: #222; }
+    #crosshair {
+      position: absolute; top: 50%; left: 50%; width: 20px; height: 20px;
+      margin-left: -10px; margin-top: -10px; pointer-events: none; z-index: 10;
+    }
+    #crosshair:before, #crosshair:after {
+      content: ''; position: absolute; background: white;
+    }
+    #crosshair:before { left: 9px; top: 0; width: 2px; height: 20px; }
+    #crosshair:after { top: 9px; left: 0; width: 20px; height: 2px; }
+    #hud {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 20;
+      text-shadow: 1px 1px 2px #000;
+    }
+    #health-bar {
+      position: absolute; top: 18px; left: 20px; width: 220px; height: 18px;
+      background: #222; border-radius: 10px; border: 2px solid #fff; overflow: hidden;
+    }
+    #health {
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, #4caf50 80%, #f44336 100%);
+      border-radius: 10px; transition: width 0.3s;
+    }
+    #ammo {
+      position: absolute; top: 18px; right: 120px; color: #fff; font-size: 20px;
+      background: rgba(0,0,0,0.5); border-radius: 6px; padding: 3px 12px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    #score {
+      position: absolute; top: 18px; right: 20px; color: #fff; font-size: 20px;
+      background: rgba(0,0,0,0.5); border-radius: 6px; padding: 3px 12px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    #minimap {
+      position: absolute; top: 60px; right: 20px; width: 90px; height: 90px;
+      background: #222; border-radius: 10px; border: 2px solid #fff; overflow: hidden;
+    }
+    .minimap-dot {
+      position: absolute; width: 10px; height: 10px;
+      background: #f00; border-radius: 50%; border: 2px solid #fff;
+    }
+    #controls {
+      position: absolute; width: 100vw; height: 100vh; pointer-events: none; z-index: 30;
+    }
+    .joystick {
+      position: absolute; bottom: 40px; left: 30px; width: 90px; height: 90px;
+      background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid #fff;
+      pointer-events: auto;
+      touch-action: none;
+    }
+    .joystick-inner {
+      position: absolute; left: 35px; top: 35px; width: 20px; height: 20px;
+      background: #fff; border-radius: 50%; opacity: 0.7;
+      pointer-events: none;
+      transition: left 0.07s, top 0.07s;
+    }
+    .button {
+      position: absolute; width: 54px; height: 54px; background: rgba(255,255,255,0.10);
+      border-radius: 50%; border: 2px solid #fff; pointer-events: auto;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px #0005;
+      transition: background 0.2s;
+      touch-action: none;
+    }
+    .button img { width: 28px; height: 28px; }
+    .fire { bottom: 70px; right: 40px; }
+    .aim { bottom: 140px; right: 100px; }
+    .reload { bottom: 20px; right: 120px; }
+    .knife { bottom: 140px; right: 40px; }
+    .crouch { bottom: 20px; right: 200px; }
+    #muzzle-flash {
+      position: absolute; left: 50%; top: 60%; width: 60px; height: 60px; margin-left: -30px; margin-top: -30px;
+      background: url('https://i.imgur.com/0Z8FqzF.png') no-repeat center/contain;
+      opacity: 0; pointer-events: none; z-index: 100;
+      transition: opacity 0.07s;
+    }
+    #hitmarker {
+      position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin-left: -20px; margin-top: -20px;
+      background: url('https://i.imgur.com/4p3k6yN.png') no-repeat center/contain;
+      opacity: 0; pointer-events: none; z-index: 101;
+      transition: opacity 0.15s;
+    }
+  </style>
 </head>
 <body>
+  <div id="crosshair"></div>
+  <div id="hud">
+    <div id="health-bar"><div id="health"></div></div>
+    <div id="ammo"><img src="https://img.icons8.com/ios-filled/20/ffffff/rifle-bullet.png"/> 30 / 120</div>
+    <div id="score"><img src="https://img.icons8.com/ios-filled/20/ffffff/skull.png"/> 0</div>
+    <div id="minimap"></div>
+  </div>
+  <div id="controls">
+    <div class="joystick" id="joystick">
+      <div class="joystick-inner" id="joystick-inner"></div>
+    </div>
+    <div class="button fire" id="fire-btn"><img src="https://img.icons8.com/ios-filled/50/ffffff/filled-circle.png"/></div>
+    <div class="button aim"><img src="https://img.icons8.com/ios-filled/50/ffffff/target.png"/></div>
+    <div class="button reload" id="reload-btn"><img src="https://img.icons8.com/ios-filled/50/ffffff/reload.png"/></div>
+    <div class="button knife"><img src="https://img.icons8.com/ios-filled/50/ffffff/combat-knife.png"/></div>
+    <div class="button crouch"><img src="https://img.icons8.com/ios-filled/50/ffffff/squat.png"/></div>
+  </div>
+  <div id="muzzle-flash"></div>
+  <div id="hitmarker"></div>
+  <!-- Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/examples/js/controls/PointerLockControls.js"></script>
+  <script>
+    // --- Three.js scene setup ---
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xbfd1e5);
 
-<div id="crosshair"></div>
-<div id="score">Score: 0</div>
+    // Camera
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 1.6, 5);
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.153.0/examples/js/controls/PointerLockControls.js"></script>
-
-<script>
-  // Scene setup
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x202020);
-
-  // Camera setup
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-  camera.position.set(0, 1.6, 5); // Player height approx 1.6m
-
-  // Renderer setup
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
-
-  // Lighting
-  const light = new THREE.DirectionalLight(0xffffff, 1);
-  light.position.set(5, 10, 7);
-  scene.add(light);
-  scene.add(new THREE.AmbientLight(0x404040));
-
-  // Floor
-  const floorGeometry = new THREE.PlaneGeometry(50, 50);
-  const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x555555 });
-  const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-  floor.rotation.x = -Math.PI / 2;
-  scene.add(floor);
-
-  // Controls (Pointer lock for FPS style)
-  const controls = new THREE.PointerLockControls(camera, document.body);
-
-  document.body.addEventListener('click', () => {
-    controls.lock();
-  });
-
-  // Movement variables
-  const move = { forward: false, backward: false, left: false, right: false };
-  const velocity = new THREE.Vector3();
-  const direction = new THREE.Vector3();
-  const speed = 5;
-
-  document.addEventListener('keydown', (e) => {
-    switch(e.code) {
-      case 'KeyW': move.forward = true; break;
-      case 'KeyS': move.backward = true; break;
-      case 'KeyA': move.left = true; break;
-      case 'KeyD': move.right = true; break;
-    }
-  });
-
-  document.addEventListener('keyup', (e) => {
-    switch(e.code) {
-      case 'KeyW': move.forward = false; break;
-      case 'KeyS': move.backward = false; break;
-      case 'KeyA': move.left = false; break;
-      case 'KeyD': move.right = false; break;
-    }
-  });
-
-  // Targets (enemies) array
-  const targets = [];
-  const targetGeometry = new THREE.BoxGeometry(1,1,1);
-  const targetMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-
-  function spawnTarget() {
-    const target = new THREE.Mesh(targetGeometry, targetMaterial.clone());
-    target.position.set(
-      (Math.random() - 0.5) * 20,
-      0.5,
-      (Math.random() - 0.5) * -20 - 5
-    );
-    scene.add(target);
-    targets.push(target);
-  }
-
-  // Spawn 10 targets initially
-  for(let i=0; i<10; i++) spawnTarget();
-
-  // Raycaster for shooting
-  const raycaster = new THREE.Raycaster();
-  const shootDirection = new THREE.Vector3();
-
-  // Score
-  let score = 0;
-  const scoreDisplay = document.getElementById('score');
-
-  // Shoot function
-  function shoot() {
-    // Get the direction the camera is facing
-    camera.getWorldDirection(shootDirection);
-
-    // Set raycaster origin at camera position and direction forward
-    raycaster.set(camera.position, shootDirection);
-
-    // Check for intersections with targets
-    const intersects = raycaster.intersectObjects(targets, false);
-
-    if(intersects.length > 0) {
-      const hitTarget = intersects[0].object;
-
-      // Remove hit target from scene and array
-      scene.remove(hitTarget);
-      targets.splice(targets.indexOf(hitTarget), 1);
-
-      // Increase score and update UI
-      score++;
-      scoreDisplay.textContent = 'Score: ' + score;
-
-      // Spawn a new target to keep game going
-      spawnTarget();
-    }
-  }
-
-  // Add event listener for shooting (left mouse click)
-  window.addEventListener('click', () => {
-    if (controls.isLocked) {
-      shoot();
-    }
-  });
-
-  // Animation loop
-  const clock = new THREE.Clock();
-
-  function animate() {
-    requestAnimationFrame(animate);
-
-    const delta = clock.getDelta();
-
-    velocity.x -= velocity.x * 10.0 * delta;
-    velocity.z -= velocity.z * 10.0 * delta;
-
-    direction.z = Number(move.forward) - Number(move.backward);
-    direction.x = Number(move.right) - Number(move.left);
-    direction.normalize();
-
-    if(move.forward || move.backward) velocity.z -= direction.z * speed * delta;
-    if(move.left || move.right) velocity.x -= direction.x * speed * delta;
-
-    controls.moveRight(-velocity.x * delta);
-    controls.moveForward(-velocity.z * delta);
-
-    renderer.render(scene, camera);
-  }
-
-  animate();
-
-  // Handle window resize
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth/window.innerHeight;
-    camera.updateProjectionMatrix();
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-</script>
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
 
+    // Lighting
+    const light = new THREE.DirectionalLight(0xffffff, 1.2);
+    light.position.set(5, 10, 7);
+    light.castShadow = true;
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0x888888));
+
+    // Ground
+    const groundGeometry = new THREE.PlaneGeometry(100, 100);
+    const groundMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc });
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = 0;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // Buildings (simple boxes)
+    function addBuilding(x, z, w, h, d, color) {
+      const geo = new THREE.BoxGeometry(w, h, d);
+      const mat = new THREE.MeshStandardMaterial({ color: color });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(x, h / 2, z);
+      mesh.castShadow = mesh.receiveShadow = true;
+      scene.add(mesh);
+    }
+    addBuilding(-10, -10, 8, 5, 8, 0xffe066);
+    addBuilding(12, -5, 10, 7, 8, 0xb0c4de);
+    addBuilding(0, 15, 12, 6, 10, 0xf2a65a);
+
+    // --- Gun (placeholder box, replace with 3D model for realism) ---
+    const gunGeometry = new THREE.BoxGeometry(0.5, 0.15, 1.2);
+    const gunMaterial = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.2 });
+    const gun = new THREE.Mesh(gunGeometry, gunMaterial);
+    gun.position.set(0.32, -0.3, -0.7);
+    gun.rotation.y = Math.PI / 12;
+    camera.add(gun);
+
+    // --- Controls ---
+    const controls = new THREE.PointerLockControls(camera, document.body);
+
+    // Desktop: click to lock pointer
+    document.body.addEventListener('click', () => {
+      if (!isMobile) controls.lock();
+    });
+
+    // Movement
+    const move = { forward: false, backward: false, left: false, right: false };
+    const velocity = new THREE.Vector3();
+    const direction = new THREE.Vector3();
+    const speed = 5;
+    document.addEventListener('keydown', (e) => {
+      switch(e.code) {
+        case 'KeyW': move.forward = true; break;
+        case 'KeyS': move.backward = true; break;
+        case 'KeyA': move.left = true; break;
+        case 'KeyD': move.right = true; break;
+      }
+    });
+    document.addEventListener('keyup', (e) => {
+      switch(e.code) {
+        case 'KeyW': move.forward = false; break;
+        case 'KeyS': move.backward = false; break;
+        case 'KeyA': move.left = false; break;
+        case 'KeyD': move.right = false; break;
+      }
+    });
+
+    // --- Enemies ---
+    const enemyGeometry = new THREE.CapsuleGeometry(0.4, 0.8, 4, 8);
+    const enemyMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
+    const enemies = [];
+    function spawnEnemy(x, z) {
+      const enemy = new THREE.Mesh(enemyGeometry, enemyMaterial.clone());
+      enemy.position.set(x, 1.2, z);
+      enemy.castShadow = true;
+      enemy.userData.health = 100;
+      scene.add(enemy);
+      enemies.push(enemy);
+    }
+    spawnEnemy(-5, -10);
+    spawnEnemy(4, -12);
+    spawnEnemy(0, -16);
+    spawnEnemy(8, -8);
+    spawnEnemy(-12, -7);
+
+    // --- Shooting ---
+    const raycaster = new THREE.Raycaster();
+    const shootDirection = new THREE.Vector3();
+    let playerAmmo = 30, playerMaxAmmo = 120, playerScore = 0, playerHealth = 100;
+    function updateHUD() {
+      document.getElementById('health').style.width = `${playerHealth}%`;
+      document.getElementById('ammo').innerHTML = `<img src="https://img.icons8.com/ios-filled/20/ffffff/rifle-bullet.png"/> ${playerAmmo} / ${playerMaxAmmo}`;
+      document.getElementById('score').innerHTML = `<img src="https://img.icons8.com/ios-filled/20/ffffff/skull.png"/> ${playerScore}`;
+    }
+    updateHUD();
+
+    // --- Muzzle flash and hit marker ---
+    function showMuzzleFlash() {
+      const mf = document.getElementById('muzzle-flash');
+      mf.style.opacity = 1;
+      setTimeout(() => mf.style.opacity = 0, 70);
+    }
+    function showHitMarker() {
+      const hm = document.getElementById('hitmarker');
+      hm.style.opacity = 1;
+      setTimeout(() => hm.style.opacity = 0, 150);
+    }
+
+    // --- Gun recoil ---
+    let recoil = 0;
+    function applyRecoil() {
+      recoil = 0.03;
+    }
+
+    function shoot() {
+      if (playerAmmo <= 0) return;
+      playerAmmo--;
+      updateHUD();
+      showMuzzleFlash();
+      applyRecoil();
+      camera.getWorldDirection(shootDirection);
+      raycaster.set(camera.position, shootDirection);
+      const intersects = raycaster.intersectObjects(enemies, false);
+      if (intersects.length > 0) {
+        const hit = intersects[0].object;
+        hit.userData.health -= 60;
+        showHitMarker();
+        if (hit.userData.health <= 0) {
+          scene.remove(hit);
+          enemies.splice(enemies.indexOf(hit), 1);
+          playerScore++;
+          updateHUD();
+        }
+      }
+    }
+
+    // --- Touch controls for mobile ---
+    let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    let joystickActive = false, joystickStart = {x:0, y:0}, joystickVector = {x:0, y:0};
+    const joystick = document.getElementById('joystick');
+    const joystickInner = document.getElementById('joystick-inner');
+
+    function handleJoystickMove(clientX, clientY) {
+      const rect = joystick.getBoundingClientRect();
+      const x = clientX - rect.left - 45;
+      const y = clientY - rect.top - 45;
+      const len = Math.sqrt(x*x + y*y);
+      const maxLen = 40;
+      const nx = len > maxLen ? x * maxLen / len : x;
+      const ny = len > maxLen ? y * maxLen / len : y;
+      joystickInner.style.left = `${45 + nx - 10}px`;
+      joystickInner.style.top = `${45 + ny - 10}px`;
+      joystickVector.x = nx / maxLen;
+      joystickVector.y = ny / maxLen;
+      move.forward = joystickVector.y < -0.2;
+      move.backward = joystickVector.y > 0.2;
+      move.left = joystickVector.x < -0.2;
+      move.right = joystickVector.x > 0.2;
+    }
+
+    joystick.addEventListener('touchstart', (e) => {
+      joystickActive = true;
+      if (e.touches.length > 0) {
+        handleJoystickMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    });
+    joystick.addEventListener('touchmove', (e) => {
+      if (joystickActive && e.touches.length > 0) {
+        handleJoystickMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    });
+    joystick.addEventListener('touchend', (e) => {
+      joystickActive = false;
+      joystickInner.style.left = '35px';
+      joystickInner.style.top = '35px';
+      move.forward = move.backward = move.left = move.right = false;
+    });
+
+    // Fire button for mobile
+    document.getElementById('fire-btn').addEventListener('touchstart', (e) => {
+      shoot();
+      e.preventDefault();
+    });
+
+    // Reload button for mobile
+    document.getElementById('reload-btn').addEventListener('touchstart', (e) => {
+      const reloadAmount = Math.min(30 - playerAmmo, playerMaxAmmo);
+      if (reloadAmount > 0) {
+        playerAmmo += reloadAmount;
+        playerMaxAmmo -= reloadAmount;
+        updateHUD();
+      }
+      e.preventDefault();
+    });
+
+    // Desktop: click to shoot if pointer is locked
+    window.addEventListener('click', () => {
+      if (!isMobile && controls.isLocked) shoot();
+    });
+
+    // --- Animation Loop ---
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      velocity.x -= velocity.x * 10.0 * delta;
+      velocity.z -= velocity.z * 10.0 * delta;
+      direction.z = Number(move.forward) - Number(move.backward);
+      direction.x = Number(move.right) - Number(move.left);
+      direction.normalize();
+      if(move.forward || move.backward) velocity.z -= direction.z * speed * delta;
+      if(move.left || move.right) velocity.x -= direction.x * speed * delta;
+      controls.moveRight(-velocity.x * delta);
+      controls.moveForward(-velocity.z * delta);
+
+      // Gun recoil animation
+      if (recoil > 0) {
+        camera.rotation.x -= recoil;
+        recoil *= 0.7;
+        if (recoil < 0.001) recoil = 0;
+      }
+
+      // Enemies move slightly (demo)
+      for (const enemy of enemies) {
+        enemy.position.x += Math.sin(Date.now() * 0.001 + enemy.position.z) * 0.002;
+        enemy.position.z += Math.cos(Date.now() * 0.001 + enemy.position.x) * 0.002;
+      }
+
+      renderer.render(scene, camera);
+      updateMinimap();
+    }
+    animate();
+
+    // --- Minimap (shows player and enemies as dots) ---
+    const minimap = document.getElementById('minimap');
+    function updateMinimap() {
+      minimap.innerHTML = '';
+      // Player dot (center)
+      const playerDot = document.createElement('div');
+      playerDot.className = 'minimap-dot';
+      playerDot.style.left = '40px'; playerDot.style.top = '40px';
+      playerDot.style.background = '#0f0';
+      minimap.appendChild(playerDot);
+      // Enemies
+      for (const enemy of enemies) {
+        const dx = (enemy.position.x - camera.position.x) * 2 + 45;
+        const dz = (enemy.position.z - camera.position.z) * 2 + 45;
+        const dot = document.createElement('div');
+        dot.className = 'minimap-dot';
+        dot.style.left = `${Math.max(0, Math.min(80, dx))}px`;
+        dot.style.top = `${Math.max(0, Math.min(80, dz))}px`;
+        minimap.appendChild(dot);
+      }
+    }
+
+    // --- Responsive ---
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // --- Ammo reload (press R) ---
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'KeyR') {
+        const reloadAmount = Math.min(30 - playerAmmo, playerMaxAmmo);
+        if (reloadAmount > 0) {
+          playerAmmo += reloadAmount;
+          playerMaxAmmo -= reloadAmount;
+          updateHUD();
+        }
+      }
+    });
+
+    // --- Simulate taking damage (for demo) ---
+    setInterval(() => {
+      if (playerHealth > 0 && Math.random() < 0.15) {
+        playerHealth -= 5;
+        if (playerHealth < 0) playerHealth = 0;
+        updateHUD();
+      }
+    }, 2000);
+
+    // --- Mobile: lock pointer automatically for gyroscope look (future feature) ---
+    // (You can use DeviceOrientation for gyroscope aiming if desired)
+  </script>
 </body>
 </html>
-
