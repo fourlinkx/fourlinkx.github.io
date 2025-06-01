@@ -448,7 +448,7 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
-    /* Form message styling */
+    /* Form message styling - no longer used for inline */
     #form-message {
       max-width: 500px;
       margin: 0.5rem auto 1.5rem;
@@ -469,6 +469,57 @@
       background-color: #f8d7da;
       border: 1px solid #f5c6cb;
       display: block;
+    }
+
+    /* Form Feedback Modal specific styles */
+    #form-feedback-content {
+      background: linear-gradient(135deg, #4895efcc, #4361eecc); /* blue gradient */
+      color: white;
+      padding: 2.5rem;
+      border-radius: 20px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      position: relative;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    #form-feedback-content.success {
+      background: linear-gradient(135deg, #28a745cc, #218838cc); /* green gradient */
+    }
+    #form-feedback-content.error {
+      background: linear-gradient(135deg, #dc3545cc, #c82333cc); /* red gradient */
+    }
+    #form-feedback-icon {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      animation: bounce 2s infinite;
+    }
+    #form-feedback-title {
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+    #form-feedback-message {
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+    #form-feedback-ok-btn {
+      background: white;
+      color: var(--primary);
+      border: none;
+      padding: 0.8rem 1.8rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    #form-feedback-ok-btn:hover {
+      background: #e2e6ea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
   </style>
 </head>
@@ -606,7 +657,8 @@
         <textarea name="message" placeholder="Message" required></textarea>
         <button type="submit">Send</button>
       </form>
-      <div id="form-message"></div>
+      <!-- Removed inline form message div -->
+      <!-- <div id="form-message"></div> -->
     </section>
   </main>
 
@@ -623,7 +675,7 @@
     ><i class="fas fa-comment-dots"></i> Live Chat</a
   >
 
-  <!-- Modal -->
+  <!-- Welcome Modal -->
   <div id="welcome-modal" class="modal">
     <div class="modal-content">
       <span class="close-modal" title="Close">&times;</span>
@@ -634,16 +686,27 @@
     </div>
   </div>
 
+  <!-- Form Feedback Modal -->
+  <div id="form-feedback-modal" class="modal">
+    <div class="modal-content" id="form-feedback-content">
+      <span class="close-modal" id="form-feedback-close" title="Close">&times;</span>
+      <div class="modal-icon" id="form-feedback-icon">🎉</div>
+      <h2 id="form-feedback-title">Success!</h2>
+      <p id="form-feedback-message">Thank you for your message! We will get back to you soon.</p>
+      <button id="form-feedback-ok-btn">OK</button>
+    </div>
+  </div>
+
   <script>
-    // Show modal popup on page load
+    // Show welcome modal popup on page load
     window.onload = function () {
       document.getElementById("welcome-modal").classList.add("show");
     };
-    // Close modal on X click
-    document.querySelector(".close-modal").addEventListener("click", function () {
+    // Close welcome modal on X click
+    document.querySelector("#welcome-modal .close-modal").addEventListener("click", function () {
       document.getElementById("welcome-modal").classList.remove("show");
     });
-    // Close modal on Get Started button click
+    // Close welcome modal on Get Started button click
     document.getElementById("get-started-btn").addEventListener("click", function () {
       document.getElementById("welcome-modal").classList.remove("show");
     });
@@ -664,10 +727,46 @@
       }
     });
 
-    // Form submission handling
+    // Form submission handling with modal feedback
     const form = document.getElementById("contact-form");
-    const formMessage = document.getElementById("form-message");
     const submitButton = form.querySelector('button[type="submit"]');
+
+    const feedbackModal = document.getElementById("form-feedback-modal");
+    const feedbackClose = document.getElementById("form-feedback-close");
+    const feedbackOkBtn = document.getElementById("form-feedback-ok-btn");
+    const feedbackIcon = document.getElementById("form-feedback-icon");
+    const feedbackTitle = document.getElementById("form-feedback-title");
+    const feedbackMessage = document.getElementById("form-feedback-message");
+    const feedbackContent = document.getElementById("form-feedback-content");
+
+    // Function to open feedback modal with message and type ('success' or 'error')
+    function openFeedbackModal(type, message) {
+      if (type === "success") {
+        feedbackIcon.textContent = "🎉";
+        feedbackTitle.textContent = "Success!";
+        feedbackTitle.style.color = "#d4edda"; // light green text
+        feedbackMessage.style.color = "#155724"; // dark green text
+        feedbackContent.classList.remove("error");
+        feedbackContent.classList.add("success");
+      } else {
+        feedbackIcon.textContent = "⚠️";
+        feedbackTitle.textContent = "Oops!";
+        feedbackTitle.style.color = "#f8d7da"; // light red text
+        feedbackMessage.style.color = "#721c24"; // dark red text
+        feedbackContent.classList.remove("success");
+        feedbackContent.classList.add("error");
+      }
+      feedbackMessage.textContent = message;
+      feedbackModal.classList.add("show");
+    }
+
+    // Close modal function
+    function closeFeedbackModal() {
+      feedbackModal.classList.remove("show");
+    }
+
+    feedbackClose.addEventListener("click", closeFeedbackModal);
+    feedbackOkBtn.addEventListener("click", closeFeedbackModal);
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -687,17 +786,15 @@
         });
 
         if (response.ok) {
-          formMessage.textContent = "Thank you for your message! We will get back to you soon.";
-          formMessage.className = "success";
+          openFeedbackModal("success", "Thank you for your message! We will get back to you soon.");
           form.reset();
         } else {
           const data = await response.json();
-          formMessage.textContent = data.errors ? data.errors.map(err => err.message).join(", ") : "Oops! There was a problem submitting your form.";
-          formMessage.className = "error";
+          const errorMsg = data.errors ? data.errors.map(err => err.message).join(", ") : "Oops! There was a problem submitting your form.";
+          openFeedbackModal("error", errorMsg);
         }
       } catch (error) {
-        formMessage.textContent = "Oops! There was a problem submitting your form.";
-        formMessage.className = "error";
+        openFeedbackModal("error", "Oops! There was a problem submitting your form.");
       } finally {
         submitButton.disabled = false;
         submitButton.textContent = "Send";
