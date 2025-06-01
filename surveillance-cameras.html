@@ -390,6 +390,57 @@
       color: var(--accent-light);
       outline: none;
     }
+
+    /* Glowing effect animation for form message modal */
+    @keyframes glowPulse {
+      0% {
+        box-shadow: 0 0 8px 2px #00ff99;
+      }
+      50% {
+        box-shadow: 0 0 20px 6px #00ff99;
+      }
+      100% {
+        box-shadow: 0 0 8px 2px #00ff99;
+      }
+    }
+
+    .glowing-modal-content {
+      border: 3px solid #00ff99;
+      box-shadow: 0 0 15px 5px #00ff99;
+      animation: glowPulse 2s infinite;
+      color: #008f4c;
+    }
+
+    .glowing-modal-content h2 {
+      color: #00cc66;
+      text-shadow: 0 0 8px #00ff99;
+      font-weight: 700;
+    }
+
+    .glowing-modal-content p {
+      color: #006633;
+      text-shadow: 0 0 6px #00cc66;
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+
+    .glowing-modal-content .btn-get-started {
+      background: #00cc66;
+      color: white;
+      border-radius: 12px;
+      padding: 1rem 2.5rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      user-select: none;
+    }
+
+    .glowing-modal-content .btn-get-started:hover,
+    .glowing-modal-content .btn-get-started:focus {
+      background: #00ff99;
+      outline: none;
+    }
   </style>
 </head>
 <body>
@@ -462,6 +513,16 @@
     </div>
   </div>
 
+  <!-- Form Message Modal (Encouraging glowing modal for success/error) -->
+  <div id="form-message-modal" class="modal" role="alertdialog" aria-modal="true" aria-labelledby="form-message-title" aria-describedby="form-message-desc" aria-hidden="true">
+    <div class="modal-content glowing-modal-content">
+      <button class="close-modal" aria-label="Close message popup" title="Close message popup" tabindex="0">&times;</button>
+      <h2 id="form-message-title"></h2>
+      <p id="form-message-desc"></p>
+      <button class="btn-get-started close-message-btn">OK</button>
+    </div>
+  </div>
+
   <script>
     // Welcome modal elements
     const welcomeModal = document.getElementById('welcome-modal');
@@ -472,6 +533,12 @@
     const loadingModal = document.getElementById("loading-modal");
     const modalBody = document.getElementById("modal-body");
     const loadingCloseBtn = loadingModal.querySelector(".close-modal");
+
+    // Form Message Modal elements
+    const formMessageModal = document.getElementById('form-message-modal');
+    const formMessageTitle = document.getElementById('form-message-title');
+    const formMessageDesc = document.getElementById('form-message-desc');
+    const formMessageCloseBtns = formMessageModal.querySelectorAll('.close-modal, .close-message-btn');
 
     // Show welcome modal on page load
     function openWelcomeModal() {
@@ -534,11 +601,8 @@
 
       document.getElementById("show-signup").addEventListener("click", showSignUpForm);
 
-      document.getElementById("login-form").addEventListener("submit", e => {
-        e.preventDefault();
-        alert("Login submitted!");
-        closeLoadingModal();
-      });
+      const loginForm = document.getElementById("login-form");
+      loginForm.addEventListener("submit", handleLoginSubmit);
     }
 
     // Show sign up form inside modal
@@ -559,15 +623,7 @@
       `;
 
       const signupForm = document.getElementById("signup-form");
-      signupForm.addEventListener("submit", e => {
-        e.preventDefault();
-        if (!signupForm.checkValidity()) {
-          signupForm.reportValidity();
-          return;
-        }
-        document.getElementById("replyto").value = document.getElementById("signup-email").value;
-        signupForm.submit();
-      });
+      signupForm.addEventListener("submit", handleSignupSubmit);
 
       document.getElementById("show-login").addEventListener("click", showLoginForm);
     }
@@ -615,6 +671,78 @@
       }
     });
 
+    // Form Message Modal functions
+    function openFormMessageModal(title, message) {
+      formMessageTitle.textContent = title;
+      formMessageDesc.textContent = message;
+      formMessageModal.classList.add('show');
+      formMessageModal.setAttribute('aria-hidden', 'false');
+      formMessageCloseBtns[1].focus();
+      trapFocus(formMessageModal);
+    }
+
+    function closeFormMessageModal() {
+      formMessageModal.classList.remove('show');
+      formMessageModal.setAttribute('aria-hidden', 'true');
+      removeTrapFocus();
+    }
+
+    // Close buttons event listeners for form message modal
+    formMessageCloseBtns.forEach(btn => {
+      btn.addEventListener('click', closeFormMessageModal);
+      btn.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          closeFormMessageModal();
+        }
+      });
+    });
+
+    // Close form message modal on Escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && formMessageModal.classList.contains('show')) {
+        closeFormMessageModal();
+      }
+    });
+
+    // Close form message modal if clicking outside content
+    formMessageModal.addEventListener('click', e => {
+      if (e.target === formMessageModal) {
+        closeFormMessageModal();
+      }
+    });
+
+    // Override login form submission to show success modal
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      openFormMessageModal(
+        "Login Successful!",
+        "Great job! You have successfully logged in. Keep up the good work!"
+      );
+      closeLoadingModal();
+    }
+
+    // Override signup form submission to show success or error modal
+    function handleSignupSubmit(e) {
+      e.preventDefault();
+      const form = e.target;
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        openFormMessageModal(
+          "Oops! Something's Missing",
+          "Please fill out all required fields correctly to proceed."
+        );
+        return;
+      }
+      openFormMessageModal(
+        "Sign Up Successful!",
+        "Welcome aboard! You're now part of Fourlinkx. Look out for instructions in your email. Let's secure the future together!"
+      );
+      closeLoadingModal();
+      // Optionally submit form here if you want real submission:
+      // form.submit();
+    }
+
     // Focus trap for modal accessibility
     let focusableElementsString = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, [tabindex="0"], [contenteditable]';
     let focusableElements = [];
@@ -649,6 +777,7 @@
 
     function removeTrapFocus() {
       welcomeModal.removeEventListener('keydown', trapTabKey);
+      formMessageModal.removeEventListener('keydown', trapTabKey);
     }
   </script>
 </body>
